@@ -1,0 +1,122 @@
+syntax = "proto3";
+package glogin;
+
+//Client信息
+message LoginClient {
+    string imei = 1;            //国际移动设备识别码（仅安卓）
+    string android_id = 2;      //国际移动设备识别码（仅安卓）
+    string dhid = 3;            //数美id
+    string mac_address = 4;     //mac地址
+    string device_model = 5;    //设备型号
+    string dvice_name = 6;      //设备名字
+    string os_version = 7;      //手机系统版本
+    string network_type = 8;    //网络类型 1蜂窝移动网络 2WIFI
+    string ip = 9;              //ipv4地址
+    string country = 10;        //ISO 3166 标准二字码
+}
+
+//Game信息
+message LoginGame {
+    string adid = 1;
+    string idfv = 2;
+    string appsflyer_id = 3;
+    string advertising_id = 4;
+    string device_token = 5;
+    string language = 6;
+    string reserved_2 = 7;
+    string bundle_id = 8;
+    string app_version = 9;
+    string platform = 10;
+    string channel = 11;
+    string game_cd = 12;
+}
+
+//第三方登录请求
+message ThirdLoginReq {
+    string third_plat = 1;     // 第三方登录的平台( google、facebook, qq, 微信,yedun）
+    string third_uid = 2;      // 第三方登录时客户端获取到的唯一ID
+    string third_token = 3;
+    string access_token = 4;   // 运营商授权码token
+    LoginClient client = 5;    // Client信息
+    LoginGame game = 6;        // Game信息
+}
+
+//第三方登录返回
+message ThridLoginRsp {
+    int32 code = 1;
+    string dh_token = 2;
+    string third_uid = 3;
+    string errmsg = 4;
+    string sm_id = 5;
+    string dh_account = 6;
+}
+
+//手机验证码登录请求
+message SmsLoginReq {
+    string step = 1;     // 步骤（verify获得验证码，login登陆）
+    string phone = 2;      // 手机号码
+    string verifycode = 3;   // 获得的待验证的手机验证码 (step为登陆时需传)
+    LoginClient client = 4;    // Client信息
+    LoginGame game = 5;        // Game信息
+}
+
+//手机验证码登录返回
+message SmsLoginRsp {
+    int32 code = 1;
+    string dh_token = 2;
+    string errmsg = 3;
+    string sm_id = 4;
+    string dh_account = 5;
+}
+
+
+//游客登录请求参数
+message VisitorLoginReq {
+    string dhid = 1;           // 数美id (visitor ID)
+    LoginClient client = 2;    // Client信息
+    LoginGame game = 3;        // Game信息
+}
+
+
+//手机验证码登录返回
+message VisitorLoginRsp {
+    int32 code = 1;
+    string dh_token = 2;
+    string errmsg = 3;
+    string sm_id = 4;
+    string dh_account = 5;    //dh数字账号
+}
+
+
+service Login {
+    rpc SMS(ThirdLoginReq) returns(ThridLoginRsp);
+    rpc Third(ThirdLoginReq) returns(ThridLoginRsp);
+    rpc Visitor(VisitorLoginReq) returns(VisitorLoginRsp);
+}
+
+
+
+
+//游客绑定申请
+message VistorBindThridReq {
+    string dhid = 1;
+    string dh_token = 2;
+    string plat = 3;
+    string thridId = 4;
+    string thridtoken = 5;
+    string extra = 6;
+    string bundle_id = 7;
+}
+
+//游客绑定回复
+message BindThridRsp {
+    string code = 1;
+    string dh_token = 2;
+    string errmsg = 3;
+    string sm_id = 4;
+    string dh_account = 5;
+}
+
+service Bind {
+    rpc BindThrid(VistorBindThridReq) returns(BindThridRsp);
+}
