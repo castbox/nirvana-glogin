@@ -33,6 +33,7 @@ type PubCfg struct {
 	WhiteList []string `json:"white_list"`
 }
 
+// 加密的pub返回结构
 type PubCfgValue struct {
 	LockIndex   int32
 	Key         string

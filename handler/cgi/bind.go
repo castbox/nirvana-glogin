@@ -8,9 +8,9 @@ import (
 type Bind struct {
 }
 
-func (Bind) Third(request *glogin2.SmsLoginReq) (response *glogin2.SmsLoginRsp, err error) {
-	response = &glogin2.SmsLoginRsp{
-		Code:   constant.ErrCodeOk,
+func (Bind) BindThird(request *glogin2.VistorBindThridReq) (response *glogin2.VistorBindThridRsp, err error) {
+	response = &glogin2.VistorBindThridRsp{
+		Code:   constant.ErrMsgOk,
 		Errmsg: constant.ErrMsgOk,
 	}
 	return response, nil

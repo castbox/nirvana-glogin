@@ -4,6 +4,7 @@ import (
 	"git.dhgames.cn/svr_comm/gmoss/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
+	"glogin/pbs/glogin"
 )
 
 var (
@@ -18,7 +19,7 @@ var (
 
 type third interface {
 	// Auth 登录返回第三方账号tokenId openId 错误信息
-	Auth(bundleId string, token string) (string, error)
+	Auth(request *glogin.ThirdLoginReq) (string, string, error)
 	String() string
 }
 

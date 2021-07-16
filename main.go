@@ -2,6 +2,7 @@ package main
 
 import (
 	log "git.dhgames.cn/svr_comm/gcore/glog"
+	"git.dhgames.cn/svr_comm/gcore/gmongo"
 	"git.dhgames.cn/svr_comm/gmoss/v2"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
@@ -16,12 +17,12 @@ import (
 )
 
 func main() {
-	//开发模式设置
+	// 开发模式设置
 	log.ResetToDevelopment()
 	// 注册服务
 	startEngine()
 	log.Infow("server started")
-	// 初始化静态配置
+	// 初始化配置
 	initConfig()
 	log.Infow("config init ok", "config", config.GetAll())
 	// 初始化DB检查
@@ -34,6 +35,7 @@ func main() {
 }
 
 func initDB() {
+	gmongo.Init(config.Field("mongo_url").String())
 }
 
 func startHttp() {
@@ -42,19 +44,13 @@ func startHttp() {
 	pprof.Register(router)
 	router.POST("/:service/:action", cgi.ServiceHandler)
 	router.POST("/cfg", cgi.CfgHandler)
+	router.POST("/token", cgi.TokenHandler)
 	router.GET("/metrics", prometheusHandler())
 	router.GET("/heart", func(ctx *gin.Context) { ctx.JSON(http.StatusOK, gin.H{"err_code": constant.ErrCodeOk}) })
 	//strWebPort := strconv.Itoa(int(config.GetAll().WebPort))
 	if err := router.Run(config.GetAll().WebPort); err != nil {
 		log.Fatalw("failed to run http server", "err", err)
 		panic(err)
-	}
-}
-
-func prometheusHandler() gin.HandlerFunc {
-	h := promhttp.Handler()
-	return func(c *gin.Context) {
-		h.ServeHTTP(c.Writer, c.Request)
 	}
 }
 
@@ -75,4 +71,11 @@ func startEngine() {
 		panic(err)
 	}
 	go loop()
+}
+
+func prometheusHandler() gin.HandlerFunc {
+	h := promhttp.Handler()
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
 }

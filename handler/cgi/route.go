@@ -16,7 +16,7 @@ func ServiceHandler(ctx *gin.Context) {
 	ctx.Writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	m := jsonpb.Marshaler{EmitDefaults: true, OrigName: true}
 	if err := m.Marshal(ctx.Writer, response); err != nil {
-		log.Warnw("LoginHandler http返回结果，json解析报错", "response", response)
+		log.Warnw("ServiceHandler http返回结果，json解析报错", "response", response)
 	}
 }
 
@@ -48,14 +48,14 @@ var loginFuncs = map[string][]interface{}{
 
 var bindFuncs = map[string][]interface{}{
 	"third": {
-		(&Bind{}).Third,
+		(&Bind{}).BindThird,
 		glogin2.NewVistorBindThridReq,
 	},
 }
 
 var antiFuncs = map[string][]interface{}{
 	"antiFuncs": {
-		(&Bind{}).Third,
+		(&Bind{}).BindThird,
 		glogin2.NewVistorBindThridReq,
 	},
 }

@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"glogin/pbs/glogin"
 	"hash"
 	"io/ioutil"
 	"math/big"
@@ -18,31 +19,31 @@ var IOS ios
 
 type ios struct{}
 
-func (i ios) Auth(bundleId string, token string) (string, error) {
-	if token == "" {
-		return "", ErrInvalidIdentityToken
+func (i ios) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
+	if request.ThirdToken == "" {
+		return "", "", ErrInvalidIdentityToken
 	}
-	appleToken, err := parseToken(token)
+	appleToken, err := parseToken(request.ThirdToken)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	key, err := fetchKeysFromApple(appleToken.header.Kid)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if key == nil {
-		return "", ErrFetchKeysFail
+		return "", "", ErrFetchKeysFail
 	}
 
 	pubKey, err := generatePubKey(key.N, key.E)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	//利用获取到的公钥解密token中的签名数据
 	sig, err := decodeSegment(appleToken.sign)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	//苹果使用的是SHA256
@@ -56,20 +57,21 @@ func (i ios) Auth(bundleId string, token string) (string, error) {
 		h = crypto.SHA512.New()
 	}
 	if h == nil {
-		return "", ErrInvalidHashType
+		return "", "", ErrInvalidHashType
 	}
 
 	h.Write([]byte(appleToken.headerStr + "." + appleToken.claimsStr))
 
 	if err := rsa.VerifyPKCS1v15(pubKey, crypto.SHA256, h.Sum(nil), sig); err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	if ok, err := appleToken.IsValid(); !ok || err != nil {
-		return "", err
+		return "", "", err
 	}
+	unionId := appleToken.claims.Sub + "_cnofficial"
 
-	return appleToken.claims.Sub + "_cnofficial", nil
+	return unionId, unionId, nil
 }
 
 func (i ios) String() string {

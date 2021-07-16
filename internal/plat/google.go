@@ -2,6 +2,7 @@ package plat
 
 import (
 	"fmt"
+	"glogin/pbs/glogin"
 	"io/ioutil"
 	"net/http"
 
@@ -17,32 +18,31 @@ var Google google
 type google struct{}
 
 // Auth 登录返回第三方账号id 和 错误信息
-func (g google) Auth(bundleId string, token string) (string, error) {
-	logger.Debugf("%s -> bundleId:%s, token:%s", g, bundleId, token)
-	baseUrl := authURL(bundleId, googleAuthKey)
-	url := baseUrl + token
+func (g google) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
+	baseUrl := authURL(request.Game.BundleId, googleAuthKey)
+	url := baseUrl + request.ThirdToken
 	resp, err := http.Get(url)
 	if err != nil {
 		resErr := fmt.Errorf("failed communicating with server: %v", err)
 		elkAlarm("error", url, resErr)
-		return "", resErr
+		return "", "", resErr
 	}
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		elkAlarm(resp.Status, url, "")
-		return "", fmt.Errorf(resp.Status)
+		return "", "", fmt.Errorf(resp.Status)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		resErr := fmt.Errorf("failed reading from metadata server: %v", err)
 		elkAlarm("error", url, resErr)
-		return "", resErr
+		return "", "", resErr
 	}
 
 	uid := gjson.GetBytes(body, "sub").String()
-	return uid, nil
+	return uid, uid, nil
 }
 
 func (g google) String() string {

@@ -87,14 +87,12 @@ message VisitorLoginRsp {
     string dh_account = 5;    //dh数字账号
 }
 
-
+//登录相关
 service Login {
-    rpc SMS(ThirdLoginReq) returns(ThridLoginRsp);
+    rpc SMS(SmsLoginReq) returns(SmsLoginRsp);
     rpc Third(ThirdLoginReq) returns(ThridLoginRsp);
     rpc Visitor(VisitorLoginReq) returns(VisitorLoginRsp);
 }
-
-
 
 
 //游客绑定申请
@@ -109,14 +107,14 @@ message VistorBindThridReq {
 }
 
 //游客绑定回复
-message BindThridRsp {
+message VistorBindThridRsp {
     string code = 1;
     string dh_token = 2;
     string errmsg = 3;
-    string sm_id = 4;
-    string dh_account = 5;
+    string sm_id = 4;    string dh_account = 5;
+
 }
 
 service Bind {
-    rpc BindThrid(VistorBindThridReq) returns(BindThridRsp);
+    rpc BindThird(VistorBindThridReq) returns(VistorBindThridRsp);
 }
