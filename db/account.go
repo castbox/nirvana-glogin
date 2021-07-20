@@ -16,20 +16,10 @@ const (
 	MaxTryTime       = 10
 )
 
-//
-//-spec create_third(binary(), binary(), binary(), binary(), binary(), map()) -> {ok, integer()} | {error, any()}.
-//create_third(Plat, OpenId, BundleId, IP, DhID, #{<<"unite">> := IsUnite} = Game) when IsUnite =:= true ->
-//Account = #{Plat => OpenId, <<"create">> => #{<<"time">> => util:now(), <<"ip">> => IP, <<"sm_id">> => DhID, <<"bundle_id">> => BundleId}},
-//lager:info("req create_third account unite ex, ~p ", [Account]),
-//create(Account, BundleId, IP, DhID, Game);
-//create_third(Plat, ThirdUid, BundleId, IP, DhID, Game) ->
-//Account = #{Plat => ThirdUid, <<"bundle_id">> => BundleId, <<"create">> => #{<<"time">> => util:now(), <<"ip">> => IP}},
-//lager:info("req create_third account , ~p ", [Account]),
-//create(Account, BundleId, IP, DhID, Game).
-
 func CheckNotExist(filter interface{}) bool {
-	count, err := gmongo.CountDocuments(config.All{}.MongoUrl, config.All{}.MongoDb, AccountTableName, filter)
+	count, err := gmongo.CountDocuments(config.MongoUrl(), config.MongoDb(), AccountTableName, filter)
 	if err != nil {
+		log.Warnw("CheckNotExist", "err", err)
 		return false
 	}
 	if count == 0 {
@@ -39,8 +29,9 @@ func CheckNotExist(filter interface{}) bool {
 }
 
 func Load(filter interface{}) (result db_core.AccountData, err error) {
-	doc, errFind := gmongo.FindOne(config.All{}.MongoUrl, config.All{}.MongoDb, AccountTableName, filter)
+	doc, errFind := gmongo.FindOne(config.MongoUrl(), config.MongoDb(), AccountTableName, filter)
 	if errFind != nil {
+		log.Warnw("AccountTable Load", "err", err)
 		err = errFind
 		return
 	}
@@ -53,9 +44,9 @@ func CreateDhId(document bson.M) (accountId int32, err error) {
 	for ; i < MaxTryTime; i++ {
 		accountId = rand.Int31n(MaxAccount-MinAccount) + MinAccount
 		document["_id"] = accountId
-		_, errInsert := gmongo.InsertOne(config.All{}.MongoUrl, config.All{}.MongoDb, AccountTableName, document)
+		_, errInsert := gmongo.InsertOne(config.MongoUrl(), config.MongoDb(), AccountTableName, document)
 		if errInsert == nil {
-			log.Infow("new account ok", "account", "times", accountId, i)
+			log.Infow("new account ok", "account", accountId, "times", i)
 			return
 		}
 	}

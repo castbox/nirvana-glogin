@@ -15,3 +15,7 @@ func NewVisitorLoginReq() *VisitorLoginReq {
 func NewVistorBindThridReq() *VistorBindThridReq {
 	return new(VistorBindThridReq)
 }
+
+func NewFastLoginReq() *FastLoginReq {
+	return new(FastLoginReq)
+}

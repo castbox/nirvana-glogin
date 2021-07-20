@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"glogin/utils"
+	"glogin/util"
 )
 
 type TokenReq struct {
@@ -19,7 +19,7 @@ func TokenHandler(ctx *gin.Context) {
 		ParseRequestError(ctx, err)
 		return
 	}
-	token, parseErr := jwt.ParseWithClaims(verify.Token, jwt.MapClaims{}, utils.KeyMethod)
+	token, parseErr := jwt.ParseWithClaims(verify.Token, jwt.MapClaims{}, util.KeyMethod)
 	if parseErr != nil {
 		err = fmt.Errorf("token parese err:%v", parseErr)
 		ParseRequestError(ctx, err)

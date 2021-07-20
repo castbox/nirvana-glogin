@@ -13,7 +13,7 @@ func main() {
 	boxId := os.Args[1]
 	pri := os.Args[2]
 
-	smid, err := ParseBoxData(boxId, pri)
+	smid, err := ParseBoxId(boxId, pri)
 	if err != nil {
 		fmt.Println(err)
 	} else {

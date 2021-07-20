@@ -7,6 +7,11 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	log "git.dhgames.cn/svr_comm/gcore/glog"
+	"glogin/config"
+	"glogin/internal/xhttp"
 	//	"fmt"
 	//	"os"
 	"errors"
@@ -74,26 +79,94 @@ func getCheckSerial(smid string) string {
 	return trueId + strings.ToLower(hash)
 }
 
-func ParseSMID(srcId string) string {
+// 数美ID处理相关函数 -去除时间戳后缀
+func DealSMID(srcId string) string {
+	log.Infow("dealSMID", "src", srcId)
+	lastPos := strings.LastIndex(srcId, "-")
+	if lastPos == -1 {
+		return srcId
+	}
+	desId := srcId[0:lastPos]
+	log.Infow("dealSMID", "des", desId)
+	return desId
+}
+
+func ParseSMID(smId string) string {
+	log.Infow("ParseSMID", "src", smId)
+	srcId := DealSMID(smId)
 	var des string
 	switch srcId[0] {
+	case '2':
+		des = srcId
+		break
 	case 'B':
-		prikey := "QbDRypciANq6gOected1"
+		prikey := "PriKey = \"-----BEGIN RSA PRIVATE KEY-----\\nMIIBPAIBAAJBAOfPLQ993UR8qJoCVJsj00/BcPDbKIjEDYnqMjgUAiQkMgYf9O4L7+WNhhtA+kIllsHpEAYJuSdl04wP05Pk0TkCAwEAAQJBAMzdJOafBrDjNqI9UwZ0x+ihfa3vEcik844iItW6oRXMFIo+P+6YHjgiiyLXeSu+60WQ4IfWdRZNdbHMhr1IIN0CIQD6GzKUls0YXxASUmdcSTUFeqXcedkhcLafHTk8jqcX8wIhAO1FmW+cyx1gm4msyhgXN1Fb7frFHniaP5L89zc6NwkjAiEAmA0e5A0GJVHt8GWepxFupaUZ3v9JDTZ8ICHhITrMxRcCIFI92Z0yP8UDA2aJGdOX2Hi+4JIXWSR8cqTEQfxGlWT5AiEA5TqIC6znNIGzeAeuz3Hdj4srmAEP/VG9EkDvdgMT6Tg=\\n-----END RSA PRIVATE KEY-----\",\n  "
 		des, _ = ParseBoxId(srcId, prikey)
 		break
 	case 'D':
-		accessKey := "QbDRypciANq6gOected1"
+		accessKey := config.Field("parse_smid_access_key").String()
 		des = ParseBoxData(srcId, accessKey)
 		break
 	default:
 		des = srcId
 		break
 	}
+	log.Infow("ParseSMID", "des", des)
 	return des
 }
 
-func ParseBoxData(boxId string, accessKey string) string {
-	return boxId
+type DeviceLabels struct {
+	Id                     string      `json:"id"`
+	FakeDevice             interface{} `json:"fake_device"`
+	DeviceSuspiciousLabels interface{} `json:"device_suspicious_labels"`
+	MonkeyDevice           interface{} `json:"monkey_device"`
+}
+
+type ParseRsp struct {
+	Code         int          `json:"code"`
+	Message      string       `json:"message"`
+	RequestId    string       `json:"requestId"`
+	DeviceLabels DeviceLabels `json:"deviceLabels"`
+}
+
+func ParseBoxData(srcBoxId string, accessKey string) string {
+	if accessKey == "" {
+		accessKey = "QbDRypciANq6gOected1"
+	}
+	FullUrl := config.Field("parse_smid_url").String()
+	if FullUrl == "" {
+		FullUrl = "http://api-tianxiang-bj.fengkongcloud.com/tianxiang/v4"
+	}
+	httpClient := xhttp.NewClient().Type(xhttp.TypeJSON)
+	req := xhttp.BodyMap{}
+	req.Set("accessKey", accessKey)
+	data := xhttp.BodyMap{}
+	data.Set("deviceId", srcBoxId)
+	data.Set("tokenId", "")
+	req.Set("data", data)
+	res, bs, errs := httpClient.Post(FullUrl).SendBodyMap(req).EndBytes()
+	if len(errs) > 0 {
+		log.Errorw("ParseSMID ParseBoxData HTTP Request Error1", "errs", errs[0])
+		return srcBoxId
+	}
+	if res.StatusCode != 200 {
+		log.Errorw("ParseSMID ParseBoxData HTTP Request Error2,", "StatusCode", res.StatusCode)
+		return srcBoxId
+	}
+	log.Infow("ParseSMID ParseBoxData HTTP Rsp,", "string(bs)", string(bs))
+	smRsp := new(ParseRsp)
+	if err := json.Unmarshal(bs, smRsp); err != nil {
+		log.Infow("ParseSMID ParseBoxData HTTP Request Error3,", "StatusCode", res.StatusCode)
+		return srcBoxId
+	}
+	if smRsp.Code == 1100 {
+		return smRsp.DeviceLabels.Id
+	} else {
+		strErr := fmt.Errorf("ParseSMID Rsp%s", string(bs))
+		log.Infow("ParseSMID ParseBoxData HTTP Request Error4,", "strErr", strErr)
+		return srcBoxId
+	}
+	return smRsp.Message
 }
 
 func ParseBoxId(boxdata string, prikey string) (string, error) {

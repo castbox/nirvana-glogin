@@ -18,7 +18,7 @@ type All struct {
 	SmsContent        string `json:"sms_content"`
 	SmsAppid          string `json:"sms_appid"`
 	MongoUrl          string `json:"mongo_url"`
-	MongoOldGpDb      string `json:"mongo_old_gpdb"`
+	MongoOldGpDb      string `json:"mongo_old_gpdb"	`
 	MongoDb           string `json:"mongo_db"`
 	JwtSecret         string `json:"jwt_secret"`
 	HawkEyeOpen       bool   `json:"hawkeye_open"`
@@ -58,4 +58,12 @@ func GetAll() *All { return &staticConfig }
 // Field 获取静态json数据
 func Field(field string) gjson.Result {
 	return gjson.GetBytes(gmoss.StaticCfg(), field)
+}
+
+func MongoUrl() string {
+	return Field("mongo_url").String()
+}
+
+func MongoDb() string {
+	return Field("mongo_db").String()
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"git.dhgames.cn/svr_comm/gmoss/v2"
-	"glogin/utils"
+	"glogin/util"
 	"strings"
 	"sync"
 )
@@ -13,9 +13,10 @@ import (
 var pubConfig sync.Map
 
 func GetCfg(appName string, vsn string, ip string) *ClusterCfg {
+	log.Infow("got new query CfgHandler GetCfg", "appName", appName, "vsn", vsn, "ip", ip)
 	v, ok := pubConfig.Load(appName)
 	if !ok {
-		log.Infow("appName GetCfg error", "appName", appName)
+		log.Infow("GetPubCfg BundleId error", "BundleId", appName)
 		return nil
 	} else {
 		fmt.Println(v)
@@ -72,7 +73,7 @@ func WatchPubCfgCallBack(path interface{}, value interface{}) {
 			keySlice := strings.Split(baseValue.Key, "/")
 			appName := keySlice[len(keySlice)-1]
 			fmt.Printf("appName : %vn", appName)
-			jsonData, err := utils.Base64Decode(baseValue.Value)
+			jsonData, err := util.Base64Decode(baseValue.Value)
 			if err != nil {
 				return
 			}

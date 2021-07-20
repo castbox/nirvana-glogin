@@ -48,7 +48,7 @@ message ThridLoginRsp {
     string third_uid = 3;
     string errmsg = 4;
     string sm_id = 5;
-    string dh_account = 6;
+    int32 dh_account = 6;
 }
 
 //手机验证码登录请求
@@ -66,7 +66,7 @@ message SmsLoginRsp {
     string dh_token = 2;
     string errmsg = 3;
     string sm_id = 4;
-    string dh_account = 5;
+    int32 dh_account = 5;
 }
 
 
@@ -78,13 +78,31 @@ message VisitorLoginReq {
 }
 
 
-//手机验证码登录返回
+//游客登录返回
 message VisitorLoginRsp {
     int32 code = 1;
     string dh_token = 2;
     string errmsg = 3;
     string sm_id = 4;
-    string dh_account = 5;    //dh数字账号
+    int32 dh_account = 5;    //dh数字账号
+    string visitor = 6;    //生成账号的visitor
+}
+
+//Fast登录请求参数
+message FastLoginReq {
+    string dh_token = 1;       // 客户端缓存的 login token
+    LoginClient client = 2;    // Client信息
+    LoginGame game = 3;        // Game信息
+}
+
+
+//Fast登录返回
+message FastLoginRsp {
+    int32 code = 1;
+    string dh_token = 2;
+    string errmsg = 3;
+    string sm_id = 4;
+    int32 dh_account = 5;    //dh数字账号
 }
 
 //登录相关
@@ -92,6 +110,7 @@ service Login {
     rpc SMS(SmsLoginReq) returns(SmsLoginRsp);
     rpc Third(ThirdLoginReq) returns(ThridLoginRsp);
     rpc Visitor(VisitorLoginReq) returns(VisitorLoginRsp);
+    rpc Fast(FastLoginReq) returns(FastLoginRsp);
 }
 
 

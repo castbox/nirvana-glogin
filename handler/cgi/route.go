@@ -44,6 +44,10 @@ var loginFuncs = map[string][]interface{}{
 		(&Login{}).Visitor,
 		glogin2.NewVisitorLoginReq,
 	},
+	"fast": {
+		(&Login{}).Fast,
+		glogin2.NewFastLoginReq,
+	},
 }
 
 var bindFuncs = map[string][]interface{}{

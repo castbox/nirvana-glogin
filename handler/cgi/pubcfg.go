@@ -1,6 +1,7 @@
 package cgi
 
 import (
+	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"github.com/gin-gonic/gin"
 	"glogin/internal/configure"
 )
@@ -12,6 +13,7 @@ import (
 func CfgHandler(ctx *gin.Context) {
 	loginInfo := &configure.CfgRequest{}
 	err := ctx.Bind(loginInfo)
+	log.Infow("got new query CfgHandler request", "request", loginInfo)
 	if err != nil {
 		ParseRequestError(ctx, err)
 		return

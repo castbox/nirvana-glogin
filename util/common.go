@@ -1,4 +1,4 @@
-package utils
+package util
 
 import (
 	"encoding/base64"
@@ -8,6 +8,18 @@ import (
 	"glogin/config"
 	"time"
 )
+
+const (
+	TimeLayout   = "2006-01-02 15:04:05"
+	TimeLayout_2 = "20060102150405"
+	DateLayout   = "2006-01-02"
+	NULL         = ""
+)
+
+type File struct {
+	Name    string `json:"name"`
+	Content []byte `json:"content"`
+}
 
 const (
 	TokenExpiredTime = 30 * 24 * 60 * 60
@@ -42,4 +54,33 @@ func GenDHToken(accountId int32) string {
 		log.Errorw("GenDHToken SignedString", "GenDHToken", err)
 	}
 	return res
+}
+
+var (
+	ExpiredToken = fmt.Errorf("token is expired")
+	InvalidToken = fmt.Errorf("token parese is not valid")
+)
+
+// ValidDHToken 验证token是否有效
+func ValidDHToken(tokenString string) (accountId int32, err error) {
+	token, parseErr := jwt.ParseWithClaims(tokenString, jwt.MapClaims{}, KeyMethod)
+	if parseErr != nil {
+		err = fmt.Errorf("token parese err:%v", parseErr)
+		log.Errorw("ValidDHToken error", "DHToken", err)
+		return 0, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		accountId = int32(claims["dhAccountId"].(float64))
+		expired := int64(claims["expire"].(float64))
+		if expired < time.Now().Unix() {
+			return 0, ExpiredToken
+		} else {
+			return accountId, nil
+		}
+	} else {
+		err = InvalidToken
+		log.Errorw("ValidDHToken error", "DHToken", err)
+		return 0, err
+	}
 }
