@@ -2,13 +2,13 @@ package main
 
 import (
 	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/gcore/gmongo"
 	"git.dhgames.cn/svr_comm/gmoss/v2"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"glogin/config"
 	"glogin/constant"
+	"glogin/db"
 	"glogin/handler/cgi"
 	"glogin/internal/configure"
 	glogin2 "glogin/pbs/glogin"
@@ -25,7 +25,7 @@ func main() {
 	// 初始化配置
 	initConfig()
 	log.Infow("config init ok", "config", config.GetAll())
-	// 初始化DB检查
+	// 初始化DB
 	initDB()
 	// 启动http服务
 	go startHttp()
@@ -35,7 +35,7 @@ func main() {
 }
 
 func initDB() {
-	gmongo.Init(config.Field("mongo_url").String())
+	db.InitMongo()
 }
 
 func startHttp() {

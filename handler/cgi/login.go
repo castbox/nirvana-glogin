@@ -42,9 +42,48 @@ func (Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, err
 		return response, nil
 	} else if request.Step == "login" {
 		log.Infow("SMS login", "request", request)
-		bCheck, _ := sms.CheckPhone(request.Phone, request.Verifycode)
-		if bCheck {
-
+		_, errCk := sms.CheckPhone(request.Phone, request.Verifycode)
+		if errCk != nil {
+			response.Code = constant.ErrCodeSMSCheckVerifyFaild
+			response.Errmsg = fmt.Sprintf("check verify faild phone %s ,verify %s", request.Phone, request.Verifycode)
+			return response, nil
+		}
+		// 数美ID解析
+		smID := smfpcrypto.ParseSMID(request.Client.Dhid)
+		request.GetClient().Dhid = smID
+		if account.CheckNotExist(bson.M{"phone": request.Phone}) {
+			// 账号不存在,创建
+			accountId, errCreate := account.CreatePhone(request)
+			if errCreate != nil {
+				response.Code = 500
+				response.Errmsg = fmt.Sprintf("sms login %s create error: %s", request.Phone, errCreate)
+				return response, errCreate
+			}
+			response.Code = 0
+			response.DhToken = util.GenDHToken(accountId)
+			return response, nil
+		} else {
+			// 账号存在, 直接登录
+			loginRsp, errLogin := account.LoginPhone(request)
+			if errLogin != nil {
+				response.Code = 500
+				response.Errmsg = fmt.Sprintf("sms login %s  error: %s", request.Phone, errLogin)
+				return response, nil
+			}
+			// 返回InternalRsp
+			rsp, ok := loginRsp.(account.InternalRsp)
+			if !ok {
+				response.Code = 500
+				response.Errmsg = fmt.Sprintf("sms login %s  error: %s", request.Phone, errLogin)
+				return response, nil
+			}
+			log.Infow("sms login success", " request.phone", request.Phone)
+			response.Code = 0
+			response.DhAccount = rsp.AccountData.ID
+			response.SmId = smID
+			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
+			response.Errmsg = "success"
+			return response, nil
 		}
 	}
 	return response, nil
@@ -77,7 +116,7 @@ func (Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLoginRs
 		accountId, errCreate := account.CreateThird(request, uid, openId)
 		if errCreate != nil {
 			response.Code = 500
-			response.Errmsg = fmt.Sprintf("thrid plat %s auth error: %s", request.ThirdPlat, errAuth)
+			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
 			return response, errCreate
 		}
 		response.Code = 0
@@ -87,21 +126,23 @@ func (Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLoginRs
 		loginRsp, errLogin := account.LoginThird(request, uid, openId)
 		if errLogin != nil {
 			response.Code = 500
-			response.Errmsg = fmt.Sprintf("thrid plat %s auth error: %s", request.ThirdPlat, errAuth)
+			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
 			return response, nil
 		}
 		// 返回
 		rsp, ok := loginRsp.(account.InternalRsp)
 		if !ok {
 			response.Code = 500
-			response.Errmsg = fmt.Sprintf("thrid plat %s auth error: %s", request.ThirdPlat, errLogin)
+			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errLogin)
 			return response, nil
 		}
+		log.Infow("thrid login success", " request.ThirdPlat", request.ThirdPlat, "openid", openId)
 		response.Code = 0
 		response.DhAccount = rsp.AccountData.ID
 		response.SmId = smID
 		response.DhToken = util.GenDHToken(rsp.AccountData.ID)
-		response.Errmsg = fmt.Sprintf("thrid plat %s auth error: %s", request.ThirdPlat, errAuth)
+		response.Errmsg = "success"
+		return response, nil
 	}
 	return response, nil
 }
@@ -166,6 +207,7 @@ func (Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp, 
 		rsp.DhToken = util.GenDHToken(value.AccountData.ID)
 		rsp.Visitor = visitorId
 		rsp.Errmsg = "success"
+		return rsp, nil
 	}
 	return rsp, nil
 }
@@ -215,12 +257,12 @@ func (Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp, 
 		response.Errmsg = fmt.Sprintf("fast login %s auth error: %s", request.DhToken, errLogin)
 		return response, nil
 	}
+	log.Infow("fast login success", "dh_token", request.DhToken)
 	response.Code = 0
 	response.SmId = smId
 	response.DhAccount = value.AccountData.ID
 	response.DhToken = util.GenDHToken(value.AccountData.ID)
 	response.Errmsg = "success"
-
 	return response, nil
 }
 

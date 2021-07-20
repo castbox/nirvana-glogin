@@ -6,6 +6,7 @@ import (
 	"glogin/config"
 	"glogin/db/db_core"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"math/rand"
 )
 
@@ -15,6 +16,47 @@ const (
 	MaxAccount       = 999999999
 	MaxTryTime       = 10
 )
+
+// 创建索引
+func InitAccount() {
+	log.Infow("account mongodb init", "table", AccountTableName)
+	indexFiles := []mongo.IndexModel{
+		{
+			Keys: bson.D{{"google", int32(1)}, {"bundle_id", int32(1)}},
+		},
+		{
+			Keys: bson.D{{"facebook", int32(1)}, {"bundle_id", int32(1)}},
+		},
+		{
+			Keys: bson.D{{"ios", int32(1)}, {"bundle_id", int32(1)}},
+		},
+		{
+			Keys: bson.D{{"google", int32(1)}},
+		},
+		{
+			Keys: bson.D{{"facebook", int32(1)}},
+		},
+		{
+			Keys: bson.D{{"ios", int32(1)}},
+		},
+		{
+			Keys: bson.D{{"visitor", int32(1)}},
+		},
+		{
+			Keys: bson.D{{"phone", int32(1)}},
+		},
+		{
+			Keys: bson.D{{"we_chat", int32(1)}},
+		},
+		{
+			Keys: bson.D{{"qq", int32(1)}},
+		},
+		{
+			Keys: bson.D{{"huawei", int32(1)}},
+		},
+	}
+	gmongo.CreateIndexes(config.MongoUrl(), config.MongoDb(), AccountTableName, indexFiles)
+}
 
 func CheckNotExist(filter interface{}) bool {
 	count, err := gmongo.CountDocuments(config.MongoUrl(), config.MongoDb(), AccountTableName, filter)

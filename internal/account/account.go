@@ -26,6 +26,19 @@ func CreateThird(request *glogin.ThirdLoginReq, uid string, openId string) (DhAc
 	return create(document, request)
 }
 
+func CreatePhone(request *glogin.SmsLoginReq) (DhAccount int32, err error) {
+	document := bson.M{"phone": request.Phone, "create": bson.M{"time": time.Now().Unix(), "bundle_id": request.Game.BundleId}}
+	return create(document, request)
+}
+
+func LoginPhone(request *glogin.SmsLoginReq) (interface{}, error) {
+	loginRsp, err := login(bson.M{"phone": request.Phone}, request)
+	if err != nil {
+		return nil, err
+	}
+	return loginRsp, nil
+}
+
 func LoginThird(request *glogin.ThirdLoginReq, uid string, openId string) (interface{}, error) {
 	loginRsp, err := login(bson.M{request.ThirdPlat: openId}, request)
 	if err != nil {

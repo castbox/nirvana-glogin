@@ -1,7 +1,9 @@
 package util
 
 import (
+	"crypto/md5"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"github.com/dgrijalva/jwt-go"
@@ -24,6 +26,12 @@ type File struct {
 const (
 	TokenExpiredTime = 30 * 24 * 60 * 60
 )
+
+func Md5String(s string) string {
+	h := md5.New()
+	h.Write([]byte(s))
+	return hex.EncodeToString(h.Sum(nil))
+}
 
 func Base64Decode(src string) ([]byte, error) {
 	by, err := base64.StdEncoding.DecodeString(src)
