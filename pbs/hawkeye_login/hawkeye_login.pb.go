@@ -49,7 +49,6 @@ func (Login_Subject) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_6896ccb986db1867, []int{0, 0}
 }
 
-// 部分字段，鹰眼不会用到，但是需要转发给BI进行计算，这部分字段详细详细含义可参考文档: https://www.yuque.com/docs/share/bb3ed862-ce1c-4da1-aea1-e14bc18687ee?#toc5 2020/12/18时注释
 type Login struct {
 	GameCd               string        `protobuf:"bytes,1,opt,name=game_cd,json=gameCd,proto3" json:"game_cd,omitempty"`
 	Subject              Login_Subject `protobuf:"varint,2,opt,name=subject,proto3,enum=hawkeye_login.Login_Subject" json:"subject,omitempty"`

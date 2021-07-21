@@ -79,3 +79,7 @@ func prometheusHandler() gin.HandlerFunc {
 		h.ServeHTTP(c.Writer, c.Request)
 	}
 }
+
+func initMisc() {
+
+}

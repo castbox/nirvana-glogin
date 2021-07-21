@@ -16,18 +16,18 @@ func CheckNotExist(filter interface{}) bool {
 	return db.CheckNotExist(filter)
 }
 
-func CreateVisitor(request *glogin.VisitorLoginReq, visitor string) (DhAccount int32, err error) {
-	document := bson.M{"visitor": visitor, "create": bson.M{"time": time.Now().Unix(), "bundle_id": request.Game.BundleId}}
+func CreateVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (DhAccount int32, err error) {
+	document := bson.M{"visitor": visitor, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
 	return create(document, request)
 }
 
-func CreateThird(request *glogin.ThirdLoginReq, uid string, openId string) (DhAccount int32, err error) {
-	document := bson.M{request.ThirdPlat: openId, "create": bson.M{"time": time.Now().Unix(), "third_uid": uid, "bundle_id": request.Game.BundleId}}
+func CreateThird(request *glogin.ThirdLoginReq, openId string, ip string) (DhAccount int32, err error) {
+	document := bson.M{request.ThirdPlat: openId, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
 	return create(document, request)
 }
 
-func CreatePhone(request *glogin.SmsLoginReq) (DhAccount int32, err error) {
-	document := bson.M{"phone": request.Phone, "create": bson.M{"time": time.Now().Unix(), "bundle_id": request.Game.BundleId}}
+func CreatePhone(request *glogin.SmsLoginReq, ip string) (DhAccount int32, err error) {
+	document := bson.M{"phone": request.Phone, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
 	return create(document, request)
 }
 

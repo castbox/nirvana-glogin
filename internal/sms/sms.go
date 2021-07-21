@@ -9,7 +9,6 @@ import (
 	"glogin/internal/xhttp"
 	"glogin/pbs/glogin"
 	"glogin/util"
-	"math/rand"
 	"time"
 )
 
@@ -20,7 +19,7 @@ func SmsVerify(req *glogin.SmsLoginReq) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	verifyCode := createVerifyCode()
+	verifyCode := CreateVerifyCode()
 	bSend, err := sendSmsVerify(phone, verifyCode)
 	if bSend {
 		_, errAdd := db.AddSmsVerify(phone, verifyCode)
@@ -67,7 +66,7 @@ func sendSmsVerify(phone string, verifyCode string) (bool, error) {
 	content := config.Field("sms_content").String() + verifyCode
 	httpClient := xhttp.NewClient().Type(xhttp.TypeUrlencoded)
 	reqBody := xhttp.BodyMap{}
-	reqBody.Set("appId", config.Field("sms_appid"))
+	reqBody.Set("appId", config.Field("sms_appid").String())
 	reqBody.Set("timestamp", timeStamp)
 	reqBody.Set("sign", smsSign(timeStamp))
 	reqBody.Set("mobiles", phone)
@@ -98,11 +97,12 @@ func sendSmsVerify(phone string, verifyCode string) (bool, error) {
 }
 
 // 生成验证码
-func createVerifyCode() string {
+func CreateVerifyCode() string {
 	var Min int32 = 100000
 	var Max int32 = 999999
-	verifyCode := rand.Int31n(Max-Min) + Min
-	return string(verifyCode)
+	verifyCode := util.Rand32Num(Min, Max)
+	strCode := fmt.Sprintf("%d", verifyCode)
+	return strCode
 }
 
 func smsSign(timeStamp string) string {

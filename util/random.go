@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+var Rander = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 //随机生成字符串
 func GetRandomString(l int) string {
 	str := "0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz"
@@ -39,4 +41,9 @@ func GetRandomNumber(l int) string {
 		result = append(result, bytes[r.Intn(len(bytes))])
 	}
 	return BytesToString(result)
+}
+
+// 包含min, max
+func Rand32Num(min, max int32) int32 {
+	return Rander.Int31n(max-min+1) + min
 }

@@ -21,14 +21,22 @@ var (
 )
 
 type Login struct {
+	Ctx *gin.Context
 }
 
 // http://127.0.0.1:8080/login/sms verify 获取验证码登陆 login 短信验证码登陆
-func (Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, err error) {
+func (l Login) SMSEx(request *glogin.SmsLoginReq, ctx *gin.Context) (response *glogin.SmsLoginRsp, err error) {
+	l.Ctx = ctx
+	return l.SMS(request)
+}
+
+func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, err error) {
 	response = &glogin.SmsLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
 	}
+	ip := l.Ctx.ClientIP()
+	log.Infow("SMS login", "request", request, "ip", ip)
 	// sms step verify 并获得Phone 验证码
 	// sms step login  手机验证码登陆
 	if request.Step == "verify" {
@@ -53,14 +61,18 @@ func (Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, err
 		request.GetClient().Dhid = smID
 		if account.CheckNotExist(bson.M{"phone": request.Phone}) {
 			// 账号不存在,创建
-			accountId, errCreate := account.CreatePhone(request)
+			accountId, errCreate := account.CreatePhone(request, ip)
 			if errCreate != nil {
 				response.Code = 500
 				response.Errmsg = fmt.Sprintf("sms login %s create error: %s", request.Phone, errCreate)
 				return response, errCreate
 			}
 			response.Code = 0
+			response.DhAccount = accountId
+			response.SmId = smID
+			response.Errmsg = "success"
 			response.DhToken = util.GenDHToken(accountId)
+			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
 			return response, nil
 		} else {
 			// 账号存在, 直接登录
@@ -77,25 +89,31 @@ func (Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, err
 				response.Errmsg = fmt.Sprintf("sms login %s  error: %s", request.Phone, errLogin)
 				return response, nil
 			}
-			log.Infow("sms login success", " request.phone", request.Phone)
 			response.Code = 0
 			response.DhAccount = rsp.AccountData.ID
 			response.SmId = smID
 			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 			response.Errmsg = "success"
+			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
 			return response, nil
 		}
 	}
 	return response, nil
 }
 
-func (Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLoginRsp, err error) {
+func (l Login) ThirdEx(request *glogin.ThirdLoginReq, ctx *gin.Context) (response *glogin.ThridLoginRsp, err error) {
+	l.Ctx = ctx
+	return l.Third(request)
+}
+func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLoginRsp, err error) {
+	ip := l.Ctx.ClientIP()
+	log.Infow("Third login", "request", request, "ip", ip)
 	response = &glogin.ThridLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
 	}
 	uid, openId, errAuth := ThirdAuth(request)
-	log.Infow("Third", "uid", uid, "openid", openId, "err", err)
+	log.Infow("ThirdAuth Rsp", "uid", uid, "openid", openId)
 	// 平台错误
 	if errAuth == PlatIsWrong {
 		response.Code = constant.ErrCodePlatIsWrong
@@ -113,7 +131,7 @@ func (Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLoginRs
 	request.GetClient().Dhid = smID
 	if account.CheckNotExist(bson.M{request.ThirdPlat: openId}) {
 		// 账号不存在,创建
-		accountId, errCreate := account.CreateThird(request, uid, openId)
+		accountId, errCreate := account.CreateThird(request, openId, ip)
 		if errCreate != nil {
 			response.Code = 500
 			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
@@ -147,11 +165,18 @@ func (Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLoginRs
 	return response, nil
 }
 
-func (Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp, err error) {
+func (l Login) VisitorEx(request *glogin.VisitorLoginReq, ctx *gin.Context) (response *glogin.VisitorLoginRsp, err error) {
+	l.Ctx = ctx
+	return l.Visitor(request)
+}
+
+func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp, err error) {
 	rsp = &glogin.VisitorLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
 	}
+	ip := l.Ctx.ClientIP()
+	log.Infow("Visitor login", "request", req, "ip", ip)
 	// 参数验证
 	if req.Dhid == "" {
 		rsp.Code = constant.ErrCodeSMIDError
@@ -170,7 +195,7 @@ func (Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp, 
 
 	if account.CheckNotExist(bson.M{"visitor": visitorId}) {
 		// 账号不存在,创建
-		accountId, errCreate := account.CreateVisitor(req, visitorId)
+		accountId, errCreate := account.CreateVisitor(req, visitorId, ip)
 		if errCreate != nil {
 			log.Infow("visitor fast login create account error ", "visitor", visitorId)
 			rsp.Code = 500
@@ -182,6 +207,7 @@ func (Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp, 
 		rsp.SmId = smId
 		rsp.DhAccount = accountId
 		rsp.Errmsg = "success"
+		log.Infow("visitor fast login success ", "rsp", rsp)
 		return rsp, nil
 	} else {
 		// 账号存在, 直接登录
@@ -210,10 +236,6 @@ func (Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp, 
 		return rsp, nil
 	}
 	return rsp, nil
-}
-
-func (l Login) Fast2(request *glogin.FastLoginReq, ctx *gin.Context) (response *glogin.FastLoginRsp, err error) {
-	return l.Fast(request)
 }
 
 func (Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp, err error) {
@@ -257,12 +279,12 @@ func (Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp, 
 		response.Errmsg = fmt.Sprintf("fast login %s auth error: %s", request.DhToken, errLogin)
 		return response, nil
 	}
-	log.Infow("fast login success", "dh_token", request.DhToken)
 	response.Code = 0
 	response.SmId = smId
 	response.DhAccount = value.AccountData.ID
 	response.DhToken = util.GenDHToken(value.AccountData.ID)
 	response.Errmsg = "success"
+	log.Infow("fast login success", "response", response)
 	return response, nil
 }
 

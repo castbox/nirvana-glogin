@@ -100,8 +100,13 @@ func ParseSMID(smId string) string {
 		des = srcId
 		break
 	case 'B':
-		prikey := "PriKey = \"-----BEGIN RSA PRIVATE KEY-----\\nMIIBPAIBAAJBAOfPLQ993UR8qJoCVJsj00/BcPDbKIjEDYnqMjgUAiQkMgYf9O4L7+WNhhtA+kIllsHpEAYJuSdl04wP05Pk0TkCAwEAAQJBAMzdJOafBrDjNqI9UwZ0x+ihfa3vEcik844iItW6oRXMFIo+P+6YHjgiiyLXeSu+60WQ4IfWdRZNdbHMhr1IIN0CIQD6GzKUls0YXxASUmdcSTUFeqXcedkhcLafHTk8jqcX8wIhAO1FmW+cyx1gm4msyhgXN1Fb7frFHniaP5L89zc6NwkjAiEAmA0e5A0GJVHt8GWepxFupaUZ3v9JDTZ8ICHhITrMxRcCIFI92Z0yP8UDA2aJGdOX2Hi+4JIXWSR8cqTEQfxGlWT5AiEA5TqIC6znNIGzeAeuz3Hdj4srmAEP/VG9EkDvdgMT6Tg=\\n-----END RSA PRIVATE KEY-----\",\n  "
-		des, _ = ParseBoxId(srcId, prikey)
+		prikey := "-----BEGIN RSA PRIVATE KEY-----\nMIIBPAIBAAJBAOfPLQ993UR8qJoCVJsj00/BcPDbKIjEDYnqMjgUAiQkMgYf9O4L7+WNhhtA+kIllsHpEAYJuSdl04wP05Pk0TkCAwEAAQJBAMzdJOafBrDjNqI9UwZ0x+ihfa3vEcik844iItW6oRXMFIo+P+6YHjgiiyLXeSu+60WQ4IfWdRZNdbHMhr1IIN0CIQD6GzKUls0YXxASUmdcSTUFeqXcedkhcLafHTk8jqcX8wIhAO1FmW+cyx1gm4msyhgXN1Fb7frFHniaP5L89zc6NwkjAiEAmA0e5A0GJVHt8GWepxFupaUZ3v9JDTZ8ICHhITrMxRcCIFI92Z0yP8UDA2aJGdOX2Hi+4JIXWSR8cqTEQfxGlWT5AiEA5TqIC6znNIGzeAeuz3Hdj4srmAEP/VG9EkDvdgMT6Tg=\n-----END RSA PRIVATE KEY-----"
+		parseDes, err := ParseBoxId(srcId, prikey)
+		if err != nil {
+			des = srcId
+		} else {
+			des = parseDes
+		}
 		break
 	case 'D':
 		accessKey := config.Field("parse_smid_access_key").String()

@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/x/bsonx"
 	"time"
 )
 
@@ -27,14 +28,16 @@ func InitVerifyCode() {
 	log.Infow("verifyCode mongodb init", "table", VerifyCodeTableName)
 	indexFiles := []mongo.IndexModel{
 		{
-			Keys: bson.D{{"phone", int32(1)}},
+			Keys: bsonx.Doc{{"phone", bsonx.Int32(1)}},
 		},
 		{
-			Keys: bson.D{{"phone", int32(1)}, {"send_time", int32(1)}},
+			Keys: bsonx.Doc{{"phone", bsonx.Int32(1)}, {"send_time", bsonx.Int32(1)}},
 		},
 		{
-			Keys:    bson.D{{"expire", int32(1)}, {"expireAfterSeconds", int32(SMSLlt)}},
-			Options: options.Index().SetExpireAfterSeconds(SMSLlt),
+			Keys:    bsonx.Doc{{"expire", bsonx.Int32(1)}},         // 设置TTL索引列"expire"
+			Options: options.Index().SetExpireAfterSeconds(SMSLlt), // 设置过期时间1天，即，
+			//Keys:    bson.D{{"expire", int32(1)}},
+			//Options: options.Index().SetExpireAfterSeconds(SMSLlt),
 		},
 	}
 	gmongo.CreateIndexes(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName, indexFiles)
@@ -50,12 +53,14 @@ func AddSmsVerify(phone string, verifyCode string) (interface{}, error) {
 	document["phone"] = phone
 	document["verify_code"] = verifyCode
 	document["send_time"] = time.Now().Unix()
-	document["expire"] = time.Now().Local()
+	timeStr := time.Now().Format("2006-01-02 15:04:05")
+	document["expire"] = timeStr
+	//localTime:=document["expire"] = time.Now().Local()
 	_, errInsert := gmongo.InsertOne(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName, document)
 	if errInsert != nil {
 		return nil, errInsert
 	}
-	log.Infow("AddSmsVerify ok", "phone", phone, "verify_code", verifyCode)
+	log.Infow("AddSmsVerify ok", "phone", phone, "verify_code", verifyCode, "timeStr", timeStr)
 	return nil, nil
 }
 
