@@ -17,9 +17,9 @@ import (
 const (
 	apiUrl     = "https://ye.dun.163yun.com/v1/oneclick/check" //本机认证服务身份证实人认证在线检测接口地址
 	version    = "v1"
-	secretId   = "your_secret_id"   //产品密钥ID，产品标识
-	secretKey  = "your_secret_key"  //产品私有密钥，服务端生成签名信息使用，请严格保管，避免泄露
-	businessId = "your_business_id" //业务ID，易盾根据产品业务特点分配
+	secretId   = "a20a4fd6a0ac8a32a2b8d01042433778" //产品密钥ID，产品标识
+	secretKey  = "945b23b071ae712e21e1722bc967b753" //产品私有密钥，服务端生成签名信息使用，请严格保管，避免泄露
+	businessId = "efedd541fba94b82a9854363975f16e0" //业务ID，易盾根据产品业务特点分配
 )
 
 //请求易盾接口
@@ -65,9 +65,9 @@ func gen_signature(params url.Values) string {
 func main() {
 	params := url.Values{
 		//token为易盾返回的token
-		"token": []string{"123456"},
+		"token": []string{"f701918e05124ce6aa90f76cfff5f534"},
 		//accessToken为运营商预取号获取到的token
-		"accessToken": []string{"123456"},
+		"accessToken": []string{"7b22616363657373546f6b656e223a226e6d6633373430303638636230373465333539303664366336356461363837333366222c22677741757468223a2231353836227d"},
 	}
 	ret := check(params)
 

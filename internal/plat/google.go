@@ -48,3 +48,7 @@ func (g google) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 func (g google) String() string {
 	return "google"
 }
+
+func (g google) DbFieldName() string {
+	return "google"
+}

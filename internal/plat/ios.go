@@ -77,6 +77,9 @@ func (i ios) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 func (i ios) String() string {
 	return "ios"
 }
+func (i ios) DbFieldName() string {
+	return "google"
+}
 
 func parseToken(token string) (*appleToken, error) {
 	parts := strings.Split(token, ".")

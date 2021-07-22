@@ -5,6 +5,7 @@ import (
 	"fmt"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"glogin/config"
+	"glogin/constant"
 	"glogin/db"
 	"glogin/internal/xhttp"
 	"glogin/pbs/glogin"
@@ -12,38 +13,38 @@ import (
 	"time"
 )
 
-func SmsVerify(req *glogin.SmsLoginReq) (bool, error) {
+func SmsVerify(req *glogin.SmsLoginReq) (int32, error) {
 	phone := req.Phone
 	log.Infow("SmsVerify", "phone", phone)
-	_, err := canSendSmsVerify(phone)
+	code, err := canSendSmsVerify(phone)
 	if err != nil {
-		return false, err
+		return code, err
 	}
 	verifyCode := CreateVerifyCode()
 	bSend, err := sendSmsVerify(phone, verifyCode)
-	if bSend {
-		_, errAdd := db.AddSmsVerify(phone, verifyCode)
-		if errAdd != nil {
-			log.Errorw("AddSmsVerify", "errAdd", errAdd)
-			return false, errAdd
-		}
-		return true, nil
+	if false == bSend {
+		return constant.ErrGLoginSmsFail, err
 	}
-	return false, nil
+	_, errAdd := db.AddSmsVerify(phone, verifyCode)
+	if errAdd != nil {
+		log.Errorw("DbAddSmsVerify", "errAdd", errAdd)
+		return constant.ErrCodeDB, errAdd
+	}
+	return constant.ErrCodeOk, nil
 }
 
 // 检查是否能发送
-func canSendSmsVerify(phone string) (bool, error) {
+func canSendSmsVerify(phone string) (int32, error) {
 	bCheck, errCheck := db.CheckSmsInterval(phone)
 	if !bCheck {
 		log.Errorw("CheckSmsInterval false", "errCheck", errCheck)
-		return false, errCheck
+		return constant.ErrGLoginSmsInterval, errCheck
 	}
 	_, errCount := db.CheckSmsVerifyCount(phone)
 	if errCount != nil {
-		return false, nil
+		return constant.ErrGLoginSmsCount, nil
 	}
-	return true, nil
+	return 0, nil
 }
 
 // 发送验证码

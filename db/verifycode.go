@@ -53,14 +53,14 @@ func AddSmsVerify(phone string, verifyCode string) (interface{}, error) {
 	document["phone"] = phone
 	document["verify_code"] = verifyCode
 	document["send_time"] = time.Now().Unix()
-	timeStr := time.Now().Format("2006-01-02 15:04:05")
-	document["expire"] = timeStr
-	//localTime:=document["expire"] = time.Now().Local()
+	//timeStr := time.Now().Format("2006-01-02 15:04:05")
+	time := time.Now().Local()
+	document["expire"] = time
 	_, errInsert := gmongo.InsertOne(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName, document)
 	if errInsert != nil {
 		return nil, errInsert
 	}
-	log.Infow("AddSmsVerify ok", "phone", phone, "verify_code", verifyCode, "timeStr", timeStr)
+	log.Infow("AddSmsVerify ok", "phone", phone, "verify_code", verifyCode, "time", time)
 	return nil, nil
 }
 
@@ -114,6 +114,7 @@ func CheckSmsInterval(phone string) (bool, error) {
 		"$gt": nowTime - 60,
 	}
 	doc, errFind := gmongo.FindOne(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName, filter)
+	// 数据库操作失败
 	if errFind != nil {
 		log.Warnw("CheckSmsVerifyCode Load", "err", errFind)
 		return false, errFind

@@ -21,8 +21,8 @@ func CreateVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (
 	return create(document, request)
 }
 
-func CreateThird(request *glogin.ThirdLoginReq, openId string, ip string) (DhAccount int32, err error) {
-	document := bson.M{request.ThirdPlat: openId, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
+func CreateThird(request *glogin.ThirdLoginReq, dbField string, openId string, ip string) (DhAccount int32, err error) {
+	document := bson.M{dbField: openId, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
 	return create(document, request)
 }
 
@@ -39,8 +39,8 @@ func LoginPhone(request *glogin.SmsLoginReq) (interface{}, error) {
 	return loginRsp, nil
 }
 
-func LoginThird(request *glogin.ThirdLoginReq, uid string, openId string) (interface{}, error) {
-	loginRsp, err := login(bson.M{request.ThirdPlat: openId}, request)
+func LoginThird(request *glogin.ThirdLoginReq, dbField string, uid string, openId string) (interface{}, error) {
+	loginRsp, err := login(bson.M{dbField: openId}, request)
 	if err != nil {
 		return nil, err
 	}

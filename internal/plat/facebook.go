@@ -44,3 +44,7 @@ func (f facebook) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 func (f facebook) String() string {
 	return "facebook"
 }
+
+func (f facebook) DbFieldName() string {
+	return "facebook"
+}

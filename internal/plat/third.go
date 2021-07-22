@@ -21,6 +21,7 @@ type third interface {
 	// Auth 登录返回第三方账号tokenId openId 错误信息
 	Auth(request *glogin.ThirdLoginReq) (string, string, error)
 	String() string
+	DbFieldName() string
 }
 
 // authURL 返回auth url地址
@@ -29,7 +30,6 @@ func authURL(bundleId string, platKey string) string {
 	if len(data) == 0 {
 		return ""
 	}
-
 	return gjson.GetBytes(data, platKey).String()
 }
 
