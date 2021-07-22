@@ -25,7 +25,7 @@ type File struct {
 
 const (
 	//TokenExpiredTime = 30 * 24 * 60 * 60
-	TokenExpiredTime = 60
+	TokenExpiredTime = 60 * 10
 )
 
 func Md5String(s string) string {

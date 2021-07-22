@@ -23,7 +23,7 @@ func SmsVerify(req *glogin.SmsLoginReq) (int32, error) {
 	verifyCode := CreateVerifyCode()
 	bSend, err := sendSmsVerify(phone, verifyCode)
 	if false == bSend {
-		return constant.ErrGLoginSmsFail, err
+		return constant.ErrCodeSmsFail, err
 	}
 	_, errAdd := db.AddSmsVerify(phone, verifyCode)
 	if errAdd != nil {
@@ -38,30 +38,17 @@ func canSendSmsVerify(phone string) (int32, error) {
 	bCheck, errCheck := db.CheckSmsInterval(phone)
 	if !bCheck {
 		log.Errorw("CheckSmsInterval false", "errCheck", errCheck)
-		return constant.ErrGLoginSmsInterval, errCheck
+		return constant.ErrCodeSmsInterval, errCheck
 	}
 	_, errCount := db.CheckSmsVerifyCount(phone)
 	if errCount != nil {
-		return constant.ErrGLoginSmsCount, nil
+		return constant.ErrCodeSmsCount, nil
 	}
 	return 0, nil
 }
 
 // 发送验证码
 func sendSmsVerify(phone string, verifyCode string) (bool, error) {
-	/*%% sms content
-	Content = list_to_binary(binary_to_list(consul_config:sms_content()) ++ binary_to_list(VerifyCode)),
-	Req = #{
-		<<"appId">> => consul_config:sms_appid(),
-		<<"timestamp">> => TimeStamp,
-		<<"sign">> => sms_sign(TimeStamp),
-		<<"mobiles">> => Phone,
-		<<"content">> => Content
-	},
-	Body = map_to_url_param(Req),
-		ibrowse:send_req(?SMS_URL, [{"Content-Type", "application/x-www-form-urlencoded"}], post, Body).
-	*?
-	*/
 	smsUrl := config.Field("sms_url").String()
 	timeStamp := util.FormatDate(time.Now(), util.YYYYMMDDHHMMSS)
 	content := config.Field("sms_content").String() + verifyCode

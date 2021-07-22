@@ -93,6 +93,10 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.DhAccount = rsp.AccountData.ID
 			response.SmId = smID
 			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
+			response.ExtendData = &glogin.ExtendData{
+				Nick:           rsp.AccountData.Phone,
+				Authentication: &glogin.StateQueryResponse{},
+			}
 			response.Errmsg = "success"
 			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
 			return response, nil
@@ -116,13 +120,13 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 	log.Infow("ThirdAuth Rsp", "uid", uid, "openid", openId)
 	// 平台错误
 	if errAuth == PlatIsWrong {
-		response.Code = constant.ErrGLoginPlatWrong
+		response.Code = constant.ErrCodePlatWrong
 		response.Errmsg = fmt.Sprintf("third %s plat is wrong", request.ThirdPlat)
 		return response, nil
 	}
 	// 第三方账号验证失败
 	if errAuth != nil {
-		response.Code = constant.ErrGLoginThirdAuthFail
+		response.Code = constant.ErrCodeThirdAuthFail
 		response.Errmsg = fmt.Sprintf("thrid plat %s auth error: %s", request.ThirdPlat, errAuth)
 		return response, nil
 	}
@@ -159,6 +163,14 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		response.DhAccount = rsp.AccountData.ID
 		response.SmId = smID
 		response.DhToken = util.GenDHToken(rsp.AccountData.ID)
+
+		// ExtendData
+		response.ExtendData = &glogin.ExtendData{
+			Authentication: &glogin.StateQueryResponse{},
+		}
+		if request.ThirdPlat == "yedun" {
+			response.ExtendData.Nick = openId
+		}
 		response.Errmsg = "success"
 		return response, nil
 	}

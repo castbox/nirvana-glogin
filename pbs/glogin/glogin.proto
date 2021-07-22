@@ -31,6 +31,25 @@ message LoginGame {
     string game_cd = 12;
 }
 
+// 防沉迷返回
+message StateQueryResponse{
+    string request_id = 1;            // 每次请求唯一标识
+    string err_code = 2;              // 错误码
+    string err_msg = 3;               // 错误码说明
+    int32 authentication_status = 4;  // 实名状态：0：成年，1：游客，2：0-8岁，3：8-16岁，4：16-18岁，5:认证中，6:异常认证中
+    bool is_holiday = 5;              // 是否节假日
+    int32 left_game_time = 8;         // 剩余游戏时间，已成年请忽略
+    int32 each_pay_amount = 9;        // 单次可充值额度，已成年请忽略
+    int32 left_pay_amount = 10;       // 总剩充值额度，已成年请忽略
+}
+
+// extendData
+message ExtendData {
+    string nick = 1;  //nick
+    StateQueryResponse authentication  = 2;
+}
+
+
 //第三方登录请求
 message ThirdLoginReq {
     string third_plat = 1;     // 第三方登录的平台( google、facebook, qq, 微信,yedun）
@@ -49,6 +68,7 @@ message ThridLoginRsp {
     string errmsg = 4;
     string sm_id = 5;
     int32 dh_account = 6;
+    ExtendData extend_data = 7; //Extend信息
 }
 
 //手机验证码登录请求
@@ -67,6 +87,7 @@ message SmsLoginRsp {
     string errmsg = 3;
     string sm_id = 4;
     int32 dh_account = 5;
+    ExtendData extend_data = 6; //Extend信息
 }
 
 
@@ -86,6 +107,7 @@ message VisitorLoginRsp {
     string sm_id = 4;
     int32 dh_account = 5;    //dh数字账号
     string visitor = 6;    //生成账号的visitor
+    ExtendData extend_data = 7; //Extend信息
 }
 
 //Fast登录请求参数
@@ -103,6 +125,7 @@ message FastLoginRsp {
     string errmsg = 3;
     string sm_id = 4;
     int32 dh_account = 5;    //dh数字账号
+    ExtendData extend_data = 6; //Extend信息
 }
 
 //登录相关
@@ -130,8 +153,9 @@ message VistorBindThridRsp {
     string code = 1;
     string dh_token = 2;
     string errmsg = 3;
-    string sm_id = 4;    string dh_account = 5;
-
+    string sm_id = 4;
+    string dh_account = 5;
+    ExtendData extend_data = 6; //Extend信息
 }
 
 service Bind {

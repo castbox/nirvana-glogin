@@ -7,6 +7,7 @@ import (
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"github.com/bitly/go-simplejson"
 	_ "github.com/gogf/gf/encoding/gjson"
+	"glogin/config"
 	"glogin/pbs/glogin"
 	"io/ioutil"
 	"net/http"
@@ -32,10 +33,9 @@ type yedun struct{}
 // Auth 登录返回第三方账号id 和 错误信息
 func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	log.Infow("yedun_check auth", "request", request)
-	//apiUrl = config.Field("yedun_oauth_url").String()
-	//secretId = config.Field("yedun_secret_id").String()
-	//secretKey = config.Field("yedun_secret_key").String()
-	//businessId = config.Field("yedun_businessId").String()
+	apiUrl := config.Field("yedun_oauth_url").String()
+	secretId := config.Field("yedun_secret_id").String()
+	businessId := config.Field("yedun_businessId").String()
 	params := url.Values{
 		//token为易盾返回的token
 		"token": []string{request.ThirdToken},
@@ -103,6 +103,7 @@ func genSignature(params url.Values) string {
 	for _, key := range keys {
 		paramStr += key + params[key][0]
 	}
+	secretKey := config.Field("yedun_secret_key").String()
 	paramStr += secretKey
 	md5Reader := md5.New()
 	md5Reader.Write([]byte(paramStr))
