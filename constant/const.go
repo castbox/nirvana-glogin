@@ -6,7 +6,11 @@ const (
 )
 
 const (
-	ServerName  = "glogin"
-	ClusterName = "lwk_dev"
-	Index       = 1
+	ServerName     = "glogin"
+	ClusterName    = "lwk_dev"
+	Index          = 1
+	Verify         = "verify"
+	Login          = "login"
+	HawkEyeDc      = "hawkeye_dc"
+	HawkEyeService = "hawkeye"
 )

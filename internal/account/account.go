@@ -3,7 +3,7 @@ package account
 import (
 	"github.com/gin-gonic/gin"
 	"glogin/db"
-	"glogin/db/db_core"
+	"glogin/internal"
 	"glogin/internal/anti"
 	"glogin/internal/hawkeye"
 	"glogin/internal/plat"
@@ -18,53 +18,66 @@ func CheckNotExist(filter interface{}) bool {
 
 func CreateVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (DhAccount int32, err error) {
 	document := bson.M{"visitor": visitor, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
-	return create(document, request)
+	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
+	return create(document, req)
 }
 
 func CreateThird(request *glogin.ThirdLoginReq, dbField string, openId string, ip string) (DhAccount int32, err error) {
 	document := bson.M{dbField: openId, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
-	return create(document, request)
+	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
+	return create(document, req)
 }
 
 func CreatePhone(request *glogin.SmsLoginReq, ip string) (DhAccount int32, err error) {
 	document := bson.M{"phone": request.Phone, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
-	return create(document, request)
+	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
+	return create(document, req)
 }
 
-func LoginPhone(request *glogin.SmsLoginReq) (interface{}, error) {
-	loginRsp, err := login(bson.M{"phone": request.Phone}, request)
+func LoginPhone(request *glogin.SmsLoginReq, ip string) (interface{}, error) {
+	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
+	loginRsp, err := login(bson.M{"phone": request.Phone}, req)
 	if err != nil {
 		return nil, err
 	}
 	return loginRsp, nil
 }
 
-func LoginThird(request *glogin.ThirdLoginReq, dbField string, uid string, openId string) (interface{}, error) {
-	loginRsp, err := login(bson.M{dbField: openId}, request)
+func LoginThird(request *glogin.ThirdLoginReq, dbField string, uid string, openId string, ip string) (interface{}, error) {
+	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
+	loginRsp, err := login(bson.M{dbField: openId}, req)
 	if err != nil {
 		return nil, err
 	}
 	return loginRsp, nil
 }
 
-func LoginFast(request *glogin.FastLoginReq, dhAccountId int32) (interface{}, error) {
-	loginRsp, err := login(bson.M{"_id": dhAccountId}, request)
+func LoginFast(request *glogin.FastLoginReq, dhAccountId int32, ip string) (interface{}, error) {
+	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
+	loginRsp, err := login(bson.M{"_id": dhAccountId}, req)
 	if err != nil {
 		return nil, err
 	}
 	return loginRsp, nil
 }
 
-func LoginVisitor(request *glogin.VisitorLoginReq, visitor string) (interface{}, error) {
-	loginRsp, err := login(bson.M{"visitor": visitor}, request)
+func LoginVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (interface{}, error) {
+	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
+	loginRsp, err := login(bson.M{"visitor": visitor}, req)
 	if err != nil {
 		return nil, err
 	}
 	return loginRsp, nil
 }
 
-func create(accountInfo bson.M, request interface{}) (DhAccount int32, err error) {
+func create(accountInfo bson.M, req internal.Req) (DhAccount int32, err error) {
 	// todo 鹰眼check注册
+	_, hErr := hawkeye.CheckRegister(req)
+	if hErr != nil {
+		DhAccount = 0
+		err = hErr
+		return
+	}
 	id, errInsert := db.CreateDhId(accountInfo)
 	if errInsert != nil {
 		err = errInsert
@@ -73,26 +86,20 @@ func create(accountInfo bson.M, request interface{}) (DhAccount int32, err error
 		DhAccount = id
 		// todo appsflyer
 		// todo anti_addiction
-		// todo 防沉迷数据查询
 		return
 	}
 }
 
-type InternalRsp struct {
-	AccountData db_core.AccountData `json:"acc_data"`
-	HawkRsp     interface{}         `json:"hawk_rsp"`
-	AntiRsp     interface{}         `json:"anti_rsp"`
-}
-
-func login(filter interface{}, request interface{}) (InternalRsp, error) {
-	internalRsp := InternalRsp{}
+func login(filter interface{}, req internal.Req) (internal.Rsp, error) {
+	internalRsp := internal.Rsp{}
 	// 加载数据
 	accountData, err := db.Load(filter)
 	if err != nil {
 		return internalRsp, err
 	}
 	// 鹰眼检查
-	hawkRsp, hawkErr := hawkeye.CheckLogin()
+	req.Account = string(accountData.ID)
+	hawkRsp, hawkErr := hawkeye.CheckLogin(req)
 	if hawkErr != nil {
 		return internalRsp, hawkErr
 	}

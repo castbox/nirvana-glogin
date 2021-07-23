@@ -58,9 +58,9 @@ var loginFuncs = map[string][]interface{}{
 		true,
 	},
 	"fast": {
-		(&Login{}).Fast,
+		(&Login{}).FastEx,
 		glogin2.NewFastLoginReq,
-		false,
+		true,
 	},
 }
 

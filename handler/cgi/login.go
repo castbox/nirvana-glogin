@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin"
 	"glogin/constant"
+	"glogin/internal"
 	"glogin/internal/account"
 	"glogin/internal/plat"
 	"glogin/internal/smfpcrypto"
@@ -34,12 +35,14 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 	response = &glogin.SmsLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
+		ExtendData: &glogin.ExtendData{
+			Authentication: &glogin.StateQueryResponse{},
+		},
 	}
 	ip := l.Ctx.ClientIP()
 	log.Infow("SMS login", "request", request, "ip", ip)
-	// sms step verify 并获得Phone 验证码
-	// sms step login  手机验证码登陆
-	if request.Step == "verify" {
+	// sms step verify 获得Phone 验证码
+	if request.Step == constant.Verify {
 		log.Infow("SMS verify", "request", request)
 		code, err := sms.SmsVerify(request)
 		if err != nil {
@@ -48,7 +51,8 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			return response, nil
 		}
 		return response, nil
-	} else if request.Step == "login" {
+		// sms step login  手机验证码登陆
+	} else if request.Step == constant.Login {
 		log.Infow("SMS login", "request", request)
 		_, errCk := sms.CheckPhone(request.Phone, request.Verifycode)
 		if errCk != nil {
@@ -71,19 +75,20 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.DhAccount = accountId
 			response.SmId = smID
 			response.Errmsg = "success"
+			response.ExtendData.Nick = request.Phone
 			response.DhToken = util.GenDHToken(accountId)
 			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
 			return response, nil
 		} else {
 			// 账号存在, 直接登录
-			loginRsp, errLogin := account.LoginPhone(request)
+			loginRsp, errLogin := account.LoginPhone(request, ip)
 			if errLogin != nil {
 				response.Code = constant.ErrCodeLoginInternal
 				response.Errmsg = fmt.Sprintf("sms login %s  error: %s", request.Phone, errLogin)
 				return response, nil
 			}
 			// 返回InternalRsp
-			rsp, ok := loginRsp.(account.InternalRsp)
+			rsp, ok := loginRsp.(internal.Rsp)
 			if !ok {
 				response.Code = constant.ErrCodeLoginInternal
 				response.Errmsg = fmt.Sprintf("sms login %s  error: %s", request.Phone, errLogin)
@@ -93,10 +98,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.DhAccount = rsp.AccountData.ID
 			response.SmId = smID
 			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
-			response.ExtendData = &glogin.ExtendData{
-				Nick:           rsp.AccountData.Phone,
-				Authentication: &glogin.StateQueryResponse{},
-			}
+			response.ExtendData.Nick = rsp.AccountData.Phone
 			response.Errmsg = "success"
 			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
 			return response, nil
@@ -115,6 +117,9 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 	response = &glogin.ThridLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
+		ExtendData: &glogin.ExtendData{
+			Authentication: &glogin.StateQueryResponse{},
+		},
 	}
 	uid, openId, dbField, errAuth := ThirdAuth(request)
 	log.Infow("ThirdAuth Rsp", "uid", uid, "openid", openId)
@@ -145,14 +150,14 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		response.DhToken = util.GenDHToken(accountId)
 	} else {
 		// 账号存在, 直接登录
-		loginRsp, errLogin := account.LoginThird(request, dbField, uid, openId)
+		loginRsp, errLogin := account.LoginThird(request, dbField, uid, openId, ip)
 		if errLogin != nil {
 			response.Code = constant.ErrCodeLoginInternal
 			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
 			return response, nil
 		}
 		// 返回
-		rsp, ok := loginRsp.(account.InternalRsp)
+		rsp, ok := loginRsp.(internal.Rsp)
 		if !ok {
 			response.Code = constant.ErrCodeParsePbInternal
 			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errLogin)
@@ -165,9 +170,6 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 
 		// ExtendData
-		response.ExtendData = &glogin.ExtendData{
-			Authentication: &glogin.StateQueryResponse{},
-		}
 		if request.ThirdPlat == "yedun" {
 			response.ExtendData.Nick = openId
 		}
@@ -186,6 +188,9 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 	rsp = &glogin.VisitorLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
+		ExtendData: &glogin.ExtendData{
+			Authentication: &glogin.StateQueryResponse{},
+		},
 	}
 	ip := l.Ctx.ClientIP()
 	log.Infow("Visitor login", "request", req, "ip", ip)
@@ -218,12 +223,14 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 		rsp.DhToken = util.GenDHToken(accountId)
 		rsp.SmId = smId
 		rsp.DhAccount = accountId
+		rsp.Visitor = visitorId
+		rsp.ExtendData.Nick = ""
 		rsp.Errmsg = "success"
 		log.Infow("visitor fast login success ", "rsp", rsp)
 		return rsp, nil
 	} else {
 		// 账号存在, 直接登录
-		loginRsp, errLogin := account.LoginVisitor(req, visitorId)
+		loginRsp, errLogin := account.LoginVisitor(req, visitorId, ip)
 		if errLogin != nil {
 			log.Infow("visitor fast login 1 error", "visitor", visitorId)
 			rsp.Code = constant.ErrCodeLoginInternal
@@ -231,7 +238,7 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 			return rsp, nil
 		}
 		// 返回
-		value, ok := loginRsp.(account.InternalRsp)
+		value, ok := loginRsp.(internal.Rsp)
 		if !ok {
 			log.Infow("visitor fast login  2 error", "visitor", visitorId)
 			rsp.Code = constant.ErrCodeParsePbInternal
@@ -250,10 +257,18 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 	return rsp, nil
 }
 
-func (Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp, err error) {
+func (l Login) FastEx(request *glogin.FastLoginReq, ctx *gin.Context) (response *glogin.FastLoginRsp, err error) {
+	l.Ctx = ctx
+	return l.Fast(request)
+}
+
+func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp, err error) {
 	response = &glogin.FastLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
+		ExtendData: &glogin.ExtendData{
+			Authentication: &glogin.StateQueryResponse{},
+		},
 	}
 	if request.DhToken == "" {
 		response.Code = constant.ErrCodeFastTokenError
@@ -275,9 +290,10 @@ func (Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp, 
 			return response, nil
 		}
 	}
+	ip := l.Ctx.ClientIP()
 	// 数美ID解析
 	smId := smfpcrypto.ParseSMID(request.Client.Dhid)
-	loginRsp, errLogin := account.LoginFast(request, dhAccount)
+	loginRsp, errLogin := account.LoginFast(request, dhAccount, ip)
 	if errLogin != nil {
 		response.Code = constant.ErrCodeLoginInternal
 		response.Errmsg = fmt.Sprintf("fast login %s auth error: %s", request.DhToken, errLogin)
@@ -285,7 +301,7 @@ func (Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp, 
 	}
 
 	// 返回
-	value, ok := loginRsp.(account.InternalRsp)
+	value, ok := loginRsp.(internal.Rsp)
 	if !ok {
 		response.Code = constant.ErrCodeParsePbInternal
 		response.Errmsg = fmt.Sprintf("fast login %s auth error: %s", request.DhToken, errLogin)
