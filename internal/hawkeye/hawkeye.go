@@ -50,15 +50,15 @@ func CheckLogin(req internal.Req) (interface{}, error) {
 	service := gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.HawkEyeService)
 	rsp, err := hawkeye_login.HawkeyeLogin(service, loginIn, gmoss.Call, gmoss.DefaultCallOption())
 	if err != nil {
-		return nil, err
+		return rsp, err
 	} else {
 		if !rsp.Pass {
-			return nil, fmt.Errorf("hawkeye_login HawkeyeLogin : %v", rsp)
+			return rsp, fmt.Errorf("hawkeye_login HawkeyeLogin : %v", rsp)
 		} else {
-			return nil, nil
+			return rsp, nil
 		}
 	}
-	return nil, nil
+	return rsp, nil
 }
 
 func CheckRegister(req internal.Req) (interface{}, error) {

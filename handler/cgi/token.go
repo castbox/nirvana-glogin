@@ -16,13 +16,13 @@ func TokenHandler(ctx *gin.Context) {
 	verify := &TokenReq{}
 	err := ctx.Bind(verify)
 	if err != nil {
-		ParseRequestError(ctx, err)
+		ParseRequestError(ctx, 500, err)
 		return
 	}
 	token, parseErr := jwt.ParseWithClaims(verify.Token, jwt.MapClaims{}, util.KeyMethod)
 	if parseErr != nil {
 		err = fmt.Errorf("token parese err:%v", parseErr)
-		ParseRequestError(ctx, err)
+		ParseRequestError(ctx, 500, err)
 		return
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {

@@ -43,6 +43,7 @@ func startHttp() {
 	router := gin.Default()
 	pprof.Register(router)
 	router.POST("/:service/:action", cgi.ServiceHandler)
+	router.POST("/anti/:action", cgi.AutiHandler)
 	router.POST("/cfg", cgi.CfgHandler)
 	router.POST("/token", cgi.TokenHandler)
 	router.GET("/metrics", prometheusHandler())
@@ -64,8 +65,8 @@ func startEngine() {
 	serviceReg := gmoss.NewServiceRegister()
 	serviceReg.Regist(&glogin2.Login_serviceDesc, cgi.Login{})
 	serviceReg.Regist(&glogin2.Bind_serviceDesc, cgi.Bind{})
-	loop, err := gmoss.RegServer(constant.ClusterName, constant.ServerName, constant.Index, serviceReg)
-	//loop, err := gmoss.RegServerByPath(serviceReg)
+	//loop, err := gmoss.RegServer(constant.ClusterName, constant.ServerName, constant.Index, serviceReg)
+	loop, err := gmoss.RegServerByPath(serviceReg)
 	if err != nil {
 		log.Fatalw("failed to register serverByPath", "err", err)
 		panic(err)

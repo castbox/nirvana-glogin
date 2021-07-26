@@ -1,7 +1,6 @@
 package account
 
 import (
-	"github.com/gin-gonic/gin"
 	"glogin/db"
 	"glogin/internal"
 	"glogin/internal/anti"
@@ -16,19 +15,19 @@ func CheckNotExist(filter interface{}) bool {
 	return db.CheckNotExist(filter)
 }
 
-func CreateVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (DhAccount int32, err error) {
+func CreateVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (interface{}, error) {
 	document := bson.M{"visitor": visitor, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
 	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
 	return create(document, req)
 }
 
-func CreateThird(request *glogin.ThirdLoginReq, dbField string, openId string, ip string) (DhAccount int32, err error) {
+func CreateThird(request *glogin.ThirdLoginReq, dbField string, openId string, ip string) (interface{}, error) {
 	document := bson.M{dbField: openId, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
 	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
 	return create(document, req)
 }
 
-func CreatePhone(request *glogin.SmsLoginReq, ip string) (DhAccount int32, err error) {
+func CreatePhone(request *glogin.SmsLoginReq, ip string) (interface{}, error) {
 	document := bson.M{"phone": request.Phone, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
 	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
 	return create(document, req)
@@ -70,22 +69,29 @@ func LoginVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (i
 	return loginRsp, nil
 }
 
-func create(accountInfo bson.M, req internal.Req) (DhAccount int32, err error) {
-	// todo 鹰眼check注册
+func create(accountInfo bson.M, req internal.Req) (rsp internal.Rsp, err error) {
+	// 鹰眼check注册
 	_, hErr := hawkeye.CheckRegister(req)
 	if hErr != nil {
-		DhAccount = 0
 		err = hErr
 		return
 	}
-	id, errInsert := db.CreateDhId(accountInfo)
+	dhid, errInsert := db.CreateDhId(accountInfo)
 	if errInsert != nil {
 		err = errInsert
 		return
 	} else {
-		DhAccount = id
-		// todo appsflyer
+		rsp.AccountData.ID = dhid
+		req.Account = string(dhid)
+		req.GameCd = req.Game.GameCd
 		// todo anti_addiction
+		antiRsp, antiErr := anti.StateQuery(req)
+		if antiErr != nil {
+			err = antiErr
+			return
+		}
+		rsp.AntiRsp = antiRsp
+		// todo appsflyer
 		return
 	}
 }
@@ -103,8 +109,9 @@ func login(filter interface{}, req internal.Req) (internal.Rsp, error) {
 	if hawkErr != nil {
 		return internalRsp, hawkErr
 	}
-	// 防沉迷检查
-	antiRsp, antiErr := anti.Check(gin.H{})
+	// 防沉迷查询
+	req.GameCd = req.Game.GameCd
+	antiRsp, antiErr := anti.StateQuery(req)
 	if antiErr != nil {
 		return internalRsp, antiErr
 	}

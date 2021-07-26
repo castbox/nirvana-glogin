@@ -15,7 +15,7 @@ func CfgHandler(ctx *gin.Context) {
 	err := ctx.Bind(loginInfo)
 	log.Infow("got new query CfgHandler request", "request", loginInfo)
 	if err != nil {
-		ParseRequestError(ctx, err)
+		ParseRequestError(ctx, 500, err)
 		return
 	}
 	cfgRsp := configure.GetCfg(loginInfo.AppName, loginInfo.Vsn, ctx.ClientIP())

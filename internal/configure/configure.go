@@ -41,6 +41,7 @@ func WatchPubCfg() {
 	//const dynamicPubUrl = "kv/app_dynamic_cfg/lwk_dev/pub_cfg/?recurse=true"
 	//http://127.0.0.1:2000/v1/kv/app_static_cfg/lwk_dev/glogin/pub_cfg/?recurse=true
 	dynamicPubUrl := fmt.Sprintf("kv/app_dynamic_cfg/%s/pub_cfg/?recurse=true", cluster)
+	log.Infow("WatchPubCfg", "dynamicPubUrl", dynamicPubUrl)
 	gmoss.DynamicCfgCustom(dynamicPubUrl, WatchPubCfgCallBack)
 }
 

@@ -13,15 +13,15 @@ import (
 	"time"
 )
 
-func SmsVerify(req *glogin.SmsLoginReq) (int32, error) {
+func GetVerify(req *glogin.SmsLoginReq) (int32, error) {
 	phone := req.Phone
 	log.Infow("SmsVerify", "phone", phone)
-	code, err := canSendSmsVerify(phone)
+	code, err := canSendVerify(phone)
 	if err != nil {
 		return code, err
 	}
 	verifyCode := CreateVerifyCode()
-	bSend, err := sendSmsVerify(phone, verifyCode)
+	bSend, err := sendVerify(phone, verifyCode)
 	if false == bSend {
 		return constant.ErrCodeSmsFail, err
 	}
@@ -34,7 +34,7 @@ func SmsVerify(req *glogin.SmsLoginReq) (int32, error) {
 }
 
 // 检查是否能发送
-func canSendSmsVerify(phone string) (int32, error) {
+func canSendVerify(phone string) (int32, error) {
 	bCheck, errCheck := db.CheckSmsInterval(phone)
 	if !bCheck {
 		log.Errorw("CheckSmsInterval false", "errCheck", errCheck)
@@ -48,7 +48,7 @@ func canSendSmsVerify(phone string) (int32, error) {
 }
 
 // 发送验证码
-func sendSmsVerify(phone string, verifyCode string) (bool, error) {
+func sendVerify(phone string, verifyCode string) (bool, error) {
 	smsUrl := config.Field("sms_url").String()
 	timeStamp := util.FormatDate(time.Now(), util.YYYYMMDDHHMMSS)
 	content := config.Field("sms_content").String() + verifyCode

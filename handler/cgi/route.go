@@ -72,16 +72,7 @@ var bindFuncs = map[string][]interface{}{
 	},
 }
 
-var antiFuncs = map[string][]interface{}{
-	"antiFuncs": {
-		(&Bind{}).BindThird,
-		glogin2.NewVistorBindThridReq,
-		false,
-	},
-}
-
 var routes = map[string]map[string][]interface{}{
 	"login": loginFuncs,
 	"bind":  bindFuncs,
-	"anti":  antiFuncs,
 }

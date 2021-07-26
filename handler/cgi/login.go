@@ -11,6 +11,7 @@ import (
 	"glogin/internal/plat"
 	"glogin/internal/smfpcrypto"
 	"glogin/internal/sms"
+	anti_authentication "glogin/pbs/authentication"
 	glogin "glogin/pbs/glogin"
 	"glogin/util"
 	"go.mongodb.org/mongo-driver/bson"
@@ -41,10 +42,10 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 	}
 	ip := l.Ctx.ClientIP()
 	log.Infow("SMS login", "request", request, "ip", ip)
-	// sms step verify 获得Phone 验证码
+	// sms step verify 获得Phone验证码
 	if request.Step == constant.Verify {
 		log.Infow("SMS verify", "request", request)
-		code, err := sms.SmsVerify(request)
+		code, err := sms.GetVerify(request)
 		if err != nil {
 			response.Code = code
 			response.Errmsg = fmt.Sprintf("get verify error %s ", request.Phone)
@@ -65,18 +66,29 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 		request.GetClient().Dhid = smID
 		if account.CheckNotExist(bson.M{"phone": request.Phone}) {
 			// 账号不存在,创建
-			accountId, errCreate := account.CreatePhone(request, ip)
+			createRsp, errCreate := account.CreatePhone(request, ip)
 			if errCreate != nil {
 				response.Code = constant.ErrCodeCreateInternal
 				response.Errmsg = fmt.Sprintf("sms login %s create error: %s", request.Phone, errCreate)
 				return response, errCreate
 			}
+			// 返回InternalRsp
+			rsp, ok := createRsp.(internal.Rsp)
+			if !ok {
+				response.Code = constant.ErrCodeCreateInternal
+				response.Errmsg = fmt.Sprintf("sms login %s  error: %v", request.Phone, rsp)
+				return response, nil
+			}
 			response.Code = constant.ErrCodeOk
-			response.DhAccount = accountId
+			response.DhAccount = rsp.AccountData.ID
 			response.SmId = smID
 			response.Errmsg = "success"
 			response.ExtendData.Nick = request.Phone
-			response.DhToken = util.GenDHToken(accountId)
+			r2, ok := rsp.AntiRsp.(anti_authentication.StateQueryResponse)
+			if ok {
+				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
+			}
+			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
 			return response, nil
 		} else {
@@ -99,6 +111,10 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.SmId = smID
 			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 			response.ExtendData.Nick = rsp.AccountData.Phone
+			r2, ok := rsp.AntiRsp.(anti_authentication.StateQueryResponse)
+			if ok {
+				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
+			}
 			response.Errmsg = "success"
 			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
 			return response, nil
@@ -140,14 +156,36 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 	request.GetClient().Dhid = smID
 	if account.CheckNotExist(bson.M{dbField: openId}) {
 		// 账号不存在,创建
-		accountId, errCreate := account.CreateThird(request, dbField, openId, ip)
+		createRsp, errCreate := account.CreateThird(request, dbField, openId, ip)
 		if errCreate != nil {
 			response.Code = constant.ErrCodeCreateInternal
 			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
 			return response, errCreate
 		}
-		response.Code = 0
-		response.DhToken = util.GenDHToken(accountId)
+
+		rsp, ok := createRsp.(internal.Rsp)
+		if !ok {
+			response.Code = constant.ErrCodeCreateInternal
+			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, rsp)
+			return response, nil
+		}
+
+		log.Infow("third login success 1", " request.ThirdPlat", request.ThirdPlat, "openid", openId)
+		response.Code = constant.ErrCodeOk
+		response.DhAccount = rsp.AccountData.ID
+		response.SmId = smID
+		response.DhToken = util.GenDHToken(rsp.AccountData.ID)
+		// 防沉迷返回
+		r2, ok := rsp.AntiRsp.(glogin.StateQueryResponse)
+		if ok {
+			response.ExtendData.Authentication = &r2
+		}
+		// ExtendData
+		if request.ThirdPlat == "yedun" {
+			response.ExtendData.Nick = openId
+		}
+		response.Errmsg = "success"
+		return response, nil
 	} else {
 		// 账号存在, 直接登录
 		loginRsp, errLogin := account.LoginThird(request, dbField, uid, openId, ip)
@@ -168,8 +206,11 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		response.DhAccount = rsp.AccountData.ID
 		response.SmId = smID
 		response.DhToken = util.GenDHToken(rsp.AccountData.ID)
-
-		// ExtendData
+		// 防沉迷返回
+		r2, ok := rsp.AntiRsp.(glogin.StateQueryResponse)
+		if ok {
+			response.ExtendData.Authentication = &r2
+		}
 		if request.ThirdPlat == "yedun" {
 			response.ExtendData.Nick = openId
 		}
@@ -212,18 +253,30 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 
 	if account.CheckNotExist(bson.M{"visitor": visitorId}) {
 		// 账号不存在,创建
-		accountId, errCreate := account.CreateVisitor(req, visitorId, ip)
+		createRsp, errCreate := account.CreateVisitor(req, visitorId, ip)
 		if errCreate != nil {
 			log.Infow("visitor fast login create account error ", "visitor", visitorId)
 			rsp.Code = constant.ErrCodeCreateInternal
 			rsp.Errmsg = fmt.Sprintf("visitor  %s fast login create account error: %s", visitorId, errCreate)
 			return rsp, errCreate
 		}
+
+		dcRsp, ok := createRsp.(internal.Rsp)
+		if !ok {
+			rsp.Code = constant.ErrCodeCreateInternal
+			rsp.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", "visitor", rsp)
+			return rsp, nil
+		}
 		rsp.Code = constant.ErrCodeOk
-		rsp.DhToken = util.GenDHToken(accountId)
+		rsp.DhToken = util.GenDHToken(dcRsp.AccountData.ID)
 		rsp.SmId = smId
-		rsp.DhAccount = accountId
+		rsp.DhAccount = dcRsp.AccountData.ID
 		rsp.Visitor = visitorId
+		// 防沉迷返回
+		r2, ok := dcRsp.AntiRsp.(anti_authentication.StateQueryResponse)
+		if ok {
+			rsp.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
+		}
 		rsp.ExtendData.Nick = ""
 		rsp.Errmsg = "success"
 		log.Infow("visitor fast login success ", "rsp", rsp)
@@ -252,6 +305,11 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 		rsp.DhToken = util.GenDHToken(value.AccountData.ID)
 		rsp.Visitor = visitorId
 		rsp.Errmsg = "success"
+		// 防沉迷返回
+		r2, ok := value.AntiRsp.(anti_authentication.StateQueryResponse)
+		if ok {
+			rsp.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
+		}
 		return rsp, nil
 	}
 	return rsp, nil
@@ -312,6 +370,12 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 	response.DhAccount = value.AccountData.ID
 	response.DhToken = util.GenDHToken(value.AccountData.ID)
 	response.Errmsg = "success"
+	// 防沉迷返回
+	r2, ok := value.AntiRsp.(anti_authentication.StateQueryResponse)
+	if ok {
+		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
+	}
+
 	log.Infow("fast login success", "response", response)
 	return response, nil
 }

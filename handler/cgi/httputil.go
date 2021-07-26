@@ -5,9 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ParseRequestError(c *gin.Context, err error) {
+func ParseRequestError(c *gin.Context, code int32, err error) {
 	c.JSON(500, gin.H{
-		"code":   500,
+		"code":   code,
 		"errmsg": fmt.Sprintf("parse json err:%v", err),
 	})
 }

@@ -12,6 +12,7 @@ type Rsp struct {
 }
 
 type Req struct {
+	GameCd  string              `json:"game_cd"`
 	Account string              `json:"account"`
 	IP      string              `json:"ip"`
 	Client  *glogin.LoginClient `json:"client"`

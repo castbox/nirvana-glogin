@@ -1,13 +1,17 @@
 package util
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/md5"
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"github.com/dgrijalva/jwt-go"
 	"glogin/config"
+	"io"
 	"time"
 )
 
@@ -92,4 +96,19 @@ func ValidDHToken(tokenString string) (accountId int32, err error) {
 		log.Errorw("ValidDHToken error", "DHToken", err)
 		return 0, err
 	}
+}
+
+// 输入文本，key，返回经过base64(aes-128)加密的结果，并且会将nonce放入到前12个字节
+func Enr(plaintext, key string) string {
+	keyBytes, _ := hex.DecodeString(key)
+	block, _ := aes.NewCipher(keyBytes)
+
+	nonce := make([]byte, 12)
+	io.ReadFull(rand.Reader, nonce)
+
+	gcm, _ := cipher.NewGCM(block)
+	ciphertext := gcm.Seal(nil, nonce, []byte(plaintext), nil)
+
+	result := append(nonce, ciphertext...)
+	return base64.StdEncoding.EncodeToString(result)
 }

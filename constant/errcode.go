@@ -2,7 +2,7 @@ package constant
 
 const (
 	ErrCodeOk                  = 0
-	ErrCodeDB                  = -1002     //Login内部错误
+	ErrCodeDB                  = -1002     //Login内部Db错误
 	ErrCodeBindType            = -20010150 //绑定类型错误
 	ErrCodeSmsInterval         = -20010200 //60s内只能发送一条短信
 	ErrCodeSmsCount            = -20010201 //10分钟内只能发送3条

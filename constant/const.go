@@ -13,4 +13,7 @@ const (
 	Login          = "login"
 	HawkEyeDc      = "hawkeye_dc"
 	HawkEyeService = "hawkeye"
+
+	AutiDc      = "auti_dc"
+	AutiService = "anti_obsession"
 )
