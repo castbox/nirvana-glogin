@@ -79,6 +79,7 @@ func startEngine() {
 	serviceReg.Regist(&glogin2.Bind_serviceDesc, cgi.Bind{})
 	//loop, err := gmoss.RegServer(constant.ClusterName, constant.ServerName, constant.Index, serviceReg)
 	loop, err := gmoss.RegServerByPath(serviceReg)
+	serviceReg.Regist(&glogin2.Gmp_serviceDesc, moss.Gmp{})
 	if err != nil {
 		log.Fatalw("failed to register serverByPath", "err", err)
 		panic(err)
