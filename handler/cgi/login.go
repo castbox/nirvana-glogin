@@ -84,9 +84,9 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.SmId = smID
 			response.Errmsg = "success"
 			response.ExtendData.Nick = request.Phone
-			r2, ok := rsp.AntiRsp.(anti_authentication.StateQueryResponse)
+			r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
 			if ok {
-				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
+				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 			}
 			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
@@ -111,9 +111,9 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.SmId = smID
 			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 			response.ExtendData.Nick = rsp.AccountData.Phone
-			r2, ok := rsp.AntiRsp.(anti_authentication.StateQueryResponse)
+			r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
 			if ok {
-				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
+				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 			}
 			response.Errmsg = "success"
 			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
@@ -176,9 +176,9 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		response.SmId = smID
 		response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 		// 防沉迷返回
-		r2, ok := rsp.AntiRsp.(glogin.StateQueryResponse)
+		r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
 		if ok {
-			response.ExtendData.Authentication = &r2
+			response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 		}
 		// ExtendData
 		if request.ThirdPlat == "yedun" {
@@ -207,9 +207,9 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		response.SmId = smID
 		response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 		// 防沉迷返回
-		r2, ok := rsp.AntiRsp.(glogin.StateQueryResponse)
+		r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
 		if ok {
-			response.ExtendData.Authentication = &r2
+			response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 		}
 		if request.ThirdPlat == "yedun" {
 			response.ExtendData.Nick = openId
@@ -321,6 +321,7 @@ func (l Login) FastEx(request *glogin.FastLoginReq, ctx *gin.Context) (response 
 }
 
 func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp, err error) {
+	log.Infow("fast login request", "request", request)
 	response = &glogin.FastLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
@@ -371,9 +372,9 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 	response.DhToken = util.GenDHToken(value.AccountData.ID)
 	response.Errmsg = "success"
 	// 防沉迷返回
-	r2, ok := value.AntiRsp.(anti_authentication.StateQueryResponse)
+	r2, ok := value.AntiRsp.(*anti_authentication.StateQueryResponse)
 	if ok {
-		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
+		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 	}
 
 	log.Infow("fast login success", "response", response)

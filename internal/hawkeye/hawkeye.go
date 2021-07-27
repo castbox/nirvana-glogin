@@ -53,7 +53,7 @@ func CheckLogin(req internal.Req) (interface{}, error) {
 		return rsp, err
 	} else {
 		if !rsp.Pass {
-			return rsp, fmt.Errorf("hawkeye_login HawkeyeLogin : %v", rsp)
+			return rsp, fmt.Errorf("CheckLogin HawkeyeLogin : %v", rsp)
 		} else {
 			return rsp, nil
 		}

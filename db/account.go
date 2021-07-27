@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"git.dhgames.cn/svr_comm/gcore/gmongo"
 	"glogin/config"
@@ -8,6 +9,7 @@ import (
 	"glogin/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
@@ -95,5 +97,35 @@ func CreateDhId(document bson.M) (accountId int32, err error) {
 			return
 		}
 	}
+	return
+}
+
+// gmp用
+func Lookup(filter bson.M) (ptrToSlice interface{}, count int32, err error) {
+	pageSize := 50
+	index := 1
+	//if pageSize, ok := filter["page_size"]; ok {
+	//}
+	//if index, ok := filter["page_num"]; ok {
+	//}
+	findOption := options.Find().SetLimit(int64(pageSize)).SetSkip(int64(pageSize * index))
+	delete(filter, "page_size")
+	delete(filter, "page_num")
+	doc, errFind := gmongo.Find(config.MongoUrl(), config.MongoDb(), AccountTableName, filter, findOption)
+	if errFind != nil {
+		log.Warnw("AccountTable Lookup gmongo.Find", "errFind", err)
+		err = errFind
+		return
+	}
+	if err = doc.All(context.TODO(), ptrToSlice); err != nil {
+		panic(err)
+	}
+	count2, errCount := gmongo.CountDocuments(config.MongoUrl(), config.MongoDb(), AccountTableName, filter)
+	if errCount != nil {
+		log.Warnw("AccountTable Lookup  gmongo.CountDocuments", "errCount", errCount)
+		err = errCount
+		return
+	}
+	count = int32(count2)
 	return
 }

@@ -1,6 +1,8 @@
 package account
 
 import (
+	"fmt"
+	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"glogin/db"
 	"glogin/internal"
 	"glogin/internal/anti"
@@ -82,7 +84,7 @@ func create(accountInfo bson.M, req internal.Req) (rsp internal.Rsp, err error) 
 		return
 	} else {
 		rsp.AccountData.ID = dhid
-		req.Account = string(dhid)
+		req.Account = fmt.Sprintf("%d", dhid)
 		req.GameCd = req.Game.GameCd
 		// todo anti_addiction
 		antiRsp, antiErr := anti.StateQuery(req)
@@ -104,17 +106,19 @@ func login(filter interface{}, req internal.Req) (internal.Rsp, error) {
 		return internalRsp, err
 	}
 	// 鹰眼检查
-	req.Account = string(accountData.ID)
+	req.Account = fmt.Sprintf("%d", accountData.ID)
 	hawkRsp, hawkErr := hawkeye.CheckLogin(req)
 	if hawkErr != nil {
 		return internalRsp, hawkErr
 	}
 	// 防沉迷查询
 	req.GameCd = req.Game.GameCd
+	log.Infow("anti.StateQuery req", "req", req)
 	antiRsp, antiErr := anti.StateQuery(req)
 	if antiErr != nil {
 		return internalRsp, antiErr
 	}
+	log.Infow("anti.StateQuery rsp ", "rsp", antiRsp)
 	internalRsp.AccountData = accountData
 	internalRsp.HawkRsp = hawkRsp
 	internalRsp.AntiRsp = antiRsp

@@ -161,3 +161,39 @@ message VistorBindThridRsp {
 service Bind {
     rpc BindThird(VistorBindThridReq) returns(VistorBindThridRsp);
 }
+
+//给GMP调用的moss接口
+message QueryRequest{
+    string account = 1;
+    repeated string bundleids = 2;
+    string login_type = 3;
+}
+
+message QueryResponse {
+    int32 code = 1;
+    int32 count = 2;
+    string msg = 3;
+    repeated AccountData data = 4;
+}
+
+message AccountData {
+    int64  _id= 1;
+    string bundle_id = 2;
+    string facebook = 3;
+    string ios = 4;
+    string google = 5;
+    string phone = 6;
+    CreateData create = 7;
+    string visitor = 8;
+}
+
+message CreateData {
+    string   ip = 1;
+    int64 time = 2;
+    string sm_id = 3;
+    string bundle_id = 4;
+}
+
+service Gmp {
+    rpc LoadAccountInfo(QueryRequest) returns(QueryResponse);
+}

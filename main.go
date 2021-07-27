@@ -18,7 +18,7 @@ import (
 
 func main() {
 	// 开发模式设置
-	log.ResetToDevelopment()
+	initDevelopment()
 	// 注册服务
 	startEngine()
 	log.Infow("server started")
@@ -32,6 +32,16 @@ func main() {
 	log.Infow("http server started")
 	// 循环
 	select {}
+}
+
+func initDevelopment() {
+	development := flag.Int("dev", 0, "是否处于开发模式，决定日志等级。")
+	flag.Parse()
+	if development == nil || *development == 0 {
+		log.ResetToProduction()
+	} else {
+		log.ResetToDevelopment()
+	}
 }
 
 func initDB() {
