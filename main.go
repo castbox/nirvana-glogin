@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"git.dhgames.cn/svr_comm/gmoss/v2"
 	"github.com/gin-contrib/pprof"
@@ -10,6 +11,7 @@ import (
 	"glogin/constant"
 	"glogin/db"
 	"glogin/handler/cgi"
+	"glogin/handler/moss"
 	"glogin/internal/configure"
 	glogin2 "glogin/pbs/glogin"
 	"net/http"
