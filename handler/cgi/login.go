@@ -83,7 +83,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.DhAccount = rsp.AccountData.ID
 			response.SmId = smID
 			response.Errmsg = "success"
-			response.ExtendData.Nick = request.Phone
+			response.ExtendData.Nick = util.HideStar(request.Phone)
 			r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
 			if ok {
 				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
@@ -110,7 +110,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.DhAccount = rsp.AccountData.ID
 			response.SmId = smID
 			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
-			response.ExtendData.Nick = rsp.AccountData.Phone
+			response.ExtendData.Nick = util.HideStar(rsp.AccountData.Phone)
 			r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
 			if ok {
 				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
@@ -182,7 +182,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		}
 		// ExtendData
 		if request.ThirdPlat == "yedun" {
-			response.ExtendData.Nick = openId
+			response.ExtendData.Nick = util.HideStar(openId)
 		}
 		response.Errmsg = "success"
 		return response, nil
@@ -212,7 +212,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 		}
 		if request.ThirdPlat == "yedun" {
-			response.ExtendData.Nick = openId
+			response.ExtendData.Nick = util.HideStar(openId)
 		}
 		response.Errmsg = "success"
 		return response, nil

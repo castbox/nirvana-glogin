@@ -11,9 +11,8 @@ const (
 	Index          = 1
 	Verify         = "verify"
 	Login          = "login"
-	HawkEyeDc      = "hawkeye_dc"
+	HawkEyeDc      = "hawkeye_dc_cluster"
 	HawkEyeService = "hawkeye"
-
-	AutiDc      = "auti_dc"
-	AutiService = "anti_obsession"
+	AutiDc         = "auti_dc_cluster"
+	AutiService    = "anti_obsession"
 )

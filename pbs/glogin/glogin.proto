@@ -177,7 +177,7 @@ message QueryResponse {
 }
 
 message AccountData {
-    int64  _id= 1;
+    int32  _id= 1;
     string bundle_id = 2;
     string facebook = 3;
     string ios = 4;

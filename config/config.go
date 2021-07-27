@@ -61,9 +61,22 @@ func Field(field string) gjson.Result {
 }
 
 func MongoUrl() string {
-	return Field("mongo_url").String()
+	mongoUrl := Field("mongo_url").String()
+	if mongoUrl == "" {
+		mongoUrl = "mongodb://WpxU:WpxU63@10.0.240.19:20294,10.0.240.19:24771/admin?replicaSet=dev-ulogin-db&maxPoolSize=10"
+	}
+	return mongoUrl
 }
 
 func MongoDb() string {
-	return Field("mongo_db").String()
+	MongoDb := Field("mongo_db").String()
+	if MongoDb == "" {
+		MongoDb = "glogin_account"
+	}
+	return MongoDb
+}
+
+func BundleInfo(bundleId string) string {
+	bundles := Field("bundles").String()
+	return bundles
 }

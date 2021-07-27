@@ -101,19 +101,21 @@ func CreateDhId(document bson.M) (accountId int32, err error) {
 }
 
 // gmp用
-func Lookup(filter bson.M) (ptrToSlice interface{}, count int32, err error) {
+func Lookup(filter bson.M, ptrToSlice interface{}) (count int32, err error) {
 	pageSize := 50
-	index := 1
-	//if pageSize, ok := filter["page_size"]; ok {
-	//}
-	//if index, ok := filter["page_num"]; ok {
-	//}
-	findOption := options.Find().SetLimit(int64(pageSize)).SetSkip(int64(pageSize * index))
+	pageNum := 1
+	if v, ok := filter["page_size"]; ok {
+		pageSize = v.(int)
+	}
+	if v2, ok := filter["page_num"]; ok {
+		pageNum = v2.(int)
+	}
+	findOption := options.Find().SetLimit(int64(pageSize)).SetSkip(int64((pageNum - 1) * pageSize))
 	delete(filter, "page_size")
 	delete(filter, "page_num")
 	doc, errFind := gmongo.Find(config.MongoUrl(), config.MongoDb(), AccountTableName, filter, findOption)
 	if errFind != nil {
-		log.Warnw("AccountTable Lookup gmongo.Find", "errFind", err)
+		log.Warnw("AccountTable Lookup gmongo.Find", "errFind", errFind)
 		err = errFind
 		return
 	}
@@ -127,5 +129,18 @@ func Lookup(filter bson.M) (ptrToSlice interface{}, count int32, err error) {
 		return
 	}
 	count = int32(count2)
+	return
+}
+
+func LoadOne(filter interface{}, result interface{}) (err error) {
+	doc, errFind := gmongo.FindOne(config.MongoUrl(), config.MongoDb(), AccountTableName, filter)
+	if errFind != nil {
+		log.Warnw("AccountTable LoadOne", "err", err)
+		err = errFind
+		return
+	}
+	if err = doc.Decode(result); err != nil {
+		panic(err)
+	}
 	return
 }

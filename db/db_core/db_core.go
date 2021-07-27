@@ -2,7 +2,7 @@ package db_core
 
 // account table
 type AccountData struct {
-	ID        int32      `json:"id" bson:"_id"`                // id DH_account
+	ID        int32      `json:"_id" bson:"_id"`               // id DH_account
 	BundleID  string     `json:"bundle_id" bson:"bundle_id"`   // 包名
 	Create    CreateData `json:"create" bson:"create"`         // create创建信息
 	Google    string     `json:"google" bson:"google"`         // google
