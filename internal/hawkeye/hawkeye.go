@@ -50,9 +50,10 @@ func CheckLogin(req internal.Req) (interface{}, error) {
 	service := gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.HawkEyeService)
 	log.Infow("HawkeyeLogin Req", "loginReq", loginIn)
 	rsp, err := hawkeye_login.HawkeyeLogin(service, loginIn, gmoss.Call, gmoss.DefaultCallOption())
-	log.Infow("HawkeyeLogin Rsp", "loginRsp", rsp)
+	log.Infow("HawkeyeLogin Rsp", "loginRsp", rsp, "err", err)
 	if err != nil {
-		return rsp, err
+		log.Infow("HawkeyeLogin Rsp 2", "err", rsp, "err", err)
+		return rsp, nil
 	} else {
 		if !rsp.Pass {
 			return rsp, fmt.Errorf("CheckLogin HawkeyeLogin : %v", rsp)
@@ -90,7 +91,8 @@ func CheckRegister(req internal.Req) (interface{}, error) {
 	rsp, err := hawkeye_register.HawkeyeRegister(service, registerIn, gmoss.Call, gmoss.DefaultCallOption())
 	log.Infow("HawkeyeRegister Rsp", "Rsp", rsp)
 	if err != nil {
-		return nil, err
+		log.Infow("HawkeyeRegister Rsp", "Rsp", rsp, "Err", err)
+		return nil, nil
 	} else {
 		if !rsp.Pass {
 			return nil, fmt.Errorf("hawkeye_login HawkeyeLogin : %v", rsp)
