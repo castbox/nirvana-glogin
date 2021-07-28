@@ -1,8 +1,10 @@
 package cgi
 
 import (
+	"fmt"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"github.com/gin-gonic/gin"
+	"glogin/constant"
 	"glogin/internal"
 	"glogin/internal/anti"
 	anti_authentication "glogin/pbs/authentication"
@@ -45,17 +47,23 @@ func AutiHandler(ctx *gin.Context) {
 		PlayerInfo: playerInfo,
 	}
 	// 实名认证
-	antiCheckRsp, errCheck := anti.Check(checkIn)
-	if errCheck != nil {
-		ctx.JSON(500, errCheck)
-		return
-	}
 	checkRsp := &AutiCheckResponse{
-		ErrCode:        antiCheckRsp.ErrCode,
-		ErrMsg:         antiCheckRsp.ErrMsg,
+		ErrCode:        "0",
 		Authentication: &glogin.StateQueryResponse{},
 	}
-
+	antiCheckRsp, errCheck := anti.Check(checkIn)
+	if errCheck != nil {
+		checkRsp.ErrCode = constant.ErrCodeStrAutiRpc
+		checkRsp.ErrMsg = fmt.Sprintf(" AutiCheck error: %v", checkRsp)
+		ctx.JSON(500, checkRsp)
+		return
+	}
+	checkRsp.ErrMsg = antiCheckRsp.ErrMsg
+	checkRsp.ErrCode = antiCheckRsp.ErrCode
+	if antiCheckRsp.ErrCode != constant.ErrCodeStrOk {
+		ctx.JSON(200, checkRsp)
+		return
+	}
 	//  查询实名信息
 	reqState := internal.Req{
 		Account: checkReq.Account,
