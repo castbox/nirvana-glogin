@@ -10,22 +10,23 @@ import (
 )
 
 type All struct {
-	WebPort           string `json:"web_port"`
-	UTLog             string `json:"utlog"`
-	TestingOpen       bool   `json:"testing_open"`
-	SmsUrl            string `json:"sms_url"`
-	SmsSecret         string `json:"sms_secret"`
-	SmsContent        string `json:"sms_content"`
-	SmsAppid          string `json:"sms_appid"`
-	MongoUrl          string `json:"mongo_url"`
-	MongoOldGpDb      string `json:"mongo_old_gpdb"	`
-	MongoDb           string `json:"mongo_db"`
-	JwtSecret         string `json:"jwt_secret"`
-	HawkEyeOpen       bool   `json:"hawkeye_open"`
-	HawkEyeFilter     string `json:"hawkeye_filter"`
-	HawkEyeDc         string `json:"hawkeye_dc"`
-	AntiAddictionOpen bool   `json:"anti_addiction_open"`
-	FacebookGraphUrl  string `json:"facebook_graphurl"`
+	WebPort           string                 `json:"web_port"`
+	UTLog             string                 `json:"utlog"`
+	SmsUrl            string                 `json:"sms_url"`
+	SmsSecret         string                 `json:"sms_secret"`
+	SmsContent        string                 `json:"sms_content"`
+	SmsAppid          string                 `json:"sms_appid"`
+	MongoUrl          string                 `json:"mongo_url"`
+	MongoOldGpDb      string                 `json:"mongo_old_gpdb"	`
+	MongoDb           string                 `json:"mongo_db"`
+	JwtSecret         string                 `json:"jwt_secret"`
+	HawkEyeOpen       bool                   `json:"hawkeye_open"`
+	HawkEyeFilter     string                 `json:"hawkeye_filter"`
+	HawkEyeDc         string                 `json:"hawkeye_dc"`
+	AntiAddictionOpen bool                   `json:"anti_addiction_open"`
+	FacebookGraphUrl  string                 `json:"facebook_graphurl"`
+	FacebookInfo      map[string]string      `json:"facebook_infos"`
+	Packages          map[string]interface{} `json:"packages"`
 }
 
 var staticConfig All
@@ -52,8 +53,14 @@ func Reload(urlI interface{}, configI interface{}) {
 	v := staticConfig
 	fmt.Println(v)
 
+	//PackageParam("com.droidhang.aod.cnofficial", "yedun_secret_id")
+
 }
 func GetAll() *All { return &staticConfig }
+
+func Packages() interface{} { return staticConfig.Packages }
+
+func FacebookInfos() map[string]string { return staticConfig.FacebookInfo }
 
 // Field 获取静态json数据
 func Field(field string) gjson.Result {
@@ -76,7 +83,21 @@ func MongoDb() string {
 	return MongoDb
 }
 
-func BundleInfo(bundleId string) string {
-	bundles := Field("bundles").String()
-	return bundles
+func PackageParam(bundleId string, key string) string {
+	packages := Packages()
+	mapData := packages.(map[string]interface{})
+	if bundleData, ok := mapData[bundleId]; ok {
+		if value, ok := bundleData.(map[string]interface{})[key]; ok {
+			return value.(string)
+		}
+	}
+	return ""
+}
+
+func FacebookParam(bundleKey string) string {
+	facebookInfos := FacebookInfos()
+	if valueData, ok := facebookInfos[bundleKey]; ok {
+		return valueData
+	}
+	return ""
 }

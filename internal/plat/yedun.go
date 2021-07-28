@@ -19,11 +19,11 @@ import (
 )
 
 const (
-	apiUrl     = "https://ye.dun.163yun.com/v1/oneclick/check" //本机认证服务身份证实人认证在线检测接口地址
-	version    = "v1"
-	secretId   = "a20a4fd6a0ac8a32a2b8d01042433778" //产品密钥ID，产品标识
-	secretKey  = "945b23b071ae712e21e1722bc967b753" //产品私有密钥，服务端生成签名信息使用，请严格保管，避免泄露
-	businessId = "efedd541fba94b82a9854363975f16e0" //业务ID，易盾根据产品业务特点分配
+	//apiUrl     = "https://ye.dun.163yun.com/v1/oneclick/check" //本机认证服务身份证实人认证在线检测接口地址
+	version = "v1"
+	//secretId   = "a20a4fd6a0ac8a32a2b8d01042433778" //产品密钥ID，产品标识
+	//secretKey  = "945b23b071ae712e21e1722bc967b753" //产品私有密钥，服务端生成签名信息使用，请严格保管，避免泄露
+	//businessId = "efedd541fba94b82a9854363975f16e0" //业务ID，易盾根据产品业务特点分配
 )
 
 var YeDun yedun
@@ -33,9 +33,12 @@ type yedun struct{}
 // Auth 登录返回第三方账号id 和 错误信息
 func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	log.Infow("yedun_check auth", "request", request)
+	//apiUrl := config.Field("yedun_oauth_url").String()
+	//secretId := config.Field("yedun_secret_id").String()
+	//businessId := config.Field("yedun_businessId").String()
 	apiUrl := config.Field("yedun_oauth_url").String()
-	secretId := config.Field("yedun_secret_id").String()
-	businessId := config.Field("yedun_businessId").String()
+	secretId := config.PackageParam(request.Game.BundleId, "yedun_secret_id")
+	businessId := config.PackageParam(request.Game.BundleId, "yedun_businessId")
 	params := url.Values{
 		//token为易盾返回的token
 		"token": []string{request.ThirdToken},
@@ -47,8 +50,9 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	params["version"] = []string{version}
 	params["timestamp"] = []string{strconv.FormatInt(time.Now().UnixNano()/1000000, 10)}
 	params["nonce"] = []string{string(make([]byte, 32))} //32位随机字符串
-	params["signature"] = []string{genSignature(params)}
+	params["signature"] = []string{genSignature(params, request.Game.BundleId)}
 
+	log.Infow("yedun_check auth url info", "apiUrl", apiUrl, "body", params)
 	resp, err := http.Post(apiUrl, "application/x-www-form-urlencoded", strings.NewReader(params.Encode()))
 	if err != nil {
 		log.Errorw("yedun auth error ", "err", err)
@@ -93,7 +97,7 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 }
 
 //生成签名信息
-func genSignature(params url.Values) string {
+func genSignature(params url.Values, bundleId string) string {
 	var paramStr string
 	keys := make([]string, 0, len(params))
 	for k := range params {
@@ -103,7 +107,8 @@ func genSignature(params url.Values) string {
 	for _, key := range keys {
 		paramStr += key + params[key][0]
 	}
-	secretKey := config.Field("yedun_secret_key").String()
+	//secretKey := config.Field("yedun_secret_key").String()
+	secretKey := config.PackageParam(bundleId, "yedun_secret_key")
 	paramStr += secretKey
 	md5Reader := md5.New()
 	md5Reader.Write([]byte(paramStr))
