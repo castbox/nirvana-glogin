@@ -1,9 +1,7 @@
 package plat
 
 import (
-	"git.dhgames.cn/svr_comm/gmoss/v2"
 	"github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
 	"glogin/pbs/glogin"
 )
 
@@ -14,6 +12,8 @@ var (
 		"facebook": Facebook,
 		"ios":      IOS,
 		"yedun":    YeDun,
+		"qq":       QQ,
+		"wechat":   WeChat,
 	}
 )
 
@@ -22,15 +22,6 @@ type third interface {
 	Auth(request *glogin.ThirdLoginReq) (string, string, error)
 	String() string
 	DbFieldName() string
-}
-
-// authURL 返回auth url地址
-func authURL(bundleId string, platKey string) string {
-	data := gmoss.DynamicCfg("glogin", bundleId, nil)
-	if len(data) == 0 {
-		return ""
-	}
-	return gjson.GetBytes(data, platKey).String()
 }
 
 // elkAlarm 运维日志

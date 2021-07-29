@@ -26,9 +26,9 @@ type AutiCheckRequest struct {
 
 // 实名信息认证返回
 type AutiCheckResponse struct {
-	ErrCode        string                     ` json:"err_code"`
+	ErrCode        string                     `json:"err_code"`
 	ErrMsg         string                     `json:"err_msg"`
-	Authentication *glogin.StateQueryResponse ` json:"authentication"`
+	Authentication *glogin.StateQueryResponse `json:"authentication"`
 }
 
 func AutiHandler(ctx *gin.Context) {

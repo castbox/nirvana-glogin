@@ -61,18 +61,6 @@ func InitAccount() {
 	gmongo.CreateIndexes(config.MongoUrl(), config.MongoDb(), AccountTableName, indexFiles)
 }
 
-func CheckNotExist(filter interface{}) bool {
-	count, err := gmongo.CountDocuments(config.MongoUrl(), config.MongoDb(), AccountTableName, filter)
-	if err != nil {
-		log.Warnw("CheckNotExist", "err", err)
-		return false
-	}
-	if count == 0 {
-		return true
-	}
-	return false
-}
-
 func Load(filter interface{}) (result db_core.AccountData, err error) {
 	doc, errFind := gmongo.FindOne(config.MongoUrl(), config.MongoDb(), AccountTableName, filter)
 	if errFind != nil {
@@ -129,18 +117,5 @@ func Lookup(filter bson.M, ptrToSlice interface{}) (count int32, err error) {
 		return
 	}
 	count = int32(count2)
-	return
-}
-
-func LoadOne(filter interface{}, result interface{}) (err error) {
-	doc, errFind := gmongo.FindOne(config.MongoUrl(), config.MongoDb(), AccountTableName, filter)
-	if errFind != nil {
-		log.Warnw("AccountTable LoadOne", "err", err)
-		err = errFind
-		return
-	}
-	if err = doc.Decode(result); err != nil {
-		panic(err)
-	}
 	return
 }

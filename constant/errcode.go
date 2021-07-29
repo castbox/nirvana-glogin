@@ -24,5 +24,5 @@ const (
 const (
 	ErrMsgOk          = "ok"
 	ErrCodeStrOk      = "0"
-	ErrCodeStrAutiRpc = "auti_service_rpc_error"
+	ErrCodeStrAutiRpc = "auti service rpc error"
 )

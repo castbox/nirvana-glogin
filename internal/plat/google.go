@@ -2,6 +2,7 @@ package plat
 
 import (
 	"fmt"
+	"glogin/config"
 	"glogin/pbs/glogin"
 	"io/ioutil"
 	"net/http"
@@ -51,4 +52,13 @@ func (g google) String() string {
 
 func (g google) DbFieldName() string {
 	return "google"
+}
+
+func authURL(bundleId string, platKey string) string {
+	//data := gmoss.DynamicCfg("glogin", bundleId, nil)
+	//if len(data) == 0 {
+	//	return ""
+	//}
+	//return gjson.GetBytes(data, platKey).String()
+	return config.Field(platKey).String()
 }

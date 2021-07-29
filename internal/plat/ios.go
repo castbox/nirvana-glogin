@@ -78,7 +78,7 @@ func (i ios) String() string {
 	return "ios"
 }
 func (i ios) DbFieldName() string {
-	return "google"
+	return "ios"
 }
 
 func parseToken(token string) (*appleToken, error) {

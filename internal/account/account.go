@@ -14,7 +14,7 @@ import (
 )
 
 func CheckNotExist(filter interface{}) bool {
-	return db.CheckNotExist(filter)
+	return db.CheckNotExist(filter, db.AccountTableName)
 }
 
 func CreateVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (interface{}, error) {

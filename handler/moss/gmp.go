@@ -55,7 +55,7 @@ func (Gmp) LoadAccountInfo(request *glogin.QueryRequest) (response *glogin.Query
 		}
 
 		doc := db_core.AccountData{}
-		errLoad := db.LoadOne(filter, &doc)
+		errLoad := db.LoadOne(filter, &doc, db.AccountTableName)
 		log.Infow(" sofa rpc LoadAccountInfo 1 response", "response", response)
 		if errLoad != nil {
 			if errLoad == mongo.ErrNoDocuments {
