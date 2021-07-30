@@ -33,12 +33,14 @@ type yedun struct{}
 // Auth 登录返回第三方账号id 和 错误信息
 func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	log.Infow("yedun_check auth", "request", request)
-	//apiUrl := config.Field("yedun_oauth_url").String()
-	//secretId := config.Field("yedun_secret_id").String()
-	//businessId := config.Field("yedun_businessId").String()
+	//businessId := config.PackageParam(request.Game.BundleId, "yedun_businessId")
 	apiUrl := config.Field("yedun_oauth_url").String()
-	secretId := config.PackageParam(request.Game.BundleId, "yedun_secret_id")
-	businessId := config.PackageParam(request.Game.BundleId, "yedun_businessId")
+	//yedun_secret_id｜yedun_secret_key｜yedun_businessId
+	yedunParam := config.PackageParam(request.Game.BundleId, "yedun_param")
+	paramArr := strings.Split(yedunParam, "|")
+	secretId := paramArr[0]
+	secretKey := paramArr[1]
+	businessId := paramArr[2]
 	params := url.Values{
 		//token为易盾返回的token
 		"token": []string{request.ThirdToken},
@@ -50,7 +52,7 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	params["version"] = []string{version}
 	params["timestamp"] = []string{strconv.FormatInt(time.Now().UnixNano()/1000000, 10)}
 	params["nonce"] = []string{string(make([]byte, 32))} //32位随机字符串
-	params["signature"] = []string{genSignature(params, request.Game.BundleId)}
+	params["signature"] = []string{genSignature(params, secretKey)}
 
 	log.Infow("yedun_check auth url info", "apiUrl", apiUrl, "body", params)
 	resp, err := http.Post(apiUrl, "application/x-www-form-urlencoded", strings.NewReader(params.Encode()))
@@ -97,7 +99,7 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 }
 
 //生成签名信息
-func genSignature(params url.Values, bundleId string) string {
+func genSignature(params url.Values, secretKey string) string {
 	var paramStr string
 	keys := make([]string, 0, len(params))
 	for k := range params {
@@ -108,7 +110,7 @@ func genSignature(params url.Values, bundleId string) string {
 		paramStr += key + params[key][0]
 	}
 	//secretKey := config.Field("yedun_secret_key").String()
-	secretKey := config.PackageParam(bundleId, "yedun_secret_key")
+	//secretKey := config.PackageParam(bundleId, "yedun_secret_key")
 	paramStr += secretKey
 	md5Reader := md5.New()
 	md5Reader.Write([]byte(paramStr))
