@@ -1,12 +1,11 @@
 package plat
 
 import (
-	"github.com/sirupsen/logrus"
+	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"glogin/pbs/glogin"
 )
 
 var (
-	logger    = logrus.WithField("component", "plat")
 	ThirdList = map[string]third{
 		"google":   Google,
 		"facebook": Facebook,
@@ -24,7 +23,7 @@ type third interface {
 	DbFieldName() string
 }
 
-// elkAlarm 运维日志
+// elkAlarm http
 func elkAlarm(status string, url string, msg interface{}) {
-	logger.Errorf("#elkAlarm#http#%s#%s#%v", status, url, msg)
+	log.Errorw("elkAlarm http", "status", status, "url", url, "msg", msg)
 }

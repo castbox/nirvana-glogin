@@ -21,7 +21,7 @@ var Facebook facebook
 
 type facebook struct{}
 
-// Auth 登录返回第三方账号id 和 错误信息
+// Auth 登录返回第三方账号tokenId openId 错误信息
 func (f facebook) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	//baseUrl := authURL(request.Game.BundleId, facebookAuthKey)
 	log.Infow("facebook auth", "request", request)

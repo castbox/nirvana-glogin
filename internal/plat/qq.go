@@ -8,7 +8,7 @@ var QQ qq
 
 type qq struct{}
 
-// Auth 登录返回第三方账号id 和 错误信息
+// Auth 登录返回第三方账号tokenId openId 错误信息
 func (q qq) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	return "", "", nil
 }

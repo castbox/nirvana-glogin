@@ -30,17 +30,23 @@ var YeDun yedun
 
 type yedun struct{}
 
-// Auth 登录返回第三方账号id 和 错误信息
+// Auth 登录返回第三方账号tokenId openId 错误信息
 func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	log.Infow("yedun_check auth", "request", request)
-	//businessId := config.PackageParam(request.Game.BundleId, "yedun_businessId")
 	apiUrl := config.Field("yedun_oauth_url").String()
-	//yedun_secret_id｜yedun_secret_key｜yedun_businessId
 	yedunParam := config.PackageParam(request.Game.BundleId, "yedun_param")
+	if yedunParam == "" {
+		resErr := fmt.Errorf("failed reading from metadata server: %s", request.Game.BundleId)
+		return "", "", resErr
+	}
+	//yedun_secret_id｜yedun_secret_key｜yedun_businessId
 	paramArr := strings.Split(yedunParam, "|")
-	secretId := paramArr[0]
-	secretKey := paramArr[1]
-	businessId := paramArr[2]
+	secretId := paramArr[0]   //yedun_secret_id
+	secretKey := paramArr[1]  //yedun_secret_key
+	businessId := paramArr[2] //yedun_business_id
+	//secretId := config.PackageParam(request.Game.BundleId, "yedun_secret_id")
+	//secretKey := config.PackageParam(request.Game.BundleId, "yedun_secret_key")
+	//businessId := config.PackageParam(request.Game.BundleId, "yedun_business_id")
 	params := url.Values{
 		//token为易盾返回的token
 		"token": []string{request.ThirdToken},

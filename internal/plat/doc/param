@@ -13,14 +13,36 @@ yedun
  对接文档地址：
  https://support.dun.163.com/documents/287305921855672320?docId=288803729972580352
  参数：
-
 a20a4fd6a0ac8a32a2b8d01042433778
 945b23b071ae712e21e1722bc967b753
 yedun_secret_id  a20a4fd6a0ac8a32a2b8d01042433778
 yedun_secret_key 945b23b071ae712e21e1722bc967b753
-bussinessId efedd541fba94b82a9854363975f16e0
+yedun_bussiness_id efedd541fba94b82a9854363975f16e0
 @万一波 @刘文昆 易盾 bussinessId，包名是 com.droidhang.aod.cnofficial 还没开启，开启了我同步
 
 
  sms
- http://www.b2m.cn/static/doc/sms/onlysms_or.html
+http://www.b2m.cn/static/doc/sms/onlysms_or.html
+
+
+
+
+
+qq
+https://wiki.connect.qq.com/android_sdk%e5%8a%9f%e8%83%bd%e5%88%97%e8%a1%a8
+Android_SDK功能列表 - QQ互联WIKI
+QQ登录是QQ互联的一种接入方式，通过接入QQ登录，用户可以使用QQ账号直接登录接入的站点，QQ登录同时提供API授权，帮助网站主将用户操作同步到QQ空间和朋友网;
+QQ接入文档
+
+神域奇兵远征
+APP ID：101964516
+APP Key：0cf01410c955385a7469d093c9d1b0d1
+
+
+微信登陆的接入文档
+https://developers.weixin.qq.com/doc/oplatform/Mobile_App/WeChat_Login/Development_Guide.html
+appid:wxfc832132cefb3b5c
+appkey:c9a406f97cd5671b87c210081e856226
+商户ID:1441277802
+
+qq 登录 Android 参数

@@ -19,6 +19,7 @@ var IOS ios
 
 type ios struct{}
 
+// Auth 登录返回第三方账号tokenId openId 错误信息
 func (i ios) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	if request.ThirdToken == "" {
 		return "", "", ErrInvalidIdentityToken

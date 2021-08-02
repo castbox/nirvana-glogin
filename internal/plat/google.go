@@ -18,7 +18,7 @@ var Google google
 
 type google struct{}
 
-// Auth 登录返回第三方账号id 和 错误信息
+// Auth 登录返回第三方账号tokenId openId 错误信息
 func (g google) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	baseUrl := authURL(request.Game.BundleId, googleAuthKey)
 	url := baseUrl + request.ThirdToken
@@ -55,10 +55,5 @@ func (g google) DbFieldName() string {
 }
 
 func authURL(bundleId string, platKey string) string {
-	//data := gmoss.DynamicCfg("glogin", bundleId, nil)
-	//if len(data) == 0 {
-	//	return ""
-	//}
-	//return gjson.GetBytes(data, platKey).String()
 	return config.Field(platKey).String()
 }
