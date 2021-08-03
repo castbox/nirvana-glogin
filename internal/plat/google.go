@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	googleAuthKey = "google_oauth_url"
+	GoogleAuthURL = "google_oauth_url"
 )
 
 var Google google
@@ -20,7 +20,7 @@ type google struct{}
 
 // Auth 登录返回第三方账号tokenId openId 错误信息
 func (g google) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
-	baseUrl := authURL(request.Game.BundleId, googleAuthKey)
+	baseUrl := authURL(request.Game.BundleId, GoogleAuthURL)
 	url := baseUrl + request.ThirdToken
 	resp, err := http.Get(url)
 	if err != nil {

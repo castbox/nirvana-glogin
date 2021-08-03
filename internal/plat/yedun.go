@@ -39,7 +39,6 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 		resErr := fmt.Errorf("failed reading from metadata server: %s", request.Game.BundleId)
 		return "", "", resErr
 	}
-	//yedun_secret_id｜yedun_secret_key｜yedun_businessId
 	paramArr := strings.Split(yedunParam, "|")
 	secretId := paramArr[0]   //yedun_secret_id
 	secretKey := paramArr[1]  //yedun_secret_key

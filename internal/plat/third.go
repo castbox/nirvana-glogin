@@ -25,5 +25,5 @@ type third interface {
 
 // elkAlarm http
 func elkAlarm(status string, url string, msg interface{}) {
-	log.Errorw("elkAlarm http", "status", status, "url", url, "msg", msg)
+	log.Warnw("elkAlarm http", "status", status, "url", url, "msg", msg)
 }

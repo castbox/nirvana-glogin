@@ -21,7 +21,7 @@ func GetVerify(req *glogin.SmsLoginReq) (int32, error) {
 		return code, err
 	}
 	verifyCode := CreateVerifyCode()
-	bSend, err := sendVerify(phone, verifyCode)
+	bSend, err := sendVerify(phone, verifyCode, req.Game.BundleId)
 	if false == bSend {
 		return constant.ErrCodeSmsFail, err
 	}
@@ -48,10 +48,11 @@ func canSendVerify(phone string) (int32, error) {
 }
 
 // 发送验证码
-func sendVerify(phone string, verifyCode string) (bool, error) {
+func sendVerify(phone string, verifyCode string, bundleId string) (bool, error) {
 	smsUrl := config.Field("sms_url").String()
 	timeStamp := util.FormatDate(time.Now(), util.YYYYMMDDHHMMSS)
-	content := config.Field("sms_content").String() + verifyCode
+	//content := config.Field("sms_content").String() + verifyCode
+	content := config.PackageParam(bundleId, "sms_content") + verifyCode
 	httpClient := xhttp.NewClient().Type(xhttp.TypeUrlencoded)
 	reqBody := xhttp.BodyMap{}
 	reqBody.Set("appId", config.Field("sms_appid").String())
