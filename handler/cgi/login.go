@@ -137,8 +137,10 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			Authentication: &glogin.StateQueryResponse{},
 		},
 	}
-	uid, openId, dbField, errAuth := ThirdAuth(request)
-	log.Infow("ThirdAuth Rsp", "uid", uid, "openid", openId)
+	authRsp, dbField, errAuth := ThirdAuth(request)
+	uid := authRsp.Uid
+	unionId := authRsp.UnionId
+	log.Infow("ThirdAuth Rsp", "uid", uid, "unionId", unionId)
 	// 平台错误
 	if errAuth == PlatIsWrong {
 		response.Code = constant.ErrCodePlatWrong
@@ -146,7 +148,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		return response, nil
 	}
 	// 第三方账号验证失败
-	if errAuth != nil {
+	if errAuth != nil || authRsp == nil {
 		response.Code = constant.ErrCodeThirdAuthFail
 		response.Errmsg = fmt.Sprintf("thrid plat %s auth error: %s", request.ThirdPlat, errAuth)
 		return response, nil
@@ -154,9 +156,9 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 	// 数美ID解析
 	smID := smfpcrypto.ParseSMID(request.Client.Dhid)
 	request.GetClient().Dhid = smID
-	if account.CheckNotExist(bson.M{dbField: openId}) {
+	if account.CheckNotExist(bson.M{dbField: unionId}) {
 		// 账号不存在,创建
-		createRsp, errCreate := account.CreateThird(request, dbField, openId, ip)
+		createRsp, errCreate := account.CreateThird(request, dbField, unionId, ip)
 		if errCreate != nil {
 			response.Code = constant.ErrCodeCreateInternal
 			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
@@ -170,7 +172,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			return response, nil
 		}
 
-		log.Infow("third login success 1", " request.ThirdPlat", request.ThirdPlat, "openid", openId)
+		log.Infow("third login success 1", " request.ThirdPlat", request.ThirdPlat, "unionId", unionId)
 		response.Code = constant.ErrCodeOk
 		response.DhAccount = rsp.AccountData.ID
 		response.SmId = smID
@@ -181,14 +183,15 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 		}
 		// ExtendData
+		response.ExtendData.Nick = authRsp.Nick
 		if request.ThirdPlat == "yedun" {
-			response.ExtendData.Nick = util.HideStar(openId)
+			response.ExtendData.Nick = util.HideStar(unionId)
 		}
 		response.Errmsg = "success"
 		return response, nil
 	} else {
 		// 账号存在, 直接登录
-		loginRsp, errLogin := account.LoginThird(request, dbField, uid, openId, ip)
+		loginRsp, errLogin := account.LoginThird(request, dbField, uid, unionId, ip)
 		if errLogin != nil {
 			response.Code = constant.ErrCodeLoginInternal
 			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
@@ -201,7 +204,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errLogin)
 			return response, nil
 		}
-		log.Infow("thrid login success", " request.ThirdPlat", request.ThirdPlat, "openid", openId)
+		log.Infow("thrid login success", " request.ThirdPlat", request.ThirdPlat, "unionId", unionId)
 		response.Code = constant.ErrCodeOk
 		response.DhAccount = rsp.AccountData.ID
 		response.SmId = smID
@@ -211,8 +214,9 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		if ok {
 			response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 		}
+		response.ExtendData.Nick = authRsp.Nick
 		if request.ThirdPlat == "yedun" {
-			response.ExtendData.Nick = util.HideStar(openId)
+			response.ExtendData.Nick = util.HideStar(unionId)
 		}
 		response.Errmsg = "success"
 		return response, nil
@@ -381,10 +385,10 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 	return response, nil
 }
 
-func ThirdAuth(request *glogin.ThirdLoginReq) (uid string, openid string, dbField string, err error) {
+func ThirdAuth(request *glogin.ThirdLoginReq) (info *plat.AuthRsp, dbField string, err error) {
 	thirdPlat := request.ThirdPlat
 	if third, ok := plat.ThirdList[thirdPlat]; ok {
-		uid, openid, err = third.Auth(request)
+		info, err = third.Auth(request)
 		dbField = third.DbFieldName()
 	} else {
 		err = PlatIsWrong

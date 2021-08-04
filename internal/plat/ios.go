@@ -20,31 +20,31 @@ var IOS ios
 type ios struct{}
 
 // Auth 登录返回第三方账号tokenId openId 错误信息
-func (i ios) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
+func (i ios) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	if request.ThirdToken == "" {
-		return "", "", ErrInvalidIdentityToken
+		return nil, ErrInvalidIdentityToken
 	}
 	appleToken, err := parseToken(request.ThirdToken)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 	key, err := fetchKeysFromApple(appleToken.header.Kid)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 	if key == nil {
-		return "", "", ErrFetchKeysFail
+		return nil, ErrFetchKeysFail
 	}
 
 	pubKey, err := generatePubKey(key.N, key.E)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	//利用获取到的公钥解密token中的签名数据
 	sig, err := decodeSegment(appleToken.sign)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	//苹果使用的是SHA256
@@ -58,21 +58,24 @@ func (i ios) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 		h = crypto.SHA512.New()
 	}
 	if h == nil {
-		return "", "", ErrInvalidHashType
+		return nil, ErrInvalidHashType
 	}
 
 	h.Write([]byte(appleToken.headerStr + "." + appleToken.claimsStr))
 
 	if err := rsa.VerifyPKCS1v15(pubKey, crypto.SHA256, h.Sum(nil), sig); err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	if ok, err := appleToken.IsValid(); !ok || err != nil {
-		return "", "", err
+		return nil, err
 	}
 	unionId := appleToken.claims.Sub + "_cnofficial"
 
-	return unionId, unionId, nil
+	return &AuthRsp{
+		Uid:     unionId,
+		UnionId: unionId,
+	}, nil
 }
 
 func (i ios) String() string {

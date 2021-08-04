@@ -21,8 +21,8 @@ var Facebook facebook
 
 type facebook struct{}
 
-// Auth 登录返回第三方账号tokenId openId 错误信息
-func (f facebook) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
+// Auth 登录返回第三方账号*AuthRsp 错误信息
+func (f facebook) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	//baseUrl := authURL(request.Game.BundleId, facebookAuthKey)
 	log.Infow("facebook auth", "request", request)
 	baseUrl := config.PackageParam(request.Game.BundleId, facebookAuthKey)
@@ -31,27 +31,27 @@ func (f facebook) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	if err != nil {
 		resErr := fmt.Errorf("failed communicating with server: %v", err)
 		elkAlarm("error", url, resErr)
-		return "", "", resErr
+		return nil, resErr
 	}
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		elkAlarm(resp.Status, url, "")
-		return "", "", fmt.Errorf(resp.Status)
+		return nil, fmt.Errorf(resp.Status)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		resErr := fmt.Errorf("failed reading from metadata server: %v", err)
 		elkAlarm("error", url, resErr)
-		return "", "", resErr
+		return nil, resErr
 	}
 
 	data := gjson.GetBytes(body, "data").Map()
 	if len(data) == 0 {
 		resErr := fmt.Errorf("failed reading data from metadata server: %v", err)
 		elkAlarm("error", url, resErr)
-		return "", "", resErr
+		return nil, resErr
 	}
 
 	isValid := data["is_valid"]
@@ -59,18 +59,23 @@ func (f facebook) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	if isValid.Exists() == false || uid.Exists() == false {
 		resErr := fmt.Errorf("failed reading isValid from metadata server: %v", err)
 		elkAlarm("error", url, resErr)
-		return "", "", resErr
+		return nil, resErr
 	}
-
 	if isValid.Bool() == false {
-		return "", "", fmt.Errorf("Invalid Auth Access Token")
+		return nil, fmt.Errorf("Invalid Auth Access Token")
 	}
 	facebookId := uid.String()
 	errB, unionId := tokenForBusiness(facebookId, request.ThirdToken, request.Game.BundleId)
 	if errB != nil {
-		return facebookId, facebookId, nil
+		return &AuthRsp{
+			Uid:     facebookId,
+			UnionId: facebookId,
+		}, nil
 	}
-	return facebookId, unionId, nil
+	return &AuthRsp{
+		Uid:     facebookId,
+		UnionId: unionId,
+	}, nil
 }
 
 // 获得关联商户 unionId

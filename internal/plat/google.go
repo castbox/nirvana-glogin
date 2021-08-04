@@ -19,31 +19,34 @@ var Google google
 type google struct{}
 
 // Auth 登录返回第三方账号tokenId openId 错误信息
-func (g google) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
+func (g google) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	baseUrl := authURL(request.Game.BundleId, GoogleAuthURL)
 	url := baseUrl + request.ThirdToken
 	resp, err := http.Get(url)
 	if err != nil {
 		resErr := fmt.Errorf("failed communicating with server: %v", err)
 		elkAlarm("error", url, resErr)
-		return "", "", resErr
+		return nil, resErr
 	}
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		elkAlarm(resp.Status, url, "")
-		return "", "", fmt.Errorf(resp.Status)
+		return nil, fmt.Errorf(resp.Status)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		resErr := fmt.Errorf("failed reading from metadata server: %v", err)
 		elkAlarm("error", url, resErr)
-		return "", "", resErr
+		return nil, resErr
 	}
 
 	uid := gjson.GetBytes(body, "sub").String()
-	return uid, uid, nil
+	return &AuthRsp{
+		Uid:     uid,
+		UnionId: uid,
+	}, nil
 }
 
 func (g google) String() string {

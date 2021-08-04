@@ -31,21 +31,21 @@ var YeDun yedun
 type yedun struct{}
 
 // Auth 登录返回第三方账号tokenId openId 错误信息
-func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
+func (y yedun) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	log.Infow("yedun_check auth", "request", request)
 	apiUrl := config.Field("yedun_oauth_url").String()
-	yedunParam := config.PackageParam(request.Game.BundleId, "yedun_param")
-	if yedunParam == "" {
-		resErr := fmt.Errorf("failed reading from metadata server: %s", request.Game.BundleId)
-		return "", "", resErr
-	}
-	paramArr := strings.Split(yedunParam, "|")
-	secretId := paramArr[0]   //yedun_secret_id
-	secretKey := paramArr[1]  //yedun_secret_key
-	businessId := paramArr[2] //yedun_business_id
-	//secretId := config.PackageParam(request.Game.BundleId, "yedun_secret_id")
-	//secretKey := config.PackageParam(request.Game.BundleId, "yedun_secret_key")
-	//businessId := config.PackageParam(request.Game.BundleId, "yedun_business_id")
+	//yedunParam := config.PackageParam(request.Game.BundleId, "yedun_param")
+	//if yedunParam == "" {
+	//	resErr := fmt.Errorf("failed reading from metadata server: %s", request.Game.BundleId)
+	//	return nil, resErr
+	//}
+	//paramArr := strings.Split(yedunParam, "|")
+	//secretId := paramArr[0]   //yedun_secret_id
+	//secretKey := paramArr[1]  //yedun_secret_key
+	//businessId := paramArr[2] //yedun_business_id
+	secretId := config.PackageParam(request.Game.BundleId, "yedun_secret_id")
+	secretKey := config.PackageParam(request.Game.BundleId, "yedun_secret_key")
+	businessId := config.PackageParam(request.Game.BundleId, "yedun_business_id")
 	params := url.Values{
 		//token为易盾返回的token
 		"token": []string{request.ThirdToken},
@@ -63,11 +63,11 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	resp, err := http.Post(apiUrl, "application/x-www-form-urlencoded", strings.NewReader(params.Encode()))
 	if err != nil {
 		log.Errorw("yedun auth error ", "err", err)
-		return "", "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", "", fmt.Errorf(resp.Status)
+		return nil, fmt.Errorf(resp.Status)
 	}
 	contents, err := ioutil.ReadAll(resp.Body)
 	//{"code":450,"msg":"wrong token"}
@@ -75,7 +75,7 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 	if err != nil {
 		resErr := fmt.Errorf("failed reading from metadata server: %w", err)
 		log.Errorw("yedun auth error ", "resErr", resErr)
-		return "", "", resErr
+		return nil, resErr
 	}
 	result, _ := simplejson.NewJson(contents)
 	log.Infow("yedun auth rsp", "contents", contents, "result", result)
@@ -86,19 +86,22 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (string, string, error) {
 		if len(phone) != 0 {
 			//fmt.Printf("取号成功, 执行登录等流程!")
 			log.Infow("yedun auth get phonecode", "phone", phone)
-			return phone, phone, nil
+			return &AuthRsp{
+				Uid:     phone,
+				UnionId: phone,
+			}, nil
 		} else {
 			resultCode, _ := data["resultCode"].(string)
 			log.Errorw("yedun auth get phonenum error", "resultCode", resultCode)
 			resultErr := fmt.Errorf("yedun auth get phonenum error: %v", resultCode)
-			return "", "", resultErr
+			return nil, resultErr
 			//fmt.Printf("取号失败,建议进行二次验证,例如短信验证码。运营商返回码resultCode为: %s", resultCode)
 		}
 	} else {
 		//fmt.Printf("降级走短信！")
 		msg, _ := result.Get("msg").String()
 		resultErr := fmt.Errorf("yedun auth get phonenum error code: %v msg: %s", code, msg)
-		return "", "", resultErr
+		return nil, resultErr
 	}
 
 }
