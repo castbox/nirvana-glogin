@@ -6,6 +6,7 @@ import (
 	"glogin/db"
 	"glogin/internal"
 	"glogin/internal/anti"
+	"glogin/internal/appsflyer"
 	"glogin/internal/hawkeye"
 	"glogin/internal/plat"
 	"glogin/pbs/glogin"
@@ -86,14 +87,15 @@ func create(accountInfo bson.M, req internal.Req) (rsp internal.Rsp, err error) 
 		rsp.AccountData.ID = dhid
 		req.Account = fmt.Sprintf("%d", dhid)
 		req.GameCd = req.Game.GameCd
-		// todo anti_addiction
+		//anti_addiction
 		antiRsp, antiErr := anti.StateQuery(req)
 		if antiErr != nil {
 			err = antiErr
 			return
 		}
 		rsp.AntiRsp = antiRsp
-		// todo appsflyer
+		// todo:: appsflyer
+		appsflyer.SendAppsFlyer(req)
 		return
 	}
 }

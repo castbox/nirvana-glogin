@@ -1,8 +1,12 @@
 package constant
 
 const (
-	ConsulKV = "http://127.0.0.1:2000/v1/kv/"
-	EtsTbl   = "pub_cfg"
+	ConsulKV         = "http://127.0.0.1:2000/v1/kv/"
+	EtsTbl           = "pub_cfg"
+	AppsFlyerANDROID = "https://api2.appsflyer.com/inappevent/"
+	AppsFlyerIOS     = "https://api2.appsflyer.com/inappevent/"
+	ANDROID          = "ANDROID"
+	IOS              = "IOS"
 )
 
 const (

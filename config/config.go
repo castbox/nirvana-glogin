@@ -83,6 +83,21 @@ func MongoDb() string {
 	return MongoDb
 }
 
+func PackageParamRst(bundleId string, key string) gjson.Result {
+	packages := Packages()
+	mapData := packages.(map[string]interface{})
+	if bundleData, ok := mapData[bundleId]; ok {
+		bD, err := json.Marshal(bundleData)
+		if err != nil {
+			log.Warnw("PackageParamRst  marshal err", "bundleData", bundleData, "err", err)
+			return gjson.Result{}
+		}
+		mapResult := gjson.ParseBytes(bD).Map()
+		return mapResult[key]
+	}
+	return gjson.Result{}
+}
+
 func PackageParam(bundleId string, key string) string {
 	packages := Packages()
 	mapData := packages.(map[string]interface{})

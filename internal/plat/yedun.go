@@ -40,9 +40,6 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	//	return nil, resErr
 	//}
 	//paramArr := strings.Split(yedunParam, "|")
-	//secretId := paramArr[0]   //yedun_secret_id
-	//secretKey := paramArr[1]  //yedun_secret_key
-	//businessId := paramArr[2] //yedun_business_id
 	secretId := config.PackageParam(request.Game.BundleId, "yedun_secret_id")
 	secretKey := config.PackageParam(request.Game.BundleId, "yedun_secret_key")
 	businessId := config.PackageParam(request.Game.BundleId, "yedun_business_id")

@@ -48,7 +48,7 @@ func (w wechat) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	appId := config.PackageParam(request.Game.BundleId, "wx_app_id")
 	appSecret := config.PackageParam(request.Game.BundleId, "wx_app_secret")
 	code := request.ThirdToken
-	log.Infow("wechat auth appInfo", "appId", appId, "appSecret", appSecret, "code", code)
+	//log.Infow("wechat auth appInfo", "appId", appId, "appSecret", appSecret, "code", code)
 	accessToken, err := GetOauth2AccessToken(appId, appSecret, code)
 	if err != nil {
 		log.Errorw("wechat auth error ", "err", err)

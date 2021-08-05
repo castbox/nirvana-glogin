@@ -138,9 +138,6 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		},
 	}
 	authRsp, dbField, errAuth := ThirdAuth(request)
-	uid := authRsp.Uid
-	unionId := authRsp.UnionId
-	log.Infow("ThirdAuth Rsp", "uid", uid, "unionId", unionId)
 	// 平台错误
 	if errAuth == PlatIsWrong {
 		response.Code = constant.ErrCodePlatWrong
@@ -153,6 +150,9 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		response.Errmsg = fmt.Sprintf("thrid plat %s auth error: %s", request.ThirdPlat, errAuth)
 		return response, nil
 	}
+	uid := authRsp.Uid
+	unionId := authRsp.UnionId
+	log.Infow("ThirdAuth Rsp", "uid", uid, "unionId", unionId)
 	// 数美ID解析
 	smID := smfpcrypto.ParseSMID(request.Client.Dhid)
 	request.GetClient().Dhid = smID
