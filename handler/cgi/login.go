@@ -204,7 +204,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errLogin)
 			return response, nil
 		}
-		log.Infow("thrid login success", " request.ThirdPlat", request.ThirdPlat, "unionId", unionId)
+		//	log.Infow("thrid login success", " request.ThirdPlat", request.ThirdPlat, "unionId", unionId)
 		response.Code = constant.ErrCodeOk
 		response.DhAccount = rsp.AccountData.ID
 		response.SmId = smID
@@ -219,6 +219,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Nick = util.HideStar(unionId)
 		}
 		response.Errmsg = "success"
+		log.Infow("thrid login success", request.ThirdPlat, "response", response, "unionId", unionId)
 		return response, nil
 	}
 	return response, nil
