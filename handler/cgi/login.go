@@ -219,7 +219,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Nick = util.HideStar(unionId)
 		}
 		response.Errmsg = "success"
-		log.Infow("thrid login success", request.ThirdPlat, "response", response, "unionId", unionId)
+		log.Infow("thrid login success", "response", response, "unionId", unionId)
 		return response, nil
 	}
 	return response, nil
