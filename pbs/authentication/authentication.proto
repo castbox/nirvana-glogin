@@ -51,6 +51,7 @@ service AuthenticationServer {
     rpc Check(CheckRequest) returns(CheckResponse);
     rpc Query(QueryRequest) returns(QueryResponse);
     rpc StateQuery(StateQueryRequest) returns(StateQueryResponse);
+    rpc AuditQuery(StateQueryRequest) returns(StateQueryResponse);
 }
 
 message r{

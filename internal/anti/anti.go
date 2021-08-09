@@ -37,7 +37,7 @@ func StateQuery(req internal.Req) (interface{}, error) {
 	}
 	cfgDc := strings.Split(config.Field(constant.AutiDc).String(), "|")
 	service := gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.AutiService)
-	rsp, err := anti_authentication.StateQuery(service, queryIn, gmoss.Call, gmoss.DefaultCallOption())
+	rsp, err := anti_authentication.AuditQuery(service, queryIn, gmoss.Call, gmoss.DefaultCallOption())
 	if err != nil {
 		return rsp, err
 	} else {
