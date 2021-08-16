@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"glogin/pbs/glogin"
+	"glogin/util"
 	"hash"
 	"io/ioutil"
 	"math/big"
@@ -73,7 +74,7 @@ func (i ios) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	unionId := appleToken.claims.Sub + "_cnofficial"
 
 	return &AuthRsp{
-		Uid:     unionId,
+		Uid:     util.StrToIntArray(unionId),
 		UnionId: unionId,
 	}, nil
 }
@@ -311,9 +312,9 @@ func (t *appleToken) Email() string {
 	return t.claims.Email
 }
 
-func (t *appleToken) EmailVerified() bool {
+func (t *appleToken) EmailVerified() string {
 	if t == nil || t.claims == nil {
-		return false
+		return ""
 	}
 	return t.claims.EmailVerified
 }
@@ -346,6 +347,7 @@ func (t *appleToken) Nonce() string {
 	return t.claims.Nonce
 }
 
+// 1天有效期
 func (t *appleToken) IsValid() (bool, error) {
 	if t == nil || t.claims == nil {
 		return false, ErrInvalidTokenFormat
@@ -354,9 +356,9 @@ func (t *appleToken) IsValid() (bool, error) {
 		return false, ErrInvalidIssValue
 	}
 	var now = time.Now().Unix()
-	if t.claims.Exp < now {
-		return false, ErrTokenExpired
-	}
+	//if t.claims.Exp < now {
+	//	return false, ErrTokenExpired
+	//}
 	if t.claims.Iat > now {
 		return false, ErrTokenExpired
 	}
@@ -383,7 +385,7 @@ type appleClaim struct {
 	Nonce          string `json:"nonce"` //客户端设置的随机值
 	NonceSupported bool   `json:"nonce_supported"`
 	Email          string `json:"email"` //邮件
-	EmailVerified  bool   `json:"email_verified"`
+	EmailVerified  string `json:"email_verified"`
 	IsPrivateEmail bool   `json:"is_private_email"`
 	RealUserStatus int    `json:"real_user_status"`
 	CHash          string `json:"c_hash"`    //

@@ -10,8 +10,8 @@ import (
 )
 
 func Check(req *anti_authentication.CheckRequest) (*anti_authentication.CheckResponse, error) {
-	autiDc := config.Field(constant.AutiDc).String()
-	cfgDc := strings.Split(autiDc, "|")
+	autiDcCluster := config.Field(constant.AutiDcCluster).String()
+	cfgDc := strings.Split(autiDcCluster, "|")
 	service := gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.AutiService)
 	rsp, err := anti_authentication.Check(service, req, gmoss.Call, gmoss.DefaultCallOption())
 	if err != nil {
@@ -35,7 +35,7 @@ func StateQuery(req internal.Req) (interface{}, error) {
 		Id:     req.Account,
 		//DeviceId: req.Client.Dhid,
 	}
-	cfgDc := strings.Split(config.Field(constant.AutiDc).String(), "|")
+	cfgDc := strings.Split(config.Field(constant.AutiDcCluster).String(), "|")
 	service := gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.AutiService)
 	rsp, err := anti_authentication.AuditQuery(service, queryIn, gmoss.Call, gmoss.DefaultCallOption())
 	if err != nil {

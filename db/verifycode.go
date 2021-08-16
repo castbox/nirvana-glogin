@@ -14,18 +14,31 @@ import (
 )
 
 const (
-	VerifyCodeTableName = "glogin_verifycode"
-	SMSLlt              = 600
-	SMSCountLimit       = 3
+	VerifyCodeTable = "glogin_verifycode"
+	SMSLlt          = 600
+	SMSCountLimit   = 3
 )
 
-//
+var VerifyTableName = ""
+
+// 支持配置优先
+func VerifyCodeTableName() string {
+	if VerifyTableName != "" {
+		return VerifyTableName
+	}
+	VerifyTableName = config.Field("code_table_name").String()
+	if VerifyTableName == "" {
+		VerifyTableName = VerifyCodeTable
+	}
+	return VerifyTableName
+}
+
 //indexModel := mongo.IndexModel{
 //Keys: bsonx.Doc{{"expire_date", bsonx.Int32(1)}}, // 设置TTL索引列"expire_date"
 //Options:options.Index().SetExpireAfterSeconds(1*24*3600), // 设置过期时间1天，即，条目过期一天过自动删除
 // 创建索引
 func InitVerifyCode() {
-	log.Infow("verifyCode mongodb init", "table", VerifyCodeTableName)
+	log.Infow("verifyCode mongodb init", "table", VerifyCodeTableName())
 	indexFiles := []mongo.IndexModel{
 		{
 			Keys: bsonx.Doc{{"phone", bsonx.Int32(1)}},
@@ -38,7 +51,7 @@ func InitVerifyCode() {
 			Options: options.Index().SetExpireAfterSeconds(SMSLlt), // 设置过期时间1天，即，
 		},
 	}
-	gmongo.CreateIndexes(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName, indexFiles)
+	gmongo.CreateIndexes(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName(), indexFiles)
 }
 
 func AddSmsVerify(phone string, verifyCode string) (interface{}, error) {
@@ -49,7 +62,7 @@ func AddSmsVerify(phone string, verifyCode string) (interface{}, error) {
 	//timeStr := time.Now().Format("2006-01-02 15:04:05.000")
 	time := time.Now()
 	document["expire"] = time
-	_, errInsert := gmongo.InsertOne(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName, document)
+	_, errInsert := gmongo.InsertOne(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName(), document)
 	if errInsert != nil {
 		return nil, errInsert
 	}
@@ -61,7 +74,7 @@ func CheckSmsVerifyCode(phone string, verifyCode string) (bool, error) {
 	filter := bson.M{}
 	filter["phone"] = phone
 	filter["verify_code"] = verifyCode
-	doc, errFind := gmongo.FindOne(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName, filter)
+	doc, errFind := gmongo.FindOne(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName(), filter)
 	if errFind != nil {
 		log.Warnw("CheckSmsVerifyCode Load", "err", errFind)
 		return false, errFind
@@ -86,7 +99,7 @@ func CheckSmsInterval(phone string) (bool, error) {
 	filter["send_time"] = bson.M{
 		"$gt": time.Now().Unix() - 60,
 	}
-	doc, errFind := gmongo.FindOne(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName, filter)
+	doc, errFind := gmongo.FindOne(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName(), filter)
 	// 数据库操作失败
 	if errFind != nil {
 		log.Warnw("CheckSmsVerifyCode Load", "err", errFind)
@@ -113,7 +126,7 @@ func CheckSmsInterval(phone string) (bool, error) {
 func CheckSmsVerifyCount(phone string) (bool, error) {
 	filter := bson.M{}
 	filter["phone"] = phone
-	count, errCount := gmongo.CountDocuments(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName, filter)
+	count, errCount := gmongo.CountDocuments(config.MongoUrl(), config.MongoDb(), VerifyCodeTableName(), filter)
 	if errCount != nil {
 		log.Warnw("CheckSmsVerifyCount", "err", errCount)
 		return false, errCount

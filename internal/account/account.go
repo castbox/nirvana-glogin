@@ -15,7 +15,7 @@ import (
 )
 
 func CheckNotExist(filter interface{}) bool {
-	return db.CheckNotExist(filter, db.AccountTableName)
+	return db.CheckNotExist(filter, db.AccountTableName())
 }
 
 func CreateVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (interface{}, error) {
@@ -24,8 +24,8 @@ func CreateVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (
 	return create(document, req)
 }
 
-func CreateThird(request *glogin.ThirdLoginReq, dbField string, openId string, ip string) (interface{}, error) {
-	document := bson.M{dbField: openId, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
+func CreateThird(request *glogin.ThirdLoginReq, dbField string, unionId string, ip string) (interface{}, error) {
+	document := bson.M{dbField: unionId, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
 	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
 	return create(document, req)
 }
@@ -45,9 +45,18 @@ func LoginPhone(request *glogin.SmsLoginReq, ip string) (interface{}, error) {
 	return loginRsp, nil
 }
 
-func LoginThird(request *glogin.ThirdLoginReq, dbField string, uid string, openId string, ip string) (interface{}, error) {
+func LoginBundleThird(request *glogin.ThirdLoginReq, dbField string, uid interface{}, ip string) (interface{}, error) {
 	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
-	loginRsp, err := login(bson.M{dbField: openId}, req)
+	loginRsp, err := login(bson.M{dbField: uid, "bundle_id": request.Game.BundleId}, req)
+	if err != nil {
+		return nil, err
+	}
+	return loginRsp, nil
+}
+
+func LoginThird(request *glogin.ThirdLoginReq, dbField string, unionId string, ip string) (interface{}, error) {
+	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
+	loginRsp, err := login(bson.M{dbField: unionId}, req)
 	if err != nil {
 		return nil, err
 	}

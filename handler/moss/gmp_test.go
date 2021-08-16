@@ -8,8 +8,11 @@ import (
 
 func TestGmp(t *testing.T) {
 	request := glogin.QueryRequest{
-		Account:   "notspecified",
-		LoginType: "phone",
+		//Account:  "notspecified",
+		Account:  "784732974",
+		PageNum:  1,
+		PageSize: 100,
+		//LoginType: "phone",
 	}
 	gmp := Gmp{}
 	rsp, err := gmp.LoadAccountInfo(&request)

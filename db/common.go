@@ -20,8 +20,9 @@ func LoadOne(filter interface{}, result interface{}, tableName string) (err erro
 		err = errFind
 		return
 	}
-	if err = doc.Decode(result); err != nil {
-		panic(err)
+	if errDecode := doc.Decode(result); errDecode != nil {
+		err = errDecode
+		panic(errDecode)
 	}
 	return
 }

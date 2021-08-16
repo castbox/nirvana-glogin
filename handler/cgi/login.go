@@ -5,6 +5,7 @@ import (
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin"
+	"glogin/config"
 	"glogin/constant"
 	"glogin/internal"
 	"glogin/internal/account"
@@ -156,6 +157,38 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 	// 数美ID解析
 	smID := smfpcrypto.ParseSMID(request.Client.Dhid)
 	request.GetClient().Dhid = smID
+	// 为兼容海外版本老数据,1004项目若获得bundle账号，直接登录
+	if config.Field("region_mark").Int() == constant.RegionOverseas &&
+		request.Game.GameCd == constant.AODGameCd {
+		if !account.CheckNotExist(bson.M{dbField: uid, "bundle_id": request.Game.BundleId}) {
+			loginRsp, errLogin := account.LoginBundleThird(request, dbField, uid, ip)
+			if errLogin != nil {
+				response.Code = constant.ErrCodeLoginInternal
+				response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
+				return response, nil
+			}
+			rsp, ok := loginRsp.(internal.Rsp)
+			if !ok {
+				response.Code = constant.ErrCodeParsePbInternal
+				response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errLogin)
+				return response, nil
+			}
+			response.Code = constant.ErrCodeOk
+			response.DhAccount = rsp.AccountData.ID
+			response.Errmsg = "success"
+			response.SmId = smID
+			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
+			r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
+			if ok {
+				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
+			}
+			response.ExtendData.Nick = authRsp.Nick
+			log.Infow("third bundle account login success", "response", response, "uid", uid)
+			return response, nil
+		}
+	}
+
+	// 卓杭通行证
 	if account.CheckNotExist(bson.M{dbField: unionId}) {
 		// 账号不存在,创建
 		createRsp, errCreate := account.CreateThird(request, dbField, unionId, ip)
@@ -191,7 +224,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		return response, nil
 	} else {
 		// 账号存在, 直接登录
-		loginRsp, errLogin := account.LoginThird(request, dbField, uid, unionId, ip)
+		loginRsp, errLogin := account.LoginThird(request, dbField, unionId, ip)
 		if errLogin != nil {
 			response.Code = constant.ErrCodeLoginInternal
 			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
@@ -219,7 +252,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Nick = util.HideStar(unionId)
 		}
 		response.Errmsg = "success"
-		log.Infow("thrid login success", "response", response, "unionId", unionId)
+		log.Infow("third login success 2", "response", response, "unionId", unionId)
 		return response, nil
 	}
 	return response, nil

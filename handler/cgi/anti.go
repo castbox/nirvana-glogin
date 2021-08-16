@@ -8,7 +8,6 @@ import (
 	"glogin/internal"
 	"glogin/internal/anti"
 	anti_authentication "glogin/pbs/authentication"
-	"glogin/pbs/glogin"
 	"glogin/util"
 )
 
@@ -24,11 +23,23 @@ type AutiCheckRequest struct {
 	Name    string `json:"name"`
 }
 
+// 防沉迷返回
+type StateQueryResponse struct {
+	RequestId            string `json:"request_id"`
+	ErrCode              string `json:"err_code"`
+	ErrMsg               string `json:"err_msg"`
+	AuthenticationStatus int32  `json:"authentication_status"`
+	IsHoliday            bool   `json:"is_holiday"`
+	LeftGameTime         int32  ` json:"left_game_time,"`
+	EachPayAmount        int32  `json:"each_pay_amount"`
+	LeftPayAmount        int32  `json:"left_pay_amount"`
+}
+
 // 实名信息认证返回
 type AutiCheckResponse struct {
-	ErrCode        string                     `json:"err_code"`
-	ErrMsg         string                     `json:"err_msg"`
-	Authentication *glogin.StateQueryResponse `json:"authentication"`
+	ErrCode        string              `json:"err_code"`
+	ErrMsg         string              `json:"err_msg"`
+	Authentication *StateQueryResponse `json:"authentication"`
 }
 
 func AutiHandler(ctx *gin.Context) {
@@ -49,7 +60,7 @@ func AutiHandler(ctx *gin.Context) {
 	// 实名认证
 	checkRsp := &AutiCheckResponse{
 		ErrCode:        "0",
-		Authentication: &glogin.StateQueryResponse{},
+		Authentication: &StateQueryResponse{},
 	}
 	antiCheckRsp, errCheck := anti.Check(checkIn)
 	if errCheck != nil {
@@ -78,7 +89,17 @@ func AutiHandler(ctx *gin.Context) {
 	log.Infow("anti.StateQuery rsp", "rsp", antiQueryRsp)
 	r2, ok := antiQueryRsp.(*anti_authentication.StateQueryResponse)
 	if ok {
-		checkRsp.Authentication = (*glogin.StateQueryResponse)(r2)
+		checkRsp.Authentication = &StateQueryResponse{
+			RequestId:            r2.RequestId,
+			ErrCode:              r2.ErrCode,
+			ErrMsg:               r2.ErrMsg,
+			AuthenticationStatus: r2.AuthenticationStatus,
+			IsHoliday:            r2.IsHoliday,
+			LeftGameTime:         r2.LeftGameTime,
+			EachPayAmount:        r2.EachPayAmount,
+			LeftPayAmount:        r2.LeftPayAmount,
+		}
 	}
+	log.Infow("new query AutiHandler rsp", "rsp", checkRsp)
 	ctx.JSON(200, checkRsp)
 }

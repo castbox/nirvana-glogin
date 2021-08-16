@@ -1,12 +1,12 @@
 package moss
 
 import (
-	"encoding/json"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"glogin/constant"
 	"glogin/db"
 	"glogin/db/db_core"
 	"glogin/pbs/glogin"
+	"glogin/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"strconv"
@@ -29,7 +29,11 @@ func (Gmp) LoadAccountInfo(request *glogin.QueryRequest) (response *glogin.Query
 	if request.Account == NotSpecified {
 		queryCond := getQueryConditions(request)
 		accounts := []db_core.AccountData{}
-		count, errLook := db.Lookup(queryCond, &accounts)
+		//option
+		option := bson.M{}
+		option["page_size"] = request.PageSize
+		option["page_num"] = request.PageNum
+		count, errLook := db.Lookup(queryCond, option, &accounts)
 		if errLook != err {
 			return response, nil
 		}
@@ -55,13 +59,13 @@ func (Gmp) LoadAccountInfo(request *glogin.QueryRequest) (response *glogin.Query
 		}
 
 		doc := db_core.AccountData{}
-		errLoad := db.LoadOne(filter, &doc, db.AccountTableName)
-		log.Infow(" sofa rpc LoadAccountInfo 1 response", "response", response)
+		errLoad := db.LoadOne(filter, &doc, db.AccountTableName())
 		if errLoad != nil {
 			if errLoad == mongo.ErrNoDocuments {
 				response.Code = 200
 				response.Count = 0
 				response.Msg = "success"
+				log.Infow(" sofa rpc LoadAccountInfo 1 response", "response", response)
 				return response, nil
 			} else {
 				return response, err
@@ -74,23 +78,26 @@ func (Gmp) LoadAccountInfo(request *glogin.QueryRequest) (response *glogin.Query
 		if errC == nil {
 			response.Data = append(response.Data, &pbAcc)
 		}
-		return response, nil
 		log.Infow(" sofa rpc LoadAccountInfo 2 response", "response", response)
+		return response, nil
 	}
 	return response, nil
 }
 
 func dbConvertToPb(dbAccount db_core.AccountData) (pbAccount glogin.AccountData, err error) {
-	jsonBlob, errB := json.Marshal(dbAccount)
-	if err != nil {
-		err = errB
-		return
+	pbAccount.XId = dbAccount.ID
+	pbAccount.BundleId = dbAccount.BundleID
+	pbAccount.Facebook = dbAccount.Facebook
+	pbAccount.Ios = util.BsonAToStr(dbAccount.IOS)
+	pbAccount.Google = dbAccount.Google
+	pbAccount.Phone = dbAccount.Phone
+	strIp := util.BsonAToStr(dbAccount.Create.Ip)
+	pbAccount.Create = &glogin.CreateData{
+		Ip:       strIp,
+		BundleId: dbAccount.Create.BundleId,
+		SmId:     dbAccount.Create.SmId,
+		Time:     dbAccount.Create.Time,
 	}
-	errUb := json.Unmarshal(jsonBlob, &pbAccount)
-	if errUb != nil {
-		err = errUb
-	}
-	//pbAccount.Id = dbAccount.ID
 	return
 }
 
@@ -106,12 +113,11 @@ func getQueryConditions(request *glogin.QueryRequest) bson.M {
 		}
 		filter["$or"] = bundleFilters
 	} else {
-		filter[request.LoginType] = bson.M{
-			"$exists": 1,
+		if request.LoginType != "" {
+			filter[request.LoginType] = bson.M{
+				"$exists": 1,
+			}
 		}
 	}
-	//options
-	filter["page_size"] = 50
-	filter["page_num"] = 1
 	return filter
 }

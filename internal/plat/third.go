@@ -17,11 +17,11 @@ var (
 )
 
 type AuthRsp struct {
-	Uid     string `json:"uid,omitempty"`     // uid
-	UnionId string `json:"unionid,omitempty"` // unionid
-	Nick    string `json:"nick,omitempty"`    // 普通用户昵称
-	Sex     int    `json:"sex,omitempty"`     // 普通用户性别，1为男性，2为女性
-	Country string `json:"country,omitempty"` // 国家，如中国为CN
+	Uid     interface{} `json:"uid"`     // uid
+	UnionId string      `json:"unionid"` // unionid
+	Nick    string      `json:"nick"`    // 普通用户昵称
+	Sex     int         `json:"sex"`     // 普通用户性别，1为男性，2为女性
+	Country string      `json:"country"` // 国家，如中国为CN
 }
 
 type third interface {
