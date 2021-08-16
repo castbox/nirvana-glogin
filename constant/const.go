@@ -17,7 +17,7 @@ const (
 	Verify           = "verify"
 	Login            = "login"
 	HawkEyeDcCluster = "hawkeye_dc_cluster"
-	HawkEyeService   = "haye"
+	HawkEyeService   = "hawkeye"
 	AutiDcCluster    = "auti_dc_cluster"
 	AutiService      = "anti_obsession"
 	RegionChina      = 0
