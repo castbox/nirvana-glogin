@@ -22,7 +22,6 @@ func LoadOne(filter interface{}, result interface{}, tableName string) (err erro
 	}
 	if errDecode := doc.Decode(result); errDecode != nil {
 		err = errDecode
-		panic(errDecode)
 	}
 	return
 }
