@@ -164,13 +164,13 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			loginRsp, errLogin := account.LoginBundleThird(request, dbField, uid, ip)
 			if errLogin != nil {
 				response.Code = constant.ErrCodeLoginInternal
-				response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
+				response.Errmsg = fmt.Sprintf("thrid plat %s bundle account login error: %s", request.ThirdPlat, errAuth)
 				return response, nil
 			}
 			rsp, ok := loginRsp.(internal.Rsp)
 			if !ok {
 				response.Code = constant.ErrCodeParsePbInternal
-				response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errLogin)
+				response.Errmsg = fmt.Sprintf("thrid plat %s bundle account login error: %s", request.ThirdPlat, errLogin)
 				return response, nil
 			}
 			response.Code = constant.ErrCodeOk

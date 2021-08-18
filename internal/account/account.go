@@ -133,8 +133,14 @@ func login(filter interface{}, req internal.Req) (internal.Rsp, error) {
 	internalRsp.AccountData = accountData
 	internalRsp.HawkRsp = hawkRsp
 	internalRsp.AntiRsp = antiRsp
-	// 返回数据
+	// 更新最后登录时间
+	updateLoginTime(accountData.ID)
 	return internalRsp, nil
+}
+
+func updateLoginTime(dhAccount int32) (err error) {
+	update := bson.M{"$set": bson.M{"last_login": time.Now().Unix()}}
+	return db.UpdateOne(bson.M{"_id": dhAccount}, update, db.AccountTableName())
 }
 
 func GetPlat(result bson.M) (platString string) {

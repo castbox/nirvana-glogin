@@ -37,3 +37,13 @@ func CheckNotExist(filter interface{}, tableName string) bool {
 	}
 	return false
 }
+
+func UpdateOne(filter interface{}, update interface{}, tableName string) (err error) {
+	_, errUpdate := gmongo.UpdateOne(config.MongoUrl(), config.MongoDb(), tableName, filter, update)
+	if errUpdate != nil {
+		log.Warnw("UpdateOne Table error", "tableName", tableName, "errUpdate", errUpdate)
+		err = errUpdate
+		return
+	}
+	return
+}
