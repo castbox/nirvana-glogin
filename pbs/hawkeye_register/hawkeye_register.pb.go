@@ -6,9 +6,9 @@ package hawkeye_register
 import (
 	context "context"
 	fmt "fmt"
-	client "git.dhgames.cn/svr_comm/gmoss/v2/client"
-	global "git.dhgames.cn/svr_comm/gmoss/v2/global"
-	moss_rpc "git.dhgames.cn/svr_comm/gmoss/v2/moss_rpc"
+	client "git.dhgames.cn/svr_comm/gmoss/v3/client"
+	global "git.dhgames.cn/svr_comm/gmoss/v3/global"
+	moss_rpc "git.dhgames.cn/svr_comm/gmoss/v3/moss_rpc"
 	proto "github.com/golang/protobuf/proto"
 	math "math"
 )
@@ -402,9 +402,9 @@ var _ context.Context
 // is compatible with the moss package it is being compiled against.
 const _ = moss_rpc.SupportPackageIsVersion3
 
-func HawkeyeRegister(svr global.Cluster, in *Register, callType global.CallType, opts global.CallOption) (*RegisterResp, error) {
+func HawkeyeRegister(in *Register, opts *global.CallOption) (*RegisterResp, error) {
 	out := new(RegisterResp)
-	err := client.Send(svr, callType, "hawkeye_register.hawkeye_register_server.hawkeye_register", in, out, opts)
+	err := client.Send("hawkeye_register.hawkeye_register_server.hawkeye_register", in, out, opts)
 	if err != nil {
 		return nil, err
 	}

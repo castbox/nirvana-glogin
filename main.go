@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/gmoss/v2"
+	"git.dhgames.cn/svr_comm/gmoss/v3"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -22,7 +22,7 @@ func main() {
 	// 开发模式设置
 	initDevelopment()
 	// 注册服务
-	startEngine()
+	go startEngine()
 	log.Infow("server started")
 	// 初始化配置
 	initConfig()
@@ -60,7 +60,6 @@ func startHttp() {
 	router.POST("/token", cgi.TokenHandler)
 	router.GET("/metrics", prometheusHandler())
 	router.GET("/heart", func(ctx *gin.Context) { ctx.JSON(http.StatusOK, gin.H{"err_code": constant.ErrCodeOk}) })
-	//strWebPort := strconv.Itoa(int(config.GetAll().WebPort))
 	if err := router.Run(config.GetAll().WebPort); err != nil {
 		log.Fatalw("failed to run http server", "err", err)
 		panic(err)
@@ -78,13 +77,12 @@ func startEngine() {
 	serviceReg.Regist(&glogin2.Login_serviceDesc, cgi.Login{})
 	serviceReg.Regist(&glogin2.Bind_serviceDesc, cgi.Bind{})
 	serviceReg.Regist(&glogin2.Gmp_serviceDesc, moss.Gmp{})
-	loop, err := gmoss.RegServerByPath(serviceReg)
-	//loop, err := gmoss.RegServer(constant.ClusterName, constant.ServerName, constant.Index, serviceReg)
+	err := gmoss.RunServerByPath(serviceReg)
+	//	err := gmoss.RunServer(constant.ClusterName, constant.ServerName, constant.Index, serviceReg)
 	if err != nil {
 		log.Fatalw("failed to register serverByPath", "err", err)
 		panic(err)
 	}
-	go loop()
 }
 
 func prometheusHandler() gin.HandlerFunc {

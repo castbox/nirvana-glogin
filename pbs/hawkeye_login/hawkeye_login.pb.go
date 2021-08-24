@@ -6,9 +6,9 @@ package hawkeye_login
 import (
 	context "context"
 	fmt "fmt"
-	client "git.dhgames.cn/svr_comm/gmoss/v2/client"
-	global "git.dhgames.cn/svr_comm/gmoss/v2/global"
-	moss_rpc "git.dhgames.cn/svr_comm/gmoss/v2/moss_rpc"
+	client "git.dhgames.cn/svr_comm/gmoss/v3/client"
+	global "git.dhgames.cn/svr_comm/gmoss/v3/global"
+	moss_rpc "git.dhgames.cn/svr_comm/gmoss/v3/moss_rpc"
 	proto "github.com/golang/protobuf/proto"
 	math "math"
 )
@@ -402,9 +402,9 @@ var _ context.Context
 // is compatible with the moss package it is being compiled against.
 const _ = moss_rpc.SupportPackageIsVersion3
 
-func HawkeyeLogin(svr global.Cluster, in *Login, callType global.CallType, opts global.CallOption) (*LoginResp, error) {
+func HawkeyeLogin(in *Login, opts *global.CallOption) (*LoginResp, error) {
 	out := new(LoginResp)
-	err := client.Send(svr, callType, "hawkeye_login.hawkeye_login_server.hawkeye_login", in, out, opts)
+	err := client.Send("hawkeye_login.hawkeye_login_server.hawkeye_login", in, out, opts)
 	if err != nil {
 		return nil, err
 	}

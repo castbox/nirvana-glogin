@@ -6,9 +6,9 @@ package anti_authentication
 import (
 	context "context"
 	fmt "fmt"
-	client "git.dhgames.cn/svr_comm/gmoss/v2/client"
-	global "git.dhgames.cn/svr_comm/gmoss/v2/global"
-	moss_rpc "git.dhgames.cn/svr_comm/gmoss/v2/moss_rpc"
+	client "git.dhgames.cn/svr_comm/gmoss/v3/client"
+	global "git.dhgames.cn/svr_comm/gmoss/v3/global"
+	moss_rpc "git.dhgames.cn/svr_comm/gmoss/v3/moss_rpc"
 	proto "github.com/golang/protobuf/proto"
 	math "math"
 )
@@ -590,36 +590,36 @@ var _ context.Context
 // is compatible with the moss package it is being compiled against.
 const _ = moss_rpc.SupportPackageIsVersion3
 
-func Check(svr global.Cluster, in *CheckRequest, callType global.CallType, opts global.CallOption) (*CheckResponse, error) {
+func Check(in *CheckRequest, opts *global.CallOption) (*CheckResponse, error) {
 	out := new(CheckResponse)
-	err := client.Send(svr, callType, "anti_authentication.AuthenticationServer.Check", in, out, opts)
+	err := client.Send("anti_authentication.AuthenticationServer.Check", in, out, opts)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func Query(svr global.Cluster, in *QueryRequest, callType global.CallType, opts global.CallOption) (*QueryResponse, error) {
+func Query(in *QueryRequest, opts *global.CallOption) (*QueryResponse, error) {
 	out := new(QueryResponse)
-	err := client.Send(svr, callType, "anti_authentication.AuthenticationServer.Query", in, out, opts)
+	err := client.Send("anti_authentication.AuthenticationServer.Query", in, out, opts)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func StateQuery(svr global.Cluster, in *StateQueryRequest, callType global.CallType, opts global.CallOption) (*StateQueryResponse, error) {
+func StateQuery(in *StateQueryRequest, opts *global.CallOption) (*StateQueryResponse, error) {
 	out := new(StateQueryResponse)
-	err := client.Send(svr, callType, "anti_authentication.AuthenticationServer.StateQuery", in, out, opts)
+	err := client.Send("anti_authentication.AuthenticationServer.StateQuery", in, out, opts)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func AuditQuery(svr global.Cluster, in *StateQueryRequest, callType global.CallType, opts global.CallOption) (*StateQueryResponse, error) {
+func AuditQuery(in *StateQueryRequest, opts *global.CallOption) (*StateQueryResponse, error) {
 	out := new(StateQueryResponse)
-	err := client.Send(svr, callType, "anti_authentication.AuthenticationServer.AuditQuery", in, out, opts)
+	err := client.Send("anti_authentication.AuthenticationServer.AuditQuery", in, out, opts)
 	if err != nil {
 		return nil, err
 	}

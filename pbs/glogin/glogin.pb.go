@@ -6,9 +6,9 @@ package glogin
 import (
 	context "context"
 	fmt "fmt"
-	client "git.dhgames.cn/svr_comm/gmoss/v2/client"
-	global "git.dhgames.cn/svr_comm/gmoss/v2/global"
-	moss_rpc "git.dhgames.cn/svr_comm/gmoss/v2/moss_rpc"
+	client "git.dhgames.cn/svr_comm/gmoss/v3/client"
+	global "git.dhgames.cn/svr_comm/gmoss/v3/global"
+	moss_rpc "git.dhgames.cn/svr_comm/gmoss/v3/moss_rpc"
 	proto "github.com/golang/protobuf/proto"
 	math "math"
 )
@@ -1592,36 +1592,36 @@ var _ context.Context
 // is compatible with the moss package it is being compiled against.
 const _ = moss_rpc.SupportPackageIsVersion3
 
-func SMS(svr global.Cluster, in *SmsLoginReq, callType global.CallType, opts global.CallOption) (*SmsLoginRsp, error) {
+func SMS(in *SmsLoginReq, opts *global.CallOption) (*SmsLoginRsp, error) {
 	out := new(SmsLoginRsp)
-	err := client.Send(svr, callType, "glogin.Login.SMS", in, out, opts)
+	err := client.Send("glogin.Login.SMS", in, out, opts)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func Third(svr global.Cluster, in *ThirdLoginReq, callType global.CallType, opts global.CallOption) (*ThridLoginRsp, error) {
+func Third(in *ThirdLoginReq, opts *global.CallOption) (*ThridLoginRsp, error) {
 	out := new(ThridLoginRsp)
-	err := client.Send(svr, callType, "glogin.Login.Third", in, out, opts)
+	err := client.Send("glogin.Login.Third", in, out, opts)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func Visitor(svr global.Cluster, in *VisitorLoginReq, callType global.CallType, opts global.CallOption) (*VisitorLoginRsp, error) {
+func Visitor(in *VisitorLoginReq, opts *global.CallOption) (*VisitorLoginRsp, error) {
 	out := new(VisitorLoginRsp)
-	err := client.Send(svr, callType, "glogin.Login.Visitor", in, out, opts)
+	err := client.Send("glogin.Login.Visitor", in, out, opts)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func Fast(svr global.Cluster, in *FastLoginReq, callType global.CallType, opts global.CallOption) (*FastLoginRsp, error) {
+func Fast(in *FastLoginReq, opts *global.CallOption) (*FastLoginRsp, error) {
 	out := new(FastLoginRsp)
-	err := client.Send(svr, callType, "glogin.Login.Fast", in, out, opts)
+	err := client.Send("glogin.Login.Fast", in, out, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -1696,9 +1696,9 @@ var Login_serviceDesc = moss_rpc.ServiceDesc{
 	Metadata: "glogin/glogin.proto",
 }
 
-func BindThird(svr global.Cluster, in *VistorBindThridReq, callType global.CallType, opts global.CallOption) (*VistorBindThridRsp, error) {
+func BindThird(in *VistorBindThridReq, opts *global.CallOption) (*VistorBindThridRsp, error) {
 	out := new(VistorBindThridRsp)
-	err := client.Send(svr, callType, "glogin.Bind.BindThird", in, out, opts)
+	err := client.Send("glogin.Bind.BindThird", in, out, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -1734,9 +1734,9 @@ var Bind_serviceDesc = moss_rpc.ServiceDesc{
 	Metadata: "glogin/glogin.proto",
 }
 
-func LoadAccountInfo(svr global.Cluster, in *QueryRequest, callType global.CallType, opts global.CallOption) (*QueryResponse, error) {
+func LoadAccountInfo(in *QueryRequest, opts *global.CallOption) (*QueryResponse, error) {
 	out := new(QueryResponse)
-	err := client.Send(svr, callType, "glogin.Gmp.LoadAccountInfo", in, out, opts)
+	err := client.Send("glogin.Gmp.LoadAccountInfo", in, out, opts)
 	if err != nil {
 		return nil, err
 	}

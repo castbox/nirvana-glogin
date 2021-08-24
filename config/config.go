@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/gmoss/v2"
-	"git.dhgames.cn/svr_comm/gmoss/v2/consul"
+	"git.dhgames.cn/svr_comm/gmoss/v3"
+	"git.dhgames.cn/svr_comm/gmoss/v3/consul"
 	"github.com/tidwall/gjson"
 )
 

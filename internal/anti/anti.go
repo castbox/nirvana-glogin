@@ -1,7 +1,8 @@
 package anti
 
 import (
-	"git.dhgames.cn/svr_comm/gmoss/v2"
+	"git.dhgames.cn/svr_comm/gmoss/v3"
+	"git.dhgames.cn/svr_comm/gmoss/v3/global"
 	"glogin/config"
 	"glogin/constant"
 	"glogin/internal"
@@ -12,8 +13,7 @@ import (
 func Check(req *anti_authentication.CheckRequest) (*anti_authentication.CheckResponse, error) {
 	autiDcCluster := config.Field(constant.AutiDcCluster).String()
 	cfgDc := strings.Split(autiDcCluster, "|")
-	service := gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.AutiService)
-	rsp, err := anti_authentication.Check(service, req, gmoss.Call, gmoss.DefaultCallOption())
+	rsp, err := anti_authentication.Check(req, global.WithCluster(cfgDc[0], cfgDc[1], constant.AutiService))
 	if err != nil {
 		return rsp, err
 	} else {
@@ -37,7 +37,9 @@ func StateQuery(req internal.Req) (interface{}, error) {
 	}
 	cfgDc := strings.Split(config.Field(constant.AutiDcCluster).String(), "|")
 	service := gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.AutiService)
-	rsp, err := anti_authentication.AuditQuery(service, queryIn, gmoss.Call, gmoss.DefaultCallOption())
+	rsp, err := anti_authentication.AuditQuery(queryIn, &global.CallOption{
+		Cluster: service,
+	})
 	if err != nil {
 		return rsp, err
 	} else {

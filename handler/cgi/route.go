@@ -2,7 +2,6 @@ package cgi
 
 import (
 	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/gmoss/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
@@ -26,7 +25,7 @@ func schedule(service string, action string, ctx *gin.Context) (result proto.Mes
 	request := reflect.ValueOf(routes[service][action][1]).Call(nil)
 	req := request[0].Interface()
 	if err := ctx.BindJSON(req); err != nil {
-		gmoss.Error("%v", err)
+		log.Errorw("BindJSON", "err", err)
 		panic(err)
 	}
 	log.Infow("schedule 2", "req", req)

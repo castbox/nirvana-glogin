@@ -3,7 +3,8 @@ package hawkeye
 import (
 	"fmt"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/gmoss/v2"
+	"git.dhgames.cn/svr_comm/gmoss/v3"
+	"git.dhgames.cn/svr_comm/gmoss/v3/global"
 	"glogin/config"
 	"glogin/constant"
 	"glogin/internal"
@@ -47,9 +48,10 @@ func CheckLogin(req internal.Req) (interface{}, error) {
 	}
 	//service := gmoss.MossWithClusterService("yanghaitao_dev", "hawkeye")
 	cfgDc := strings.Split(config.Field(constant.HawkEyeDcCluster).String(), "|")
-	service := gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.HawkEyeService)
 	log.Infow("HawkeyeLogin Req", "loginReq", loginIn)
-	rsp, err := hawkeye_login.HawkeyeLogin(service, loginIn, gmoss.Call, gmoss.DefaultCallOption())
+	rsp, err := hawkeye_login.HawkeyeLogin(loginIn, &global.CallOption{
+		Cluster: gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.HawkEyeService),
+	})
 	log.Infow("HawkeyeLogin Rsp", "loginRsp", rsp, "err", err)
 	if err != nil {
 		log.Infow("HawkeyeLogin Rsp 2", "err", rsp, "err", err)
@@ -86,9 +88,10 @@ func CheckRegister(req internal.Req) (interface{}, error) {
 	}
 
 	cfgDc := strings.Split(config.Field(constant.HawkEyeDcCluster).String(), "|")
-	service := gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.HawkEyeService)
 	log.Infow("HawkeyeRegister Req", "Req", registerIn)
-	rsp, err := hawkeye_register.HawkeyeRegister(service, registerIn, gmoss.Call, gmoss.DefaultCallOption())
+	rsp, err := hawkeye_register.HawkeyeRegister(registerIn, &global.CallOption{
+		Cluster: gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.HawkEyeService),
+	})
 	log.Infow("HawkeyeRegister Rsp", "Rsp", rsp)
 	if err != nil {
 		log.Infow("HawkeyeRegister Rsp", "Rsp", rsp, "Err", err)
