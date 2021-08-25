@@ -31,7 +31,7 @@ func main() {
 	initDB()
 	// 启动http服务
 	go startHttp()
-	log.Infow("http server started")
+	log.Infow("glogin server started")
 	// 循环
 	select {}
 }
@@ -72,6 +72,10 @@ func initConfig() {
 }
 
 func startEngine() {
+	gmoss.RegSignal(func() {
+		log.Infow("glogin server stop")
+		os.Exit(0)
+	})
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	serviceReg := gmoss.NewServiceRegister()
 	serviceReg.Regist(&glogin2.Login_serviceDesc, cgi.Login{})
