@@ -141,21 +141,20 @@ service Login {
 message VistorBindThridReq {
     string dhid = 1;
     string dh_token = 2;
-    string plat = 3;
-    string thridId = 4;
-    string thridtoken = 5;
-    string extra = 6;
-    string bundle_id = 7;
+    string third_plat = 3;
+    string third_token = 4;
+    string visitor = 5;
 }
 
 //游客绑定回复
 message VistorBindThridRsp {
-    string code = 1;
+    int32 code = 1;
     string dh_token = 2;
     string errmsg = 3;
     string sm_id = 4;
-    string dh_account = 5;
+    int32 dh_account = 5;
     ExtendData extend_data = 6; //Extend信息
+    string third_plat = 7;
 }
 
 service Bind {

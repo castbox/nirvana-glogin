@@ -19,6 +19,10 @@ const (
 	ErrCodeLoginInternal       = -20010410 //Login内部错误
 	ErrCodeParsePbInternal     = -20010411 //内部pb解析错误
 	ErrCodeCreateVisitorIdFail = -20010412 //创建visitorID错误
+	ErrCodeBindVisitorNotExist = -20010413 //绑定游客账号不存在
+	ErrCodeVisitorLoadErr      = -20010414 //游客账号加载失败
+	ErrCodeThirdAlreadyBind    = -20010415 //第三方账号已经绑定
+	ErrCodeThirdBindFail       = -20010416 //绑定失败
 )
 
 const (

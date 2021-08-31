@@ -4,6 +4,7 @@ import (
 	"fmt"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"glogin/db"
+	"glogin/db/db_core"
 	"glogin/internal"
 	"glogin/internal/anti"
 	"glogin/internal/appsflyer"
@@ -151,4 +152,14 @@ func GetPlat(result bson.M) (platString string) {
 		}
 	}
 	return
+}
+
+// BindThird 游客账号绑定第三方
+func Load(filter interface{}) (db_core.AccountData, error) {
+	return db.Load(filter)
+}
+
+func BindThird(accountId int32, thirdPlat, thirdUid string) error {
+	update := bson.M{"$set": bson.M{thirdPlat: thirdUid}}
+	return db.UpdateOne(bson.M{"_id": accountId}, update, db.AccountTableName())
 }
