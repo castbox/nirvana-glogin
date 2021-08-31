@@ -187,6 +187,7 @@ message AccountData {
     string phone = 6;
     CreateData create = 7;
     string visitor = 8;
+    int64  last_login = 9;
 }
 
 message CreateData {

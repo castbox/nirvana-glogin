@@ -92,6 +92,7 @@ func dbConvertToPb(dbAccount db_core.AccountData) (pbAccount glogin.AccountData,
 	pbAccount.Google = dbAccount.Google
 	pbAccount.Phone = dbAccount.Phone
 	pbAccount.Visitor = dbAccount.Visitor
+	pbAccount.LastLogin = dbAccount.LastLogin
 	strIp := util.BsonAToStr(dbAccount.Create.Ip)
 	pbAccount.Create = &glogin.CreateData{
 		Ip:       strIp,
