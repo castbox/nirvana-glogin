@@ -9,6 +9,7 @@ import (
 	"glogin/internal/anti"
 	anti_authentication "glogin/pbs/authentication"
 	"glogin/util"
+	"time"
 )
 
 const (
@@ -46,6 +47,13 @@ func AutiHandler(ctx *gin.Context) {
 	checkReq := &AutiCheckRequest{}
 	err := ctx.Bind(checkReq)
 	log.Infow("new query AutiHandler checkReq", "request", checkReq)
+
+	// 实名认证
+	checkRsp := &AutiCheckResponse{
+		ErrCode:        "0",
+		Authentication: &StateQueryResponse{},
+	}
+
 	if err != nil {
 		ParseRequestError(ctx, 500, err)
 		return
@@ -57,11 +65,12 @@ func AutiHandler(ctx *gin.Context) {
 		Id:         checkReq.Account, //账号ID
 		PlayerInfo: playerInfo,
 	}
-	// 实名认证
-	checkRsp := &AutiCheckResponse{
-		ErrCode:        "0",
-		Authentication: &StateQueryResponse{},
-	}
+
+	before := time.Now().UnixNano()
+	defer func() {
+		log.Infow("new query AutiHandler rsp1", "request", checkReq, "rsp", checkRsp, "time_cost", (time.Now().UnixNano()-before)/1000000)
+	}()
+
 	log.Infow("anti.Check req", "req", checkIn)
 	antiCheckRsp, errCheck := anti.Check(checkIn)
 	if errCheck != nil {

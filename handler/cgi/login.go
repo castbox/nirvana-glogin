@@ -17,6 +17,7 @@ import (
 	"glogin/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"strings"
+	"time"
 )
 
 var (
@@ -130,7 +131,7 @@ func (l Login) ThirdEx(request *glogin.ThirdLoginReq, ctx *gin.Context) (respons
 }
 func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLoginRsp, err error) {
 	ip := l.Ctx.ClientIP()
-	log.Infow("Third login", "request", request, "ip", ip)
+	log.Infow("Third login request", "request", request, "ip", ip)
 	response = &glogin.ThridLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
@@ -138,6 +139,12 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			Authentication: &glogin.StateQueryResponse{},
 		},
 	}
+
+	before := time.Now().UnixNano()
+	defer func() {
+		log.Infow("Third login rsp", "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
+	}()
+
 	authRsp, dbField, errAuth := ThirdAuth(request)
 	// 平台错误
 	if errAuth == PlatIsWrong {
@@ -367,6 +374,12 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 			Authentication: &glogin.StateQueryResponse{},
 		},
 	}
+
+	before := time.Now().UnixNano()
+	defer func() {
+		log.Infow("fast login rsp", "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
+	}()
+
 	if request.DhToken == "" {
 		response.Code = constant.ErrCodeFastTokenError
 		response.Errmsg = fmt.Sprintf("fast is token null game: %s client: %s", request.Game, request.Client)
