@@ -130,7 +130,7 @@ func login(filter interface{}, req internal.Req) (internal.Rsp, error) {
 	if antiErr != nil {
 		return internalRsp, antiErr
 	}
-	log.Infow("anti.StateQuery rsp ", "rsp", antiRsp)
+	log.Infow("anti.StateQuery rsp ", "rsp", antiRsp, "req", req)
 	internalRsp.AccountData = accountData
 	internalRsp.HawkRsp = hawkRsp
 	internalRsp.AntiRsp = antiRsp

@@ -394,6 +394,7 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 	if errLogin != nil {
 		response.Code = constant.ErrCodeLoginInternal
 		response.Errmsg = fmt.Sprintf("fast login %s auth error: %s", request.DhToken, errLogin)
+		log.Warnw("Fast Login error ", "errLogin", errLogin)
 		return response, nil
 	}
 
