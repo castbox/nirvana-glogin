@@ -35,6 +35,8 @@ func (l Login) SMSEx(request *glogin.SmsLoginReq, ctx *gin.Context) (response *g
 }
 
 func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, err error) {
+	ip := l.Ctx.ClientIP()
+	log.Infow("SMS login request", "request", request, "ip", ip)
 	response = &glogin.SmsLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
@@ -42,8 +44,12 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			Authentication: &glogin.StateQueryResponse{},
 		},
 	}
-	ip := l.Ctx.ClientIP()
-	log.Infow("SMS login", "request", request, "ip", ip)
+
+	before := time.Now().UnixNano()
+	defer func() {
+		log.Infow("SMS login rsp", "request", request, "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
+	}()
+
 	// sms step verify 获得Phone验证码
 	if request.Step == constant.Verify {
 		log.Infow("SMS verify", "request", request)
@@ -71,14 +77,14 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			createRsp, errCreate := account.CreatePhone(request, ip)
 			if errCreate != nil {
 				response.Code = constant.ErrCodeCreateInternal
-				response.Errmsg = fmt.Sprintf("sms login %s create error: %s", request.Phone, errCreate)
+				response.Errmsg = fmt.Sprintf("sms login1 %s create error: %s", request.Phone, errCreate)
 				return response, errCreate
 			}
 			// 返回InternalRsp
 			rsp, ok := createRsp.(internal.Rsp)
 			if !ok {
 				response.Code = constant.ErrCodeCreateInternal
-				response.Errmsg = fmt.Sprintf("sms login %s  error: %v", request.Phone, rsp)
+				response.Errmsg = fmt.Sprintf("sms login2 %s  error: %v", request.Phone, rsp)
 				return response, nil
 			}
 			response.Code = constant.ErrCodeOk
@@ -98,14 +104,14 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			loginRsp, errLogin := account.LoginPhone(request, ip)
 			if errLogin != nil {
 				response.Code = constant.ErrCodeLoginInternal
-				response.Errmsg = fmt.Sprintf("sms login %s  error: %s", request.Phone, errLogin)
+				response.Errmsg = fmt.Sprintf("sms login3 %s  error: %s", request.Phone, errLogin)
 				return response, nil
 			}
 			// 返回InternalRsp
 			rsp, ok := loginRsp.(internal.Rsp)
 			if !ok {
 				response.Code = constant.ErrCodeLoginInternal
-				response.Errmsg = fmt.Sprintf("sms login %s  error: %s", request.Phone, errLogin)
+				response.Errmsg = fmt.Sprintf("sms login4 %s  error: %s", request.Phone, errLogin)
 				return response, nil
 			}
 			response.Code = constant.ErrCodeOk
@@ -118,7 +124,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 			}
 			response.Errmsg = "success"
-			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
+			log.Infow("sms login success", "request.phone", request.Phone, "rsp", response)
 			return response, nil
 		}
 	}
@@ -201,14 +207,14 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		createRsp, errCreate := account.CreateThird(request, dbField, unionId, ip)
 		if errCreate != nil {
 			response.Code = constant.ErrCodeCreateInternal
-			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
+			response.Errmsg = fmt.Sprintf("thrid plat 1 %s login error: %s", request.ThirdPlat, errCreate)
 			return response, errCreate
 		}
 
 		rsp, ok := createRsp.(internal.Rsp)
 		if !ok {
 			response.Code = constant.ErrCodeCreateInternal
-			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, rsp)
+			response.Errmsg = fmt.Sprintf("thrid plat 2 %s login error: %s", request.ThirdPlat, rsp)
 			return response, nil
 		}
 
@@ -234,14 +240,14 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		loginRsp, errLogin := account.LoginThird(request, dbField, unionId, ip)
 		if errLogin != nil {
 			response.Code = constant.ErrCodeLoginInternal
-			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errAuth)
+			response.Errmsg = fmt.Sprintf("thrid plat 3 %s login error: %s", request.ThirdPlat, errLogin)
 			return response, nil
 		}
 		// 返回
 		rsp, ok := loginRsp.(internal.Rsp)
 		if !ok {
 			response.Code = constant.ErrCodeParsePbInternal
-			response.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", request.ThirdPlat, errLogin)
+			response.Errmsg = fmt.Sprintf("thrid plat 4 %s login error: %s", request.ThirdPlat, errLogin)
 			return response, nil
 		}
 		//	log.Infow("thrid login success", " request.ThirdPlat", request.ThirdPlat, "unionId", unionId)
@@ -280,6 +286,12 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 	}
 	ip := l.Ctx.ClientIP()
 	log.Infow("Visitor login", "request", req, "ip", ip)
+
+	before := time.Now().UnixNano()
+	defer func() {
+		log.Infow("Visitor login rsp", "response", rsp, "time_cost", (time.Now().UnixNano()-before)/1000000)
+	}()
+
 	// 参数验证
 	if req.Dhid == "" {
 		rsp.Code = constant.ErrCodeParamError
@@ -392,11 +404,11 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 		if errToken == util.ExpiredToken {
 			// 1:快速登录失败，token 过期 30天
 			response.Code = constant.ErrCodeFastTokenExpired
-			response.Errmsg = fmt.Sprintf("fast login: %s", errToken)
+			response.Errmsg = fmt.Sprintf("fast login3: %s", errToken)
 			return response, nil
 		} else {
 			response.Code = constant.ErrCodeFastTokenVaild
-			response.Errmsg = fmt.Sprintf("fast login: %s", errToken)
+			response.Errmsg = fmt.Sprintf("fast login4: %s", errToken)
 			return response, nil
 		}
 	}
@@ -406,7 +418,7 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 	loginRsp, errLogin := account.LoginFast(request, dhAccount, ip)
 	if errLogin != nil {
 		response.Code = constant.ErrCodeLoginInternal
-		response.Errmsg = fmt.Sprintf("fast login %s auth error: %s", request.DhToken, errLogin)
+		response.Errmsg = fmt.Sprintf("fast login1 %s auth error: %s", request.DhToken, errLogin)
 		log.Warnw("Fast Login error ", "errLogin", errLogin)
 		return response, nil
 	}
@@ -415,7 +427,7 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 	value, ok := loginRsp.(internal.Rsp)
 	if !ok {
 		response.Code = constant.ErrCodeParsePbInternal
-		response.Errmsg = fmt.Sprintf("fast login %s auth error: %s", request.DhToken, errLogin)
+		response.Errmsg = fmt.Sprintf("fast login2 %s auth error: %s", request.DhToken, errLogin)
 		return response, nil
 	}
 	response.Code = constant.ErrCodeOk
