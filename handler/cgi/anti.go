@@ -62,6 +62,7 @@ func AutiHandler(ctx *gin.Context) {
 		ErrCode:        "0",
 		Authentication: &StateQueryResponse{},
 	}
+	log.Infow("anti.Check req", "req", checkIn)
 	antiCheckRsp, errCheck := anti.Check(checkIn)
 	if errCheck != nil {
 		checkRsp.ErrCode = constant.ErrCodeStrAutiRpc
@@ -75,6 +76,7 @@ func AutiHandler(ctx *gin.Context) {
 		ctx.JSON(200, checkRsp)
 		return
 	}
+	log.Infow("anti.Check rsp", "rsp", checkRsp)
 	//  查询实名信息
 	reqState := internal.Req{
 		Account: checkReq.Account,
@@ -100,6 +102,6 @@ func AutiHandler(ctx *gin.Context) {
 			LeftPayAmount:        r2.LeftPayAmount,
 		}
 	}
-	log.Infow("new query AutiHandler rsp", "rsp", checkRsp)
+	log.Infow("new query AutiHandler rsp", "rsp", checkRsp, "request", checkReq)
 	ctx.JSON(200, checkRsp)
 }
