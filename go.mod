@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	git.dhgames.cn/svr_comm/gcore v0.1.8
-	git.dhgames.cn/svr_comm/gmoss/v3 v3.0.9
+	git.dhgames.cn/svr_comm/gmoss/v3 v3.1.0
 	github.com/JakeXu/aliyun-sms-sdk-golang v0.0.0-20171107055740-67b111e025ba
 	github.com/bitly/go-simplejson v0.5.0
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect

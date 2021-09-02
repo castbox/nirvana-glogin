@@ -4,8 +4,8 @@ cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 git.dhgames.cn/svr_comm/gcore v0.1.8 h1:nC82oj0aQh3hKDSKp/xv+OhzqLmGxVZl8uoYYaDhFpg=
 git.dhgames.cn/svr_comm/gcore v0.1.8/go.mod h1:+kS77g98UCqmD/EoS34LpQetr7ChMxPoP1rdvo/dpRU=
 git.dhgames.cn/svr_comm/gmoss/v2 v2.1.8/go.mod h1:bXBFZ8mnwFGO6ZsCn31tFbvTaqsdBwahILx/lT7Nyxs=
-git.dhgames.cn/svr_comm/gmoss/v3 v3.0.8 h1:5G2ZLGUzN3tvrzRuyBHqIM9LVRBCAbRtuz8WURe17v4=
-git.dhgames.cn/svr_comm/gmoss/v3 v3.0.8/go.mod h1:9TlHspyJPIQliQU5ECsDdT/Ge2ZTTBiACeBNknSZUUA=
+git.dhgames.cn/svr_comm/gmoss/v3 v3.1.0 h1:cRWBHi+k99f6MiH/ZIKrlhv2TURlEfiV3n1keZJV5dw=
+git.dhgames.cn/svr_comm/gmoss/v3 v3.1.0/go.mod h1:9TlHspyJPIQliQU5ECsDdT/Ge2ZTTBiACeBNknSZUUA=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/JakeXu/aliyun-sms-sdk-golang v0.0.0-20171107055740-67b111e025ba h1:rtZOUnSjjXAFijZYOP6POLvHdpvqFOdwyDUwhi94BME=

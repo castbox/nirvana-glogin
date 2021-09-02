@@ -8,12 +8,13 @@ import (
 	"glogin/internal"
 	anti_authentication "glogin/pbs/authentication"
 	"strings"
+	"time"
 )
 
 func Check(req *anti_authentication.CheckRequest) (*anti_authentication.CheckResponse, error) {
 	autiDcCluster := config.Field(constant.AutiDcCluster).String()
 	cfgDc := strings.Split(autiDcCluster, "|")
-	rsp, err := anti_authentication.Check(req, global.WithCluster(cfgDc[0], cfgDc[1], constant.AutiService))
+	rsp, err := anti_authentication.Check(req, global.WithCluster(cfgDc[0], cfgDc[1], constant.AutiService).WithTimeout(time.Second*9))
 	if err != nil {
 		return rsp, err
 	} else {

@@ -22,7 +22,7 @@ const (
 	ErrCodeBindVisitorNotExist = -20010413 //绑定游客账号不存在
 	ErrCodeVisitorLoadErr      = -20010414 //游客账号加载失败
 	ErrCodeThirdAlreadyBind    = -20010415 //第三方账号已经绑定
-	ErrCodeThirdBindFail       = -20010416 //绑定失败
+	ErrCodeThirdBindFail       = -20010416 //第三方账号绑定失败
 )
 
 const (
