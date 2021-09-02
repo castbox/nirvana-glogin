@@ -69,6 +69,14 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.Errmsg = fmt.Sprintf("check verify faild phone %s ,verify %s", request.Phone, request.Verifycode)
 			return response, nil
 		}
+
+		// 必传参数验证
+		if request.Game.GameCd == "" || request.Game.Channel == "" || request.Client.Dhid == "" {
+			response.Code = constant.ErrCodeParamError
+			response.Errmsg = fmt.Sprintf("sms login req param error GameCd: %s Channel: %s Client.Dhid: %s", request.Game.GameCd, request.Game.Channel, request.Client.Dhid)
+			return response, nil
+		}
+
 		// 数美ID解析
 		smID := smfpcrypto.ParseSMID(request.Client.Dhid)
 		request.GetClient().Dhid = smID
@@ -150,6 +158,13 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 	defer func() {
 		log.Infow("Third login rsp", "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
+
+	// 必传参数验证
+	if request.Game.GameCd == "" || request.Game.Channel == "" || request.Client.Dhid == "" {
+		response.Code = constant.ErrCodeParamError
+		response.Errmsg = fmt.Sprintf("third login req param error GameCd: %s Channel: %s Client.Dhid: %s", request.Game.GameCd, request.Game.Channel, request.Client.Dhid)
+		return response, nil
+	}
 
 	authRsp, dbField, errAuth := ThirdAuth(request)
 	// 平台错误
@@ -292,10 +307,10 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 		log.Infow("Visitor login rsp", "response", rsp, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 
-	// 参数验证
-	if req.Dhid == "" {
+	// 必传参数验证
+	if req.Dhid == "" || req.Game.GameCd == "" || req.Game.Channel == "" {
 		rsp.Code = constant.ErrCodeParamError
-		rsp.Errmsg = fmt.Sprintf("visitor is agrs error dhid: %s", req.Dhid)
+		rsp.Errmsg = fmt.Sprintf("visitor is agrs error dhid: %s GameCd: %s Channel: %s", req.Dhid, req.Game.GameCd, req.Game.Channel)
 		return rsp, nil
 	}
 	// 数美ID解析
@@ -391,6 +406,13 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 	defer func() {
 		log.Infow("fast login rsp", "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
+
+	// 必传参数验证
+	if request.Game.GameCd == "" || request.Game.Channel == "" {
+		response.Code = constant.ErrCodeParamError
+		response.Errmsg = fmt.Sprintf("fast login req param error GameCd: %s Channel: %s", request.Game.GameCd, request.Game.Channel)
+		return response, nil
+	}
 
 	if request.DhToken == "" {
 		response.Code = constant.ErrCodeFastTokenError

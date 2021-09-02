@@ -94,6 +94,10 @@ func DealSMID(srcId string) string {
 func ParseSMID(smId string) string {
 	log.Infow("ParseSMID", "src", smId)
 	srcId := DealSMID(smId)
+	// 只有时间戳 或者为空
+	if srcId == "" {
+		return srcId
+	}
 	var des string
 	switch srcId[0] {
 	case '2':

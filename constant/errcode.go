@@ -9,7 +9,7 @@ const (
 	ErrCodeSmsFail             = -20010400 //短信服务失败
 	ErrCodeThirdAuthFail       = -20010401 //第三方验证失败
 	ErrCodePlatWrong           = -20010402 //平台标示错误
-	ErrCodeParamError          = -20010403 //参数错误
+	ErrCodeParamError          = -20010403 //请求参数错误
 	ErrCodeFastTokenError      = -20010404 //fast token错误
 	ErrCodeFastTokenExpired    = -20010405 //fast token过期
 	ErrCodeFastTokenVaild      = -20010406 //token错误无效
