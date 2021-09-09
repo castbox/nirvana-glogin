@@ -12,6 +12,7 @@ import (
 	"glogin/internal/plat"
 	"glogin/pbs/glogin"
 	"go.mongodb.org/mongo-driver/bson"
+	"reflect"
 	"time"
 )
 
@@ -144,16 +145,6 @@ func updateLoginTime(dhAccount int32) (err error) {
 	return db.UpdateOne(bson.M{"_id": dhAccount}, update, db.AccountTableName())
 }
 
-func GetPlat(result bson.M) (platString string) {
-	for key := range plat.ThirdList {
-		if _, ok := result[key]; ok { // val 存储的是第三方uid，只有找到返回key 就可以了
-			platString = key
-			break
-		}
-	}
-	return
-}
-
 // BindThird 游客账号绑定第三方
 func Load(filter interface{}) (db_core.AccountData, error) {
 	return db.Load(filter)
@@ -162,4 +153,28 @@ func Load(filter interface{}) (db_core.AccountData, error) {
 func BindThird(accountId int32, thirdPlat, thirdUid string) error {
 	update := bson.M{"$set": bson.M{thirdPlat: thirdUid}}
 	return db.UpdateOne(bson.M{"_id": accountId}, update, db.AccountTableName())
+}
+
+func GetPlat(in interface{}) (platString string, err error) {
+	v := reflect.ValueOf(in)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct { // 非结构体返回错误提示
+		return "", fmt.Errorf("only accepts struct or struct pointer; got %T", v)
+	}
+	t := reflect.TypeOf(in)
+	var data = make(map[string]interface{})
+	for i := 0; i < v.NumField(); i++ {
+		if !v.Field(i).IsZero() {
+			data[t.Field(i).Tag.Get("bson")] = v.Field(i).Interface()
+		}
+	}
+	for key := range plat.ThirdList {
+		if _, ok := data[key]; ok { // val 存储的是第三方uid，只有找到返回key 就可以了
+			platString = key
+			return
+		}
+	}
+	return
 }

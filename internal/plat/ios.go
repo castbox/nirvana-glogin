@@ -326,9 +326,9 @@ func (t *appleToken) NonceSupported() bool {
 	return t.claims.NonceSupported
 }
 
-func (t *appleToken) IsPrivateEmail() bool {
+func (t *appleToken) IsPrivateEmail() string {
 	if t == nil || t.claims == nil {
-		return false
+		return ""
 	}
 	return t.claims.IsPrivateEmail
 }
@@ -376,6 +376,20 @@ func (t *appleToken) String() string {
 	return fmt.Sprintf("Header: [%s], Claims: [%s], Sign: [%s]\n", hStr, cStr, t.sign)
 }
 
+//{
+//"iss": "https://appleid.apple.com",
+//"aud": "com.sarunw.siwa",
+//"exp": 1577943613,
+//"iat": 1577943013,
+//"sub": "xxx.yyy.zzz",
+//"nonce": "nounce",
+//"c_hash": "xxxx",
+//"email": "xxxx@privaterelay.appleid.com",
+//"email_verified": "true",
+//"is_private_email": "true",
+//"auth_time": 1577943013
+//}
+
 type appleClaim struct {
 	Iss            string `json:"iss"`   //签发者，固定值: https://appleid.apple.com
 	Sub            string `json:"sub"`   //用户唯一标识
@@ -386,7 +400,7 @@ type appleClaim struct {
 	NonceSupported bool   `json:"nonce_supported"`
 	Email          string `json:"email"` //邮件
 	EmailVerified  string `json:"email_verified"`
-	IsPrivateEmail bool   `json:"is_private_email"`
+	IsPrivateEmail string `json:"is_private_email"`
 	RealUserStatus int    `json:"real_user_status"`
 	CHash          string `json:"c_hash"`    //
 	AuthTime       int64  `json:"auth_time"` //验证时间

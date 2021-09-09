@@ -18,14 +18,15 @@ func SendAppsFlyer(req internal.Req) (interface{}, error) {
 	if req.GameCd == "" {
 		req.GameCd = req.Game.GameCd
 	}
-
 	urlBase := ""
 	if req.Game.Platform == constant.ANDROID {
 		urlBase = constant.AppsFlyerANDROID + req.Game.BundleId
 	} else {
-		appsFlyerIosId := config.PackageParamRst(req.Game.BundleId, "appsflyer_ios_id").String()
+		//先从package参数去拿，如果没有 去game参数去拿，如果还没有就填默认
+		appsFlyerIosId := "id1153461915"
+		appsFlyerIosId = config.PackageParamRst(req.Game.BundleId, "appsflyer_ios_id").String()
 		if appsFlyerIosId == "" {
-			appsFlyerIosId = "id1153461915"
+			appsFlyerIosId = config.GameParamRst(req.GameCd, "appsflyer_ios_id").String()
 		}
 		urlBase = constant.AppsFlyerIOS + appsFlyerIosId
 	}
@@ -40,9 +41,17 @@ func SendAppsFlyer(req internal.Req) (interface{}, error) {
 		"eventTime":      util.FormatDate(time.Now(), util.YYYY_MM_DD_HH_MM_SS_SSS),
 		"af_events_api":  "true",
 	}
-	appsFlyerAuthentication := config.PackageParamRst(req.Game.BundleId, "appsflyer_Authentication").String()
-	appsflyerRegistrationId := config.PackageParamRst(req.Game.BundleId, "appsflyer_registrationId").Int()
-	//bm := map[string]interface{"id" :appsflyerRegistrationId}
+	appsFlyerAuthentication := "36FfNk244xi9BCxEURqa5n"
+	appsflyerRegistrationId := 12
+
+	appsFlyerAuthentication = config.PackageParamRst(req.Game.BundleId, "appsflyer_Authentication").String()
+	if appsFlyerAuthentication == "" {
+		appsFlyerAuthentication = config.GameParamRst(req.GameCd, "appsflyer_Authentication").String()
+	}
+	appsflyerRegistrationId = int(config.PackageParamRst(req.Game.BundleId, "appsflyer_registrationId").Int())
+	if appsflyerRegistrationId == 0 {
+		appsflyerRegistrationId = int(config.GameParamRst(req.GameCd, "appsflyer_registrationId").Int())
+	}
 	bm := map[string]interface{}{
 		"id": appsflyerRegistrationId,
 	}

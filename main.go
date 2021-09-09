@@ -23,7 +23,7 @@ func main() {
 	// 开发模式设置
 	initDevelopment()
 	// 注册服务
-	go startEngine()
+	startEngine()
 	log.Infow("server started")
 	// 初始化配置
 	initConfig()
@@ -61,7 +61,7 @@ func startHttp() {
 	router.POST("/token", cgi.TokenHandler)
 	router.GET("/metrics", prometheusHandler())
 	router.GET("/heart", func(ctx *gin.Context) { ctx.JSON(http.StatusOK, gin.H{"err_code": constant.ErrCodeOk}) })
-	if err := router.Run(config.GetAll().WebPort); err != nil {
+	if err := router.Run(config.WebPort()); err != nil {
 		log.Fatalw("failed to run http server", "err", err)
 		panic(err)
 	}

@@ -463,6 +463,10 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 	}
 
+	plat, errG := account.GetPlat(value.AccountData)
+	if errG == nil {
+		response.ThirdPlat = plat
+	}
 	log.Infow("fast login success", "response", response)
 	return response, nil
 }

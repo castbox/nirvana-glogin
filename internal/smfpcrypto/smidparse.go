@@ -94,8 +94,9 @@ func DealSMID(srcId string) string {
 func ParseSMID(smId string) string {
 	log.Infow("ParseSMID", "src", smId)
 	srcId := DealSMID(smId)
+
 	// 只有时间戳 或者为空
-	if srcId == "" {
+	if srcId == "" && len(srcId) == 0 {
 		return srcId
 	}
 	var des string
@@ -175,13 +176,17 @@ func ParseBoxData(srcBoxId string, accessKey string) string {
 		return srcBoxId
 	}
 	if smRsp.Code == 1100 {
+		if smRsp.DeviceLabels.Id == "" {
+			log.Infow("ParseSMID ParseBoxData HTTP Request Error5 smRsp.DeviceLabels.Id is null,", "smRsp", smRsp)
+			return srcBoxId
+		}
 		return smRsp.DeviceLabels.Id
 	} else {
 		strErr := fmt.Errorf("ParseSMID Rsp%s", string(bs))
 		log.Infow("ParseSMID ParseBoxData HTTP Request Error4,", "strErr", strErr)
 		return srcBoxId
 	}
-	return smRsp.Message
+	return srcBoxId
 }
 
 func ParseBoxId(boxdata string, prikey string) (string, error) {

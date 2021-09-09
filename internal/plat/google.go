@@ -2,6 +2,7 @@ package plat
 
 import (
 	"fmt"
+	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"glogin/config"
 	"glogin/pbs/glogin"
 	"io/ioutil"
@@ -22,6 +23,7 @@ type google struct{}
 func (g google) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	baseUrl := authURL(request.Game.BundleId, GoogleAuthURL)
 	url := baseUrl + request.ThirdToken
+	log.Infow("google Auth ", "url", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		resErr := fmt.Errorf("failed communicating with server: %v", err)

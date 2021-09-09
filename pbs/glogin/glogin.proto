@@ -126,6 +126,7 @@ message FastLoginRsp {
     string sm_id = 4;
     int32 dh_account = 5;    //dh数字账号
     ExtendData extend_data = 6; //Extend信息
+    string third_plat = 7; //third_plat
 }
 
 //登录相关

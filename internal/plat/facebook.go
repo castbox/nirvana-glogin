@@ -27,6 +27,7 @@ func (f facebook) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	log.Infow("facebook auth", "request", request)
 	baseUrl := config.PackageParam(request.Game.BundleId, facebookAuthKey)
 	url := baseUrl + request.ThirdToken
+	log.Infow("facebook_oauth_url", "url", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		resErr := fmt.Errorf("failed communicating with server: %v", err)
@@ -91,6 +92,7 @@ func tokenForBusiness(faceBookId string, token string, bundleId string) (error, 
 			return nil, doc.TokenForBusiness
 		}
 	}
+	//没有找到记录或者load其他错误，都走线上去获取 unionID
 	baseUrl := config.Field("facebook_for_business_url").String()
 	url := baseUrl + token
 	resp, err := http.Get(url)
@@ -99,7 +101,6 @@ func tokenForBusiness(faceBookId string, token string, bundleId string) (error, 
 		elkAlarm("error", url, resErr)
 		return err, ""
 	}
-
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		elkAlarm(resp.Status, url, "")

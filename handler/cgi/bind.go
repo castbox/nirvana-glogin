@@ -42,18 +42,7 @@ func (Bind) BindThird(request *glogin2.VistorBindThridReq) (response *glogin2.Vi
 		return response, nil
 	}
 
-	data, err := bson.Marshal(dhAccount)
-	if err != nil {
-		log.Infow("BindThird thirdUid bson.Marshal error  ", "err", err)
-		return response, nil
-	}
-	result := bson.M{}
-	err3 := bson.Unmarshal(data, result)
-	if err3 != nil {
-		log.Infow("BindThird thirdUid bson.Unmarshal error  ", "err", err)
-		return response, nil
-	}
-	platString := account.GetPlat(result)
+	platString, _ := account.GetPlat(dhAccount)
 	// 账号已经绑定
 	if platString != "" {
 		log.Infow("BindThird Visitor had bind error  ", "platString", platString, "Visitor", request.Visitor)
