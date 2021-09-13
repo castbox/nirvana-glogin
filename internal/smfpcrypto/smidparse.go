@@ -162,11 +162,11 @@ func ParseBoxData(srcBoxId string, accessKey string) string {
 	req.Set("data", data)
 	res, bs, errs := httpClient.Post(FullUrl).SendBodyMap(req).EndBytes()
 	if len(errs) > 0 {
-		log.Errorw("ParseSMID ParseBoxData HTTP Request Error1", "errs", errs[0])
+		log.Warnw("ParseSMID ParseBoxData HTTP Request Error1", "errs", errs[0])
 		return srcBoxId
 	}
 	if res.StatusCode != 200 {
-		log.Errorw("ParseSMID ParseBoxData HTTP Request Error2,", "StatusCode", res.StatusCode)
+		log.Warnw("ParseSMID ParseBoxData HTTP Request Error2,", "StatusCode", res.StatusCode)
 		return srcBoxId
 	}
 	log.Infow("ParseSMID ParseBoxData HTTP Rsp,", "string(bs)", string(bs))

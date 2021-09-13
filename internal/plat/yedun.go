@@ -59,7 +59,7 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	log.Infow("yedun_check auth url info", "apiUrl", apiUrl, "body", params)
 	resp, err := http.Post(apiUrl, "application/x-www-form-urlencoded", strings.NewReader(params.Encode()))
 	if err != nil {
-		log.Errorw("yedun auth error ", "err", err)
+		log.Warnw("yedun auth error ", "err", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -71,7 +71,7 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	//{"code":200,"data":{"phone":"19181732997","resultCode":"0"},"msg":"ok"}}
 	if err != nil {
 		resErr := fmt.Errorf("failed reading from metadata server: %w", err)
-		log.Errorw("yedun auth error ", "resErr", resErr)
+		log.Warnw("yedun auth error ", "resErr", resErr)
 		return nil, resErr
 	}
 	result, _ := simplejson.NewJson(contents)
@@ -89,7 +89,7 @@ func (y yedun) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 			}, nil
 		} else {
 			resultCode, _ := data["resultCode"].(string)
-			log.Errorw("yedun auth get phonenum error", "resultCode", resultCode)
+			log.Warnw("yedun auth get phonenum error", "resultCode", resultCode)
 			resultErr := fmt.Errorf("yedun auth get phonenum error: %v", resultCode)
 			return nil, resultErr
 			//fmt.Printf("取号失败,建议进行二次验证,例如短信验证码。运营商返回码resultCode为: %s", resultCode)

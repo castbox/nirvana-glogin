@@ -81,7 +81,7 @@ func ValidDHToken(tokenString string) (accountId int32, err error) {
 	token, parseErr := jwt.ParseWithClaims(tokenString, jwt.MapClaims{}, KeyMethod)
 	if parseErr != nil {
 		err = fmt.Errorf("token parese err:%v", parseErr)
-		log.Errorw("ValidDHToken error", "DHToken", err)
+		log.Warnw("ValidDHToken error", "DHToken", err)
 		return 0, err
 	}
 
@@ -95,7 +95,7 @@ func ValidDHToken(tokenString string) (accountId int32, err error) {
 		}
 	} else {
 		err = InvalidToken
-		log.Errorw("ValidDHToken error", "DHToken", err)
+		log.Warnw("ValidDHToken error", "DHToken", err)
 		return 0, err
 	}
 }

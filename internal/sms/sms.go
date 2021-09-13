@@ -37,7 +37,7 @@ func GetVerify(req *glogin.SmsLoginReq) (int32, error) {
 func canSendVerify(phone string) (int32, error) {
 	bCheck, errCheck := db.CheckSmsInterval(phone)
 	if !bCheck {
-		log.Errorw("CheckSmsInterval false", "errCheck", errCheck)
+		log.Warnw("CheckSmsInterval false", "errCheck", errCheck)
 		return constant.ErrCodeSmsInterval, errCheck
 	}
 	_, errCount := db.CheckSmsVerifyCount(phone)

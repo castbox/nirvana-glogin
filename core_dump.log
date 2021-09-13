@@ -1,9 +1,0 @@
-
-sever stated at :2021-20-08 14:15:40
-panic: proto: duplicate enum registered: CompressType
-
-goroutine 1 [running]:
-github.com/golang/protobuf/proto.RegisterEnum(0x1bfd807, 0xc, 0xc0002117d0, 0xc000211830)
-	/Users/liuwenkun/go/pkg/mod/github.com/golang/protobuf@v1.4.3/proto/registry.go:104 +0x11f
-git.dhgames.cn/svr_comm/gmoss/v2/moss_rpc/codec/moss/pb.init.0()
-	/Users/liuwenkun/go/pkg/mod/git.dhgames.cn/svr_comm/gmoss/v2@v2.1.8/moss_rpc/codec/moss/pb/rpc_meta.pb.go:198 +0x52

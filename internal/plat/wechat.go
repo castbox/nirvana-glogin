@@ -51,7 +51,7 @@ func (w wechat) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	//log.Infow("wechat auth appInfo", "appId", appId, "appSecret", appSecret, "code", code)
 	accessToken, err := GetOauth2AccessToken(appId, appSecret, code)
 	if err != nil {
-		log.Errorw("wechat auth error ", "err", err)
+		log.Warnw("wechat auth error ", "err", err)
 		return nil, err
 	}
 	log.Infow("wechat auth rsp", "rsp", accessToken)
@@ -69,7 +69,7 @@ func (w wechat) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	// Nick
 	oauth2UserInfo, errUserInfo := GetOauth2UserInfo(accessToken.AccessToken, accessToken.Openid)
 	if errUserInfo != nil {
-		log.Errorw("wechat auth GetOauth2UserInfo error ", "errUserInfo", errUserInfo)
+		log.Warnw("wechat auth GetOauth2UserInfo error ", "errUserInfo", errUserInfo)
 		return nil, errUserInfo
 	}
 	log.Infow("wechat auth GetOauth2UserInfo rsp", "rsp", errUserInfo)

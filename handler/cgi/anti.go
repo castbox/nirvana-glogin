@@ -18,29 +18,29 @@ const (
 
 // SDK实名信息认证
 type AutiCheckRequest struct {
-	GameCd  string `json:"game_cd" binding:"required"`
-	Account string `json:"account"`
-	Pid     string `json:"pid" binding:"required"`
-	Name    string `json:"name"`
+	GameCd  string `json:"game_cd" binding:"required"` //游戏唯一表示
+	Account string `json:"account"`                    //卓杭账号ID
+	Pid     string `json:"pid" binding:"required"`     //身份PID
+	Name    string `json:"name"`                       //名字
 }
 
 // 防沉迷返回
 type StateQueryResponse struct {
-	RequestId            string `json:"request_id"`
-	ErrCode              string `json:"err_code"`
-	ErrMsg               string `json:"err_msg"`
-	AuthenticationStatus int32  `json:"authentication_status"`
-	IsHoliday            bool   `json:"is_holiday"`
-	LeftGameTime         int32  ` json:"left_game_time,"`
-	EachPayAmount        int32  `json:"each_pay_amount"`
-	LeftPayAmount        int32  `json:"left_pay_amount"`
+	RequestId            string `json:"request_id"`            // 每次请求唯一标识
+	ErrCode              string `json:"err_code"`              // 返回代码
+	ErrMsg               string `json:"err_msg"`               // 错误信息
+	AuthenticationStatus int32  `json:"authentication_status"` // 实名状态：0：成年，1：游客，2：0-8岁，3：8-16岁，4：16-18岁
+	IsHoliday            bool   `json:"is_holiday"`            // 是否节假日
+	LeftGameTime         int32  ` json:"left_game_time,"`      // 剩余游戏时间，已成年请忽略
+	EachPayAmount        int32  `json:"each_pay_amount"`       // 单次可充值额度，已成年请忽略
+	LeftPayAmount        int32  `json:"left_pay_amount"`       // 总剩充值额度，已成年请忽略
 }
 
 // 实名信息认证返回
 type AutiCheckResponse struct {
-	ErrCode        string              `json:"err_code"`
-	ErrMsg         string              `json:"err_msg"`
-	Authentication *StateQueryResponse `json:"authentication"`
+	ErrCode        string              `json:"err_code"`       // 每次请求唯一标识,用作问题校验时查询
+	ErrMsg         string              `json:"err_msg"`        // 错误码
+	Authentication *StateQueryResponse `json:"authentication"` // 防沉迷状态
 }
 
 func AutiHandler(ctx *gin.Context) {
