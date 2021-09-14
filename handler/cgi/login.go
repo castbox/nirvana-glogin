@@ -100,6 +100,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.SmId = smID
 			response.Errmsg = "success"
 			response.ExtendData.Nick = util.HideStar(request.Phone)
+			response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
 			r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
 			if ok {
 				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
@@ -127,6 +128,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.SmId = smID
 			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 			response.ExtendData.Nick = util.HideStar(rsp.AccountData.Phone)
+			response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
 			r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
 			if ok {
 				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
@@ -211,6 +213,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 			}
 			response.ExtendData.Nick = authRsp.Nick
+			response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
 			log.Infow("third bundle account login success", "response", response, "uid", uid)
 			return response, nil
 		}
@@ -245,6 +248,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		}
 		// ExtendData
 		response.ExtendData.Nick = authRsp.Nick
+		response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
 		if request.ThirdPlat == "yedun" {
 			response.ExtendData.Nick = util.HideStar(unionId)
 		}
@@ -276,6 +280,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 		}
 		response.ExtendData.Nick = authRsp.Nick
+		response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
 		if request.ThirdPlat == "yedun" {
 			response.ExtendData.Nick = util.HideStar(unionId)
 		}
@@ -350,6 +355,7 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 			rsp.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
 		}
 		rsp.ExtendData.Nick = ""
+		rsp.ExtendData.GameFirstLogin = dcRsp.GameRsp.FirstLogin
 		rsp.Errmsg = "success"
 		log.Infow("visitor fast login success ", "rsp", rsp)
 		return rsp, nil
@@ -377,6 +383,7 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 		rsp.DhToken = util.GenDHToken(value.AccountData.ID)
 		rsp.Visitor = visitorId
 		rsp.Errmsg = "success"
+		rsp.ExtendData.GameFirstLogin = value.GameRsp.FirstLogin
 		// 防沉迷返回
 		r2, ok := value.AntiRsp.(anti_authentication.StateQueryResponse)
 		if ok {
@@ -467,6 +474,7 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 	if errG == nil {
 		response.ThirdPlat = plat
 	}
+	response.ExtendData.GameFirstLogin = value.GameRsp.FirstLogin
 	log.Infow("fast login success", "response", response)
 	return response, nil
 }

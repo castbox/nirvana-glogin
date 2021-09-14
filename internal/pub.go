@@ -7,6 +7,7 @@ import (
 
 type Rsp struct {
 	AccountData db_core.AccountData `json:"acc_data"`
+	GameRsp     db_core.GameRsp     `json:"game_rsp"`
 	HawkRsp     interface{}         `json:"hawk_rsp"`
 	AntiRsp     interface{}         `json:"anti_rsp"`
 }

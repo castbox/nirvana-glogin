@@ -2,16 +2,21 @@ package db_core
 
 // account table
 type AccountData struct {
-	ID        int32       `json:"_id" bson:"_id"`               // id DH_account
-	BundleID  string      `json:"bundle_id" bson:"bundle_id"`   // 包名
-	Create    CreateData  `json:"create" bson:"create"`         // create创建信息
-	Google    string      `json:"google" bson:"google"`         // google
-	Facebook  string      `json:"facebook" bson:"facebook"`     // facebook unionId
-	IOS       interface{} `json:"ios" bson:"ios"`               // IOS 调整为interface兼容老数据 (老array 新string)
-	Visitor   string      `json:"visitor" bson:"visitor"`       // visitor
-	Phone     string      `json:"phone" bson:"phone"`           // phone
-	WeChat    string      `json:"we_chat" bson:"we_chat"`       // wechat
-	LastLogin int64       `json:"last_login" bson:"last_login"` // last_login
+	ID        int32               `json:"_id" bson:"_id"`               // id DH_account
+	BundleID  string              `json:"bundle_id" bson:"bundle_id"`   // 包名
+	Create    CreateData          `json:"create" bson:"create"`         // create创建信息
+	Google    string              `json:"google" bson:"google"`         // google
+	Facebook  string              `json:"facebook" bson:"facebook"`     // facebook unionId
+	IOS       interface{}         `json:"ios" bson:"ios"`               // IOS 调整为interface兼容老数据 (老array 新string)
+	Visitor   string              `json:"visitor" bson:"visitor"`       // visitor
+	Phone     string              `json:"phone" bson:"phone"`           // phone
+	WeChat    string              `json:"we_chat" bson:"we_chat"`       // wechat
+	LastLogin int64               `json:"last_login" bson:"last_login"` // last_login
+	Games     map[string]GameInfo `json:"games" bson:"games"`           // games
+}
+
+type GameInfo struct {
+	Time int64 `json:"time" bson:"time"` // Time
 }
 
 type CreateData struct {
@@ -42,4 +47,8 @@ type TokenForBusinessData struct {
 	BundleID         string      `json:"bundle_id" bson:"bundle_id"`                   // 包名
 	FacebookToken    string      `json:"facebook_token" bson:"facebook_token"`         // facebook_token
 	TokenForBusiness string      `json:"token_for_business" bson:"token_for_business"` // token_for_business
+}
+
+type GameRsp struct {
+	FirstLogin bool `json:"first_login" bson:"first_login"` // first_login
 }

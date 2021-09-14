@@ -90,6 +90,12 @@ func create(accountInfo bson.M, req internal.Req) (rsp internal.Rsp, err error) 
 		err = hErr
 		return
 	}
+	// 自动激活gameCD  k-v  gameCd - time
+	gameMap := make(map[string]db_core.GameInfo)
+	gameMap[req.Game.GameCd] = db_core.GameInfo{
+		Time: time.Now().Unix(),
+	}
+	accountInfo["games"] = gameMap
 	dhid, errInsert := db.CreateDhId(accountInfo)
 	if errInsert != nil {
 		err = errInsert
@@ -105,6 +111,7 @@ func create(accountInfo bson.M, req internal.Req) (rsp internal.Rsp, err error) 
 			return
 		}
 		rsp.AntiRsp = antiRsp
+		rsp.GameRsp.FirstLogin = true
 		// todo:: appsflyer
 		appsflyer.SendAppsFlyer(req)
 		return
@@ -135,14 +142,27 @@ func login(filter interface{}, req internal.Req) (internal.Rsp, error) {
 	internalRsp.AccountData = accountData
 	internalRsp.HawkRsp = hawkRsp
 	internalRsp.AntiRsp = antiRsp
-	// 更新最后登录时间
-	updateLoginTime(accountData.ID)
+	// 更新信息
+	gameRsp, _ := updateLoginInfo(req, accountData)
+	internalRsp.GameRsp = gameRsp
 	return internalRsp, nil
 }
 
-func updateLoginTime(dhAccount int32) (err error) {
-	update := bson.M{"$set": bson.M{"last_login": time.Now().Unix()}}
-	return db.UpdateOne(bson.M{"_id": dhAccount}, update, db.AccountTableName())
+func updateLoginInfo(req internal.Req, accountData db_core.AccountData) (db_core.GameRsp, error) {
+	upData := bson.M{"last_login": time.Now().Unix()}
+	gameRsp := db_core.GameRsp{
+		FirstLogin: false,
+	}
+	_, ok := accountData.Games[req.GameCd]
+	if !ok {
+		accountData.Games[req.GameCd] = db_core.GameInfo{
+			Time: time.Now().Unix(),
+		}
+		upData["games"] = accountData.Games
+		gameRsp.FirstLogin = true
+	}
+	setData := bson.M{"$set": upData}
+	return gameRsp, db.UpdateOne(bson.M{"_id": accountData.ID}, setData, db.AccountTableName())
 }
 
 // BindThird 游客账号绑定第三方
