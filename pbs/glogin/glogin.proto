@@ -41,6 +41,8 @@ message StateQueryResponse{
     int32 left_game_time = 8;         // 剩余游戏时间，已成年请忽略
     int32 each_pay_amount = 9;        // 单次可充值额度，已成年请忽略
     int32 left_pay_amount = 10;       // 总剩充值额度，已成年请忽略
+    int32 login_code = 11;            // 是否可以登陆的提示code
+    string login_message = 12;        // 如果login_code不为0，相应的提示字段。
 }
 
 // extendData

@@ -14,6 +14,7 @@ message CheckResponse {
     string request_id = 1; // 每次请求唯一标识,用作问题校验时查询
     string err_code = 2;   // 错误码
     string err_msg = 3;    // 错误码说明
+    string check_msg = 4;  // 实名提示信息,如果认证成功，并且玩家是未成年，客户端需要显示此字段
 }
 
 // 实名信息查询
@@ -45,6 +46,8 @@ message StateQueryResponse{
     int32 left_game_time = 8;         // 剩余游戏时间，已成年请忽略
     int32 each_pay_amount = 9;        // 单次可充值额度，已成年请忽略
     int32 left_pay_amount = 10;       // 总剩充值额度，已成年请忽略
+    int32 login_code = 11;            // 是否可以登陆的提示code
+    string login_message = 12;        // 如果login_code不为0，相应的提示字段。
 }
 
 service AuthenticationServer {
