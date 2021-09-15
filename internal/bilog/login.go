@@ -45,17 +45,17 @@ type LoginEvent struct {
 	LoginType string `json:"login_type"`
 }
 
-func SmsLogin(req *glogin.SmsLoginReq) {
-	login(LoginTypeSMS, req.Game, req.Client)
+func SmsLogin(req *glogin.SmsLoginReq, dhAccount string) {
+	login(LoginTypeSMS, dhAccount, req.Game, req.Client)
 }
 
-func FastLogin(req *glogin.FastLoginReq) {
-	login(LoginTypeFast, req.Game, req.Client)
+func FastLogin(req *glogin.FastLoginReq, dhAccount string) {
+	login(LoginTypeFast, dhAccount, req.Game, req.Client)
 }
 
-func ThirdLogin(req *glogin.ThirdLoginReq) {
+func ThirdLogin(req *glogin.ThirdLoginReq, dhAccount string) {
 	loginType := GetLoginType(req.ThirdPlat)
-	login(loginType, req.Game, req.Client)
+	login(loginType, dhAccount, req.Game, req.Client)
 }
 
 func GetLoginType(thirdPlat string) string {
@@ -65,7 +65,7 @@ func GetLoginType(thirdPlat string) string {
 	return thirdPlat
 }
 
-func login(loginType string, reqGame *glogin.LoginGame, reqClient *glogin.LoginClient) {
+func login(loginType string, dhAccount string, reqGame *glogin.LoginGame, reqClient *glogin.LoginClient) {
 	value := EventValueLogin{
 		DeviceInfo: &DeviceInfo{
 			Adid:        reqGame.Adid,
@@ -87,7 +87,7 @@ func login(loginType string, reqGame *glogin.LoginGame, reqClient *glogin.LoginC
 		},
 		UserInfo: &UserInfo{
 			BundleId: reqGame.BundleId,
-			Account:  "",
+			Account:  dhAccount,
 		},
 		EventInfo: &LoginEvent{
 			loginType,

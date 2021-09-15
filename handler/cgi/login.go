@@ -114,7 +114,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			}
 			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
-			bilog.SmsLogin(request)
+			bilog.SmsLogin(request, string(response.DhAccount))
 			return response, nil
 		} else {
 			// 账号存在, 直接登录
@@ -143,7 +143,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			}
 			response.Errmsg = "success"
 			log.Infow("sms login success", "request.phone", request.Phone, "rsp", response)
-			bilog.SmsLogin(request)
+			bilog.SmsLogin(request, string(response.DhAccount))
 			return response, nil
 		}
 	}
@@ -227,7 +227,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Nick = authRsp.Nick
 			response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
 			log.Infow("third bundle account login success", "response", response, "uid", uid)
-			bilog.ThirdLogin(request)
+			bilog.ThirdLogin(request, string(response.DhAccount))
 			return response, nil
 		}
 	}
@@ -266,7 +266,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Nick = util.HideStar(unionId)
 		}
 		response.Errmsg = "success"
-		bilog.ThirdLogin(request)
+		bilog.ThirdLogin(request, string(response.DhAccount))
 		return response, nil
 	} else {
 		// 账号存在, 直接登录
@@ -300,7 +300,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		}
 		response.Errmsg = "success"
 		log.Infow("third login success 2", "response", response, "unionId", unionId)
-		bilog.ThirdLogin(request)
+		bilog.ThirdLogin(request, string(response.DhAccount))
 		return response, nil
 	}
 	return response, nil
