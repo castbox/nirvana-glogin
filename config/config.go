@@ -11,7 +11,7 @@ import (
 )
 
 type MongoCfg struct {
-	Url    string `json:"url"`
+	Uri    string `json:"uri"`
 	DBName string `json:"dbname"`
 }
 
@@ -103,7 +103,7 @@ func MongoUrl() string {
 	mongoInfo := Mongo()
 	mongoUrl := "mongodb://WpxU:WpxU63@10.0.240.19:20294,10.0.240.19:24771/admin?replicaSet=dev-ulogin-db&maxPoolSize=10"
 	if VData, ok := mongoInfo["login"]; ok {
-		mongoUrl = VData.Url
+		mongoUrl = VData.Uri
 	}
 	return mongoUrl
 }

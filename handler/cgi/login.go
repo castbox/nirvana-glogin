@@ -50,8 +50,6 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 	defer func() {
 		if err := recover(); err != nil {
 			log.Errorw("got panic", "err", err)
-			//response.Code = constant.ErrUnkown
-			//response.Errmsg = constant.ErrMsgUnkwon
 		}
 		log.Infow("SMS login rsp", "request", request, "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
