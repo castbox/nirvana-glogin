@@ -143,8 +143,9 @@ func login(filter interface{}, req internal.Req) (internal.Rsp, error) {
 	internalRsp.HawkRsp = hawkRsp
 	internalRsp.AntiRsp = antiRsp
 	// 更新信息
-	gameRsp, _ := updateLoginInfo(req, accountData)
+	gameRsp, upErr := updateLoginInfo(req, accountData)
 	internalRsp.GameRsp = gameRsp
+	log.Infow("login internalRsp ", "rsp", internalRsp, "upErr", upErr)
 	return internalRsp, nil
 }
 
@@ -153,14 +154,24 @@ func updateLoginInfo(req internal.Req, accountData db_core.AccountData) (db_core
 	gameRsp := db_core.GameRsp{
 		FirstLogin: false,
 	}
-	_, ok := accountData.Games[req.GameCd]
-	if !ok {
+	if accountData.Games == nil {
+		accountData.Games = make(map[string]db_core.GameInfo)
 		accountData.Games[req.GameCd] = db_core.GameInfo{
 			Time: time.Now().Unix(),
 		}
 		upData["games"] = accountData.Games
 		gameRsp.FirstLogin = true
+	} else {
+		_, ok := accountData.Games[req.GameCd]
+		if !ok {
+			accountData.Games[req.GameCd] = db_core.GameInfo{
+				Time: time.Now().Unix(),
+			}
+			upData["games"] = accountData.Games
+			gameRsp.FirstLogin = true
+		}
 	}
+
 	setData := bson.M{"$set": upData}
 	return gameRsp, db.UpdateOne(bson.M{"_id": accountData.ID}, setData, db.AccountTableName())
 }

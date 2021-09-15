@@ -71,6 +71,9 @@ func AutiHandler(ctx *gin.Context) {
 
 	before := time.Now().UnixNano()
 	defer func() {
+		if err := recover(); err != nil {
+			log.Errorw("got panic", "err", err)
+		}
 		log.Infow("new query AutiHandler rsp1", "request", checkReq, "rsp", checkRsp, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 

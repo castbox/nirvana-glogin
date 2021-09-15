@@ -21,9 +21,16 @@ type GameCfg struct {
 	AppsFlyerRegistrationId int    `json:"appsflyer_registrationId"`
 }
 
+type PushLogCfg struct {
+	Url       string `json:"url"`
+	Salt      string `json:"salt"`
+	TopicCode int64  `json:"topic_code"`
+}
+
 type All struct {
 	Ports             map[string]int         `json:"port"`
 	UTLog             string                 `json:"utlog"`
+	PushLog           PushLogCfg             `json:"push_log"`
 	SmsUrl            string                 `json:"sms_url"`
 	SmsSecret         string                 `json:"sms_secret"`
 	SmsContent        string                 `json:"sms_content"`

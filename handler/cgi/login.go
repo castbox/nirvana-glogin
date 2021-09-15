@@ -9,6 +9,7 @@ import (
 	"glogin/constant"
 	"glogin/internal"
 	"glogin/internal/account"
+	"glogin/internal/bilog"
 	"glogin/internal/plat"
 	"glogin/internal/smfpcrypto"
 	"glogin/internal/sms"
@@ -47,9 +48,15 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 
 	before := time.Now().UnixNano()
 	defer func() {
+		if err := recover(); err != nil {
+			log.Errorw("got panic", "err", err)
+			//response.Code = constant.ErrUnkown
+			//response.Errmsg = constant.ErrMsgUnkwon
+		}
 		log.Infow("SMS login rsp", "request", request, "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 
+	request.Client.Ip = ip
 	// sms step verify 获得Phone验证码
 	if request.Step == constant.Verify {
 		log.Infow("SMS verify", "request", request)
@@ -107,6 +114,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			}
 			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
+			bilog.SmsLogin(request)
 			return response, nil
 		} else {
 			// 账号存在, 直接登录
@@ -135,6 +143,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			}
 			response.Errmsg = "success"
 			log.Infow("sms login success", "request.phone", request.Phone, "rsp", response)
+			bilog.SmsLogin(request)
 			return response, nil
 		}
 	}
@@ -158,6 +167,9 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 
 	before := time.Now().UnixNano()
 	defer func() {
+		if err := recover(); err != nil {
+			log.Errorw("got panic", "err", err)
+		}
 		log.Infow("Third login rsp", "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 
@@ -167,7 +179,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		response.Errmsg = fmt.Sprintf("third login req param error GameCd: %s Channel: %s Client.Dhid: %s", request.Game.GameCd, request.Game.Channel, request.Client.Dhid)
 		return response, nil
 	}
-
+	request.Client.Ip = ip
 	authRsp, dbField, errAuth := ThirdAuth(request)
 	// 平台错误
 	if errAuth == PlatIsWrong {
@@ -215,6 +227,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Nick = authRsp.Nick
 			response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
 			log.Infow("third bundle account login success", "response", response, "uid", uid)
+			bilog.ThirdLogin(request)
 			return response, nil
 		}
 	}
@@ -253,6 +266,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Nick = util.HideStar(unionId)
 		}
 		response.Errmsg = "success"
+		bilog.ThirdLogin(request)
 		return response, nil
 	} else {
 		// 账号存在, 直接登录
@@ -286,6 +300,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		}
 		response.Errmsg = "success"
 		log.Infow("third login success 2", "response", response, "unionId", unionId)
+		bilog.ThirdLogin(request)
 		return response, nil
 	}
 	return response, nil
@@ -305,10 +320,14 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 		},
 	}
 	ip := l.Ctx.ClientIP()
+	req.Client.Ip = ip
 	log.Infow("Visitor login", "request", req, "ip", ip)
 
 	before := time.Now().UnixNano()
 	defer func() {
+		if err := recover(); err != nil {
+			log.Errorw("got panic", "err", err)
+		}
 		log.Infow("Visitor login rsp", "response", rsp, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 
@@ -411,6 +430,9 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 
 	before := time.Now().UnixNano()
 	defer func() {
+		if err := recover(); err != nil {
+			log.Errorw("got panic", "err", err)
+		}
 		log.Infow("fast login rsp", "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 
@@ -442,6 +464,7 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 		}
 	}
 	ip := l.Ctx.ClientIP()
+	request.Client.Ip = ip
 	// 数美ID解析
 	smId := smfpcrypto.ParseSMID(request.Client.Dhid)
 	loginRsp, errLogin := account.LoginFast(request, dhAccount, ip)
@@ -476,6 +499,7 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 	}
 	response.ExtendData.GameFirstLogin = value.GameRsp.FirstLogin
 	log.Infow("fast login success", "response", response)
+	//bilog.FastLogin(request)
 	return response, nil
 }
 
