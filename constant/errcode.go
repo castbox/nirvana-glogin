@@ -27,7 +27,7 @@ const (
 )
 
 const (
-	ErrMsgOk          = "ok"
+	ErrMsgOk          = "success"
 	ErrCodeStrOk      = "0"
 	ErrCodeStrAutiRpc = "auti service rpc error"
 	ErrMsgUnkwon      = "unkown"

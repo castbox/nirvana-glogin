@@ -45,7 +45,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			Authentication: &glogin.StateQueryResponse{},
 		},
 	}
-
+	request.Client.Ip = ip
 	before := time.Now().UnixNano()
 	defer func() {
 		if err := recover(); err != nil {
@@ -54,7 +54,6 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 		log.Infow("SMS login rsp", "request", request, "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 
-	request.Client.Ip = ip
 	// sms step verify 获得Phone验证码
 	if request.Step == constant.Verify {
 		log.Infow("SMS verify", "request", request)
@@ -68,23 +67,23 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 		// sms step login  手机验证码登陆
 	} else if request.Step == constant.Login {
 		log.Infow("SMS login", "request", request)
+		bCheck, checkCode, checkMsg := smsParamCheck(request)
+		if !bCheck {
+			response.Code = checkCode
+			response.Errmsg = checkMsg
+			return response, nil
+		}
+		// 短信认证
 		_, errCk := sms.CheckPhone(request.Phone, request.Verifycode)
 		if errCk != nil {
 			response.Code = constant.ErrCodeSMSCheckVerifyFail
 			response.Errmsg = fmt.Sprintf("check verify faild phone %s ,verify %s", request.Phone, request.Verifycode)
 			return response, nil
 		}
-
-		// 必传参数验证
-		if request.Game.GameCd == "" || request.Game.Channel == "" || request.Client.Dhid == "" {
-			response.Code = constant.ErrCodeParamError
-			response.Errmsg = fmt.Sprintf("sms login req param error GameCd: %s Channel: %s Client.Dhid: %s", request.Game.GameCd, request.Game.Channel, request.Client.Dhid)
-			return response, nil
-		}
-
 		// 数美ID解析
 		smID := smfpcrypto.ParseSMID(request.Client.Dhid)
 		request.GetClient().Dhid = smID
+		response.SmId = smID
 		if account.CheckNotExist(bson.M{"phone": request.Phone}) {
 			// 账号不存在,创建
 			createRsp, errCreate := account.CreatePhone(request, ip)
@@ -94,23 +93,8 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 				return response, errCreate
 			}
 			// 返回InternalRsp
-			rsp, ok := createRsp.(internal.Rsp)
-			if !ok {
-				response.Code = constant.ErrCodeCreateInternal
-				response.Errmsg = fmt.Sprintf("sms login2 %s  error: %v", request.Phone, rsp)
-				return response, nil
-			}
-			response.Code = constant.ErrCodeOk
-			response.DhAccount = rsp.AccountData.ID
-			response.SmId = smID
-			response.Errmsg = "success"
+			smsResponse(response, createRsp)
 			response.ExtendData.Nick = util.HideStar(request.Phone)
-			response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
-			r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
-			if ok {
-				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
-			}
-			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
 			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
 			bilog.SmsLogin(request, string(response.DhAccount))
 			return response, nil
@@ -123,23 +107,8 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 				return response, nil
 			}
 			// 返回InternalRsp
-			rsp, ok := loginRsp.(internal.Rsp)
-			if !ok {
-				response.Code = constant.ErrCodeLoginInternal
-				response.Errmsg = fmt.Sprintf("sms login4 %s  error: %s", request.Phone, errLogin)
-				return response, nil
-			}
-			response.Code = constant.ErrCodeOk
-			response.DhAccount = rsp.AccountData.ID
-			response.SmId = smID
-			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
-			response.ExtendData.Nick = util.HideStar(rsp.AccountData.Phone)
-			response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
-			r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
-			if ok {
-				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
-			}
-			response.Errmsg = "success"
+			smsResponse(response, loginRsp)
+			response.ExtendData.Nick = util.HideStar(request.Phone)
 			log.Infow("sms login success", "request.phone", request.Phone, "rsp", response)
 			bilog.SmsLogin(request, string(response.DhAccount))
 			return response, nil
@@ -162,7 +131,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			Authentication: &glogin.StateQueryResponse{},
 		},
 	}
-
+	request.Client.Ip = ip
 	before := time.Now().UnixNano()
 	defer func() {
 		if err := recover(); err != nil {
@@ -172,14 +141,15 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 	}()
 
 	// 必传参数验证
-	if request.Game.GameCd == "" || request.Game.Channel == "" || request.Client.Dhid == "" {
-		response.Code = constant.ErrCodeParamError
-		response.Errmsg = fmt.Sprintf("third login req param error GameCd: %s Channel: %s Client.Dhid: %s", request.Game.GameCd, request.Game.Channel, request.Client.Dhid)
+	bCheck, checkCode, checkMsg := thirdParamCheck(request)
+	if !bCheck {
+		response.Code = checkCode
+		response.Errmsg = checkMsg
 		return response, nil
 	}
-	request.Client.Ip = ip
+
+	// 第三方认证
 	authRsp, dbField, errAuth := ThirdAuth(request)
-	// 平台错误
 	if errAuth == PlatIsWrong {
 		response.Code = constant.ErrCodePlatWrong
 		response.Errmsg = fmt.Sprintf("third %s plat is wrong", request.ThirdPlat)
@@ -197,6 +167,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 	// 数美ID解析
 	smID := smfpcrypto.ParseSMID(request.Client.Dhid)
 	request.GetClient().Dhid = smID
+	response.SmId = smID
 	// 为兼容海外版本老数据,1004项目若获得bundle账号，直接登录
 	if config.Field("region_mark").Int() == constant.RegionOverseas &&
 		request.Game.GameCd == constant.AODGameCd {
@@ -207,25 +178,11 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 				response.Errmsg = fmt.Sprintf("thrid plat %s bundle account login error: %s", request.ThirdPlat, errAuth)
 				return response, nil
 			}
-			rsp, ok := loginRsp.(internal.Rsp)
-			if !ok {
-				response.Code = constant.ErrCodeParsePbInternal
-				response.Errmsg = fmt.Sprintf("thrid plat %s bundle account login error: %s", request.ThirdPlat, errLogin)
-				return response, nil
-			}
-			response.Code = constant.ErrCodeOk
-			response.DhAccount = rsp.AccountData.ID
-			response.Errmsg = "success"
 			response.SmId = smID
-			response.DhToken = util.GenDHToken(rsp.AccountData.ID)
-			r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
-			if ok {
-				response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
-			}
 			response.ExtendData.Nick = authRsp.Nick
-			response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
+			thirdResponse(response, loginRsp)
 			log.Infow("third bundle account login success", "response", response, "uid", uid)
-			bilog.ThirdLogin(request, string(response.DhAccount))
+			bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
 			return response, nil
 		}
 	}
@@ -239,32 +196,13 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.Errmsg = fmt.Sprintf("thrid plat 1 %s login error: %s", request.ThirdPlat, errCreate)
 			return response, errCreate
 		}
-
-		rsp, ok := createRsp.(internal.Rsp)
-		if !ok {
-			response.Code = constant.ErrCodeCreateInternal
-			response.Errmsg = fmt.Sprintf("thrid plat 2 %s login error: %s", request.ThirdPlat, rsp)
-			return response, nil
-		}
-
-		log.Infow("third login success 1", " request.ThirdPlat", request.ThirdPlat, "unionId", unionId)
-		response.Code = constant.ErrCodeOk
-		response.DhAccount = rsp.AccountData.ID
-		response.SmId = smID
-		response.DhToken = util.GenDHToken(rsp.AccountData.ID)
-		// 防沉迷返回
-		r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
-		if ok {
-			response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
-		}
-		// ExtendData
+		thirdResponse(response, createRsp)
 		response.ExtendData.Nick = authRsp.Nick
-		response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
 		if request.ThirdPlat == "yedun" {
 			response.ExtendData.Nick = util.HideStar(unionId)
 		}
-		response.Errmsg = "success"
-		bilog.ThirdLogin(request, string(response.DhAccount))
+		log.Infow("third login success 1", " request.ThirdPlat", request.ThirdPlat, "unionId", unionId)
+		bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
 		return response, nil
 	} else {
 		// 账号存在, 直接登录
@@ -275,30 +213,13 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			return response, nil
 		}
 		// 返回
-		rsp, ok := loginRsp.(internal.Rsp)
-		if !ok {
-			response.Code = constant.ErrCodeParsePbInternal
-			response.Errmsg = fmt.Sprintf("thrid plat 4 %s login error: %s", request.ThirdPlat, errLogin)
-			return response, nil
-		}
-		//	log.Infow("thrid login success", " request.ThirdPlat", request.ThirdPlat, "unionId", unionId)
-		response.Code = constant.ErrCodeOk
-		response.DhAccount = rsp.AccountData.ID
-		response.SmId = smID
-		response.DhToken = util.GenDHToken(rsp.AccountData.ID)
-		// 防沉迷返回
-		r2, ok := rsp.AntiRsp.(*anti_authentication.StateQueryResponse)
-		if ok {
-			response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
-		}
+		thirdResponse(response, loginRsp)
 		response.ExtendData.Nick = authRsp.Nick
-		response.ExtendData.GameFirstLogin = rsp.GameRsp.FirstLogin
 		if request.ThirdPlat == "yedun" {
 			response.ExtendData.Nick = util.HideStar(unionId)
 		}
-		response.Errmsg = "success"
 		log.Infow("third login success 2", "response", response, "unionId", unionId)
-		bilog.ThirdLogin(request, string(response.DhAccount))
+		bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
 		return response, nil
 	}
 	return response, nil
@@ -320,7 +241,6 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 	ip := l.Ctx.ClientIP()
 	req.Client.Ip = ip
 	log.Infow("Visitor login", "request", req, "ip", ip)
-
 	before := time.Now().UnixNano()
 	defer func() {
 		if err := recover(); err != nil {
@@ -330,9 +250,10 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 	}()
 
 	// 必传参数验证
-	if req.Dhid == "" || req.Game.GameCd == "" || req.Game.Channel == "" {
-		rsp.Code = constant.ErrCodeParamError
-		rsp.Errmsg = fmt.Sprintf("visitor is agrs error dhid: %s GameCd: %s Channel: %s", req.Dhid, req.Game.GameCd, req.Game.Channel)
+	bCheck, checkCode, checkMsg := visitorParamCheck(req)
+	if !bCheck {
+		rsp.Code = checkCode
+		rsp.Errmsg = checkMsg
 		return rsp, nil
 	}
 	// 数美ID解析
@@ -354,26 +275,8 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 			rsp.Errmsg = fmt.Sprintf("visitor  %s fast login create account error: %s", visitorId, errCreate)
 			return rsp, errCreate
 		}
-
-		dcRsp, ok := createRsp.(internal.Rsp)
-		if !ok {
-			rsp.Code = constant.ErrCodeCreateInternal
-			rsp.Errmsg = fmt.Sprintf("thrid plat %s login error: %s", "visitor", rsp)
-			return rsp, nil
-		}
-		rsp.Code = constant.ErrCodeOk
-		rsp.DhToken = util.GenDHToken(dcRsp.AccountData.ID)
 		rsp.SmId = smId
-		rsp.DhAccount = dcRsp.AccountData.ID
-		rsp.Visitor = visitorId
-		// 防沉迷返回
-		r2, ok := dcRsp.AntiRsp.(anti_authentication.StateQueryResponse)
-		if ok {
-			rsp.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
-		}
-		rsp.ExtendData.Nick = ""
-		rsp.ExtendData.GameFirstLogin = dcRsp.GameRsp.FirstLogin
-		rsp.Errmsg = "success"
+		visitorResponse(rsp, createRsp)
 		log.Infow("visitor fast login success ", "rsp", rsp)
 		return rsp, nil
 	} else {
@@ -386,26 +289,9 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 			return rsp, nil
 		}
 		// 返回
-		value, ok := loginRsp.(internal.Rsp)
-		if !ok {
-			log.Infow("visitor fast login  2 error", "visitor", visitorId)
-			rsp.Code = constant.ErrCodeParsePbInternal
-			rsp.Errmsg = fmt.Sprintf("visitor %s fast login error: %s", req.Dhid, errLogin)
-			return rsp, nil
-		}
-		log.Infow("visitor login success", "visitor", visitorId)
-		rsp.Code = constant.ErrCodeOk
-		rsp.DhAccount = value.AccountData.ID
 		rsp.SmId = smId
-		rsp.DhToken = util.GenDHToken(value.AccountData.ID)
-		rsp.Visitor = visitorId
-		rsp.Errmsg = "success"
-		rsp.ExtendData.GameFirstLogin = value.GameRsp.FirstLogin
-		// 防沉迷返回
-		r2, ok := value.AntiRsp.(anti_authentication.StateQueryResponse)
-		if ok {
-			rsp.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
-		}
+		visitorResponse(rsp, loginRsp)
+		log.Infow("visitor login success", "visitor", visitorId)
 		return rsp, nil
 	}
 	return rsp, nil
@@ -426,6 +312,8 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 		},
 	}
 
+	ip := l.Ctx.ClientIP()
+	request.Client.Ip = ip
 	before := time.Now().UnixNano()
 	defer func() {
 		if err := recover(); err != nil {
@@ -435,18 +323,12 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 	}()
 
 	// 必传参数验证
-	if request.Game.GameCd == "" || request.Game.Channel == "" {
-		response.Code = constant.ErrCodeParamError
-		response.Errmsg = fmt.Sprintf("fast login req param error GameCd: %s Channel: %s", request.Game.GameCd, request.Game.Channel)
+	bCheck, checkCode, checkMsg := fastParamCheck(request)
+	if !bCheck {
+		response.Code = checkCode
+		response.Errmsg = checkMsg
 		return response, nil
 	}
-
-	if request.DhToken == "" {
-		response.Code = constant.ErrCodeFastTokenError
-		response.Errmsg = fmt.Sprintf("fast is token null game: %s client: %s", request.Game, request.Client)
-		return response, nil
-	}
-
 	// 校验token
 	dhAccount, errToken := util.ValidDHToken(request.DhToken)
 	if errToken != nil {
@@ -461,10 +343,12 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 			return response, nil
 		}
 	}
-	ip := l.Ctx.ClientIP()
-	request.Client.Ip = ip
+
 	// 数美ID解析
 	smId := smfpcrypto.ParseSMID(request.Client.Dhid)
+	response.SmId = smId
+
+	// 登录验证
 	loginRsp, errLogin := account.LoginFast(request, dhAccount, ip)
 	if errLogin != nil {
 		response.Code = constant.ErrCodeLoginInternal
@@ -473,29 +357,8 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 		return response, nil
 	}
 
-	// 返回
-	value, ok := loginRsp.(internal.Rsp)
-	if !ok {
-		response.Code = constant.ErrCodeParsePbInternal
-		response.Errmsg = fmt.Sprintf("fast login2 %s auth error: %s", request.DhToken, errLogin)
-		return response, nil
-	}
-	response.Code = constant.ErrCodeOk
-	response.SmId = smId
-	response.DhAccount = value.AccountData.ID
-	response.DhToken = util.GenDHToken(value.AccountData.ID)
-	response.Errmsg = "success"
-	// 防沉迷返回
-	r2, ok := value.AntiRsp.(*anti_authentication.StateQueryResponse)
-	if ok {
-		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
-	}
-
-	plat, errG := account.GetPlat(value.AccountData)
-	if errG == nil {
-		response.ThirdPlat = plat
-	}
-	response.ExtendData.GameFirstLogin = value.GameRsp.FirstLogin
+	// 返回赋值
+	fastResponse(response, loginRsp)
 	log.Infow("fast login success", "response", response)
 	//bilog.FastLogin(request)
 	return response, nil
@@ -524,4 +387,102 @@ func CreateVisitorID(srcVisitor string, dhId string) string {
 	// 拼接时间戳
 	timeParam := srcVisitor[lastPos:]
 	return dhId + timeParam
+}
+
+func fastParamCheck(request *glogin.FastLoginReq) (bRsp bool, code int32, errMsg string) {
+	if request.Game.GameCd == "" || request.Game.Channel == "" {
+		code = constant.ErrCodeParamError
+		errMsg = fmt.Sprintf("fast login req param error GameCd: %s Channel: %s", request.Game.GameCd, request.Game.Channel)
+		return false, code, errMsg
+	}
+
+	if request.DhToken == "" {
+		code = constant.ErrCodeFastTokenError
+		errMsg = fmt.Sprintf("fast is token null game: %s client: %s", request.Game, request.Client)
+		return false, code, errMsg
+	}
+	return true, code, errMsg
+}
+
+func fastResponse(response *glogin.FastLoginRsp, loginRsp internal.Rsp) {
+	response.Code = constant.ErrCodeOk
+	response.Errmsg = "success"
+	response.DhAccount = loginRsp.AccountData.ID
+	response.DhToken = util.GenDHToken(loginRsp.AccountData.ID)
+	// 防沉迷返回
+	r2, ok := loginRsp.AntiRsp.(*anti_authentication.StateQueryResponse)
+	if ok {
+		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
+	}
+	plat, errG := account.GetPlat(loginRsp.AccountData)
+	if errG == nil {
+		response.ThirdPlat = plat
+	}
+	response.ExtendData.GameFirstLogin = loginRsp.GameRsp.FirstLogin
+}
+
+func visitorParamCheck(request *glogin.VisitorLoginReq) (bRsp bool, code int32, errMsg string) {
+	if request.Dhid == "" || request.Game.GameCd == "" || request.Game.Channel == "" {
+		code = constant.ErrCodeParamError
+		errMsg = fmt.Sprintf("visitor is agrs error dhid: %s GameCd: %s Channel: %s", request.Dhid, request.Game.GameCd, request.Game.Channel)
+		return false, code, errMsg
+	}
+	return true, code, errMsg
+}
+
+func visitorResponse(rsp *glogin.VisitorLoginRsp, dcRsp internal.Rsp) {
+	rsp.Code = constant.ErrCodeOk
+	rsp.DhToken = util.GenDHToken(dcRsp.AccountData.ID)
+	rsp.DhAccount = dcRsp.AccountData.ID
+	rsp.Visitor = dcRsp.AccountData.Visitor
+	// 防沉迷返回
+	r2, ok := dcRsp.AntiRsp.(anti_authentication.StateQueryResponse)
+	if ok {
+		rsp.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
+	}
+	rsp.ExtendData.Nick = ""
+	rsp.ExtendData.GameFirstLogin = dcRsp.GameRsp.FirstLogin
+	rsp.Errmsg = "success"
+}
+
+func thirdParamCheck(request *glogin.ThirdLoginReq) (bRsp bool, code int32, errMsg string) {
+	if request.Game.GameCd == "" || request.Game.Channel == "" || request.Client.Dhid == "" {
+		code = constant.ErrCodeParamError
+		errMsg = fmt.Sprintf("third login req param error GameCd: %s Channel: %s Client.Dhid: %s", request.Game.GameCd, request.Game.Channel, request.Client.Dhid)
+		return false, code, errMsg
+	}
+	return true, code, errMsg
+}
+
+func thirdResponse(response *glogin.ThridLoginRsp, dcRsp internal.Rsp) {
+	response.Code = constant.ErrCodeOk
+	response.DhAccount = dcRsp.AccountData.ID
+	response.Errmsg = "success"
+	response.DhToken = util.GenDHToken(dcRsp.AccountData.ID)
+	r2, ok := dcRsp.AntiRsp.(*anti_authentication.StateQueryResponse)
+	if ok {
+		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
+	}
+	response.ExtendData.GameFirstLogin = dcRsp.GameRsp.FirstLogin
+}
+
+func smsParamCheck(request *glogin.SmsLoginReq) (bRsp bool, code int32, errMsg string) {
+	if request.Phone == "" || request.Game.GameCd == "" || request.Game.Channel == "" || request.Client.Dhid == "" {
+		code = constant.ErrCodeParamError
+		errMsg = fmt.Sprintf("sms login req param error GameCd: %s Channel: %s Client.Dhid: %s", request.Game.GameCd, request.Game.Channel, request.Client.Dhid)
+		return false, code, errMsg
+	}
+	return true, code, errMsg
+}
+
+func smsResponse(response *glogin.SmsLoginRsp, dcRsp internal.Rsp) {
+	response.Code = constant.ErrCodeOk
+	response.DhAccount = dcRsp.AccountData.ID
+	response.Errmsg = "success"
+	response.DhToken = util.GenDHToken(dcRsp.AccountData.ID)
+	r2, ok := dcRsp.AntiRsp.(*anti_authentication.StateQueryResponse)
+	if ok {
+		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
+	}
+	response.ExtendData.GameFirstLogin = dcRsp.GameRsp.FirstLogin
 }
