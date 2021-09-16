@@ -96,7 +96,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			smsResponse(response, createRsp)
 			response.ExtendData.Nick = util.HideStar(request.Phone)
 			log.Infow("sms login success", " request.phone", request.Phone, "rsp", response)
-			bilog.SmsLogin(request, string(response.DhAccount))
+			bilog.SmsLogin(request, util.Int642String(int64(response.DhAccount)))
 			return response, nil
 		} else {
 			// 账号存在, 直接登录
@@ -110,7 +110,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			smsResponse(response, loginRsp)
 			response.ExtendData.Nick = util.HideStar(request.Phone)
 			log.Infow("sms login success", "request.phone", request.Phone, "rsp", response)
-			bilog.SmsLogin(request, string(response.DhAccount))
+			bilog.SmsLogin(request, util.Int642String(int64(response.DhAccount)))
 			return response, nil
 		}
 	}
