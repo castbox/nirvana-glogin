@@ -23,4 +23,5 @@ const (
 	RegionChina      = 0
 	RegionOverseas   = 1
 	AODGameCd        = "1004"
+	TimeOut          = 5
 )

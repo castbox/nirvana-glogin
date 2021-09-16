@@ -11,6 +11,7 @@ import (
 	"glogin/pbs/hawkeye_login"
 	"glogin/pbs/hawkeye_register"
 	"strings"
+	"time"
 )
 
 // AOD特殊处理（AOD台湾审核和内网unity dev等需绕开鹰眼检查）
@@ -51,6 +52,7 @@ func CheckLogin(req internal.Req) (interface{}, error) {
 	log.Infow("HawkeyeLogin Req", "loginReq", loginIn)
 	rsp, err := hawkeye_login.HawkeyeLogin(loginIn, &global.CallOption{
 		Cluster: gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.HawkEyeService),
+		Timeout: time.Second * constant.TimeOut,
 	})
 	log.Infow("HawkeyeLogin Rsp", "loginRsp", rsp, "err", err)
 	if err != nil {
@@ -91,6 +93,7 @@ func CheckRegister(req internal.Req) (interface{}, error) {
 	log.Infow("HawkeyeRegister Req", "Req", registerIn)
 	rsp, err := hawkeye_register.HawkeyeRegister(registerIn, &global.CallOption{
 		Cluster: gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.HawkEyeService),
+		Timeout: time.Second * constant.TimeOut,
 	})
 	log.Infow("HawkeyeRegister Rsp", "Rsp", rsp)
 	if err != nil {
