@@ -24,4 +24,5 @@ const (
 	RegionOverseas   = 1
 	AODGameCd        = "1004"
 	TimeOut          = 5
+	DefaultBundleId  = "com.dh.bpc.ios"
 )
