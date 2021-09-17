@@ -45,7 +45,6 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			Authentication: &glogin.StateQueryResponse{},
 		},
 	}
-	request.Client.Ip = ip
 	before := time.Now().UnixNano()
 	defer func() {
 		if err := recover(); err != nil {
@@ -73,6 +72,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 			response.Errmsg = checkMsg
 			return response, nil
 		}
+		request.Client.Ip = ip
 		// 短信认证
 		_, errCk := sms.CheckPhone(request.Phone, request.Verifycode)
 		if errCk != nil {
@@ -131,7 +131,6 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			Authentication: &glogin.StateQueryResponse{},
 		},
 	}
-	request.Client.Ip = ip
 	before := time.Now().UnixNano()
 	defer func() {
 		if err := recover(); err != nil {
@@ -148,6 +147,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		return response, nil
 	}
 
+	request.Client.Ip = ip
 	// 第三方认证
 	authRsp, dbField, errAuth := ThirdAuth(request)
 	if errAuth == PlatIsWrong {
@@ -238,9 +238,7 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 			Authentication: &glogin.StateQueryResponse{},
 		},
 	}
-	ip := l.Ctx.ClientIP()
-	req.Client.Ip = ip
-	log.Infow("Visitor login", "request", req, "ip", ip)
+	log.Infow("Visitor login", "request", req)
 	before := time.Now().UnixNano()
 	defer func() {
 		if err := recover(); err != nil {
@@ -256,6 +254,8 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 		rsp.Errmsg = checkMsg
 		return rsp, nil
 	}
+	ip := l.Ctx.ClientIP()
+	req.Client.Ip = ip
 	// 数美ID解析
 	smId := smfpcrypto.ParseSMID(req.Client.Dhid)
 	// 创建唯一设备账号，如果有SMID就用SMID创建，如果没有就随机
@@ -312,8 +312,6 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 		},
 	}
 
-	ip := l.Ctx.ClientIP()
-	request.Client.Ip = ip
 	before := time.Now().UnixNano()
 	defer func() {
 		if err := recover(); err != nil {
@@ -329,6 +327,8 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 		response.Errmsg = checkMsg
 		return response, nil
 	}
+	ip := l.Ctx.ClientIP()
+	request.Client.Ip = ip
 	// 校验token
 	dhAccount, errToken := util.ValidDHToken(request.DhToken)
 	if errToken != nil {
@@ -467,7 +467,7 @@ func thirdResponse(response *glogin.ThridLoginRsp, dcRsp internal.Rsp) {
 }
 
 func smsParamCheck(request *glogin.SmsLoginReq) (bRsp bool, code int32, errMsg string) {
-	if request.Phone == "" || request.Game.GameCd == "" || request.Game.Channel == "" || request.Client.Dhid == "" {
+	if request.Client == nil || request.Phone == "" || request.Game.GameCd == "" || request.Game.Channel == "" || request.Client.Dhid == "" {
 		code = constant.ErrCodeParamError
 		errMsg = fmt.Sprintf("sms login req param error GameCd: %s Channel: %s Client.Dhid: %s", request.Game.GameCd, request.Game.Channel, request.Client.Dhid)
 		return false, code, errMsg
