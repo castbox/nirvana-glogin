@@ -92,7 +92,7 @@ func AutiHandler(ctx *gin.Context) {
 		ctx.JSON(200, checkRsp)
 		return
 	}
-	log.Infow("anti.Check rsp", "rsp", checkRsp)
+	log.Infow("anti.Check rsp", "rsp", antiCheckRsp)
 	//  查询实名信息
 	reqState := internal.Req{
 		Account: checkReq.Account,
