@@ -5,6 +5,7 @@ import (
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"git.dhgames.cn/svr_comm/gcore/gmongo"
 	"glogin/config"
+	"glogin/constant"
 	"glogin/db/db_core"
 	"glogin/util"
 	"go.mongodb.org/mongo-driver/bson"
@@ -128,5 +129,23 @@ func Lookup(filter bson.M, option bson.M, ptrToSlice interface{}) (count int32, 
 		return
 	}
 	count = int32(count2)
+	return
+}
+
+// 指定DB、TBName查询
+func LoadSpecify(filter interface{}, dbName string, tableName string) (result db_core.AccountData, err error) {
+	if dbName == "" {
+		dbName = config.MongoDb()
+	}
+	if tableName == "" {
+		tableName = constant.LoginAccountOldGp
+	}
+	doc, errFind := gmongo.FindOne(config.MongoUrl(), dbName, tableName, filter)
+	if errFind != nil {
+		log.Warnw("LoadSpecify Load", "err", err, "dbName", dbName, "tableName", tableName)
+		err = errFind
+		return
+	}
+	err = doc.Decode(&result)
 	return
 }

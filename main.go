@@ -57,6 +57,7 @@ func startHttp() {
 	pprof.Register(router)
 	router.POST("/:service/:action", cgi.ServiceHandler)
 	router.POST("/anti/:action", cgi.AutiHandler)
+	router.POST("/ids/:action", cgi.IdsHandler)
 	router.POST("/cfg", cgi.CfgHandler)
 	router.POST("/token", cgi.TokenHandler)
 	router.GET("/metrics", prometheusHandler())

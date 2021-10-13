@@ -209,3 +209,7 @@ func GetPlat(in interface{}) (platString string, err error) {
 	}
 	return
 }
+
+func LoadSpecify(filter interface{}, dbName string, tableName string) (db_core.AccountData, error) {
+	return db.LoadSpecify(filter, dbName, tableName)
+}

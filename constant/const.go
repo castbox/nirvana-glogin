@@ -25,4 +25,8 @@ const (
 	AODGameCd        = "1004"
 	TimeOut          = 5
 	DefaultBundleId  = "com.dh.bpc.ios"
+
+	IdsGetOldAccount  = "oldacountid"
+	IdsGetFaceBookID  = "oldfacebookid"
+	LoginAccountOldGp = "ulogin_account_oldgp"
 )
