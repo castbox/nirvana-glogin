@@ -21,18 +21,13 @@ const (
 	MaxTryTime   = 10
 )
 
-var TableName = ""
-
 // 支持配置优先
 func AccountTableName() string {
-	if TableName != "" {
-		return TableName
+	tableName := config.Field("account_table_name").String()
+	if tableName == "" {
+		tableName = AccountTable
 	}
-	TableName = config.Field("account_table_name").String()
-	if TableName == "" {
-		TableName = AccountTable
-	}
-	return TableName
+	return tableName
 }
 
 // 创建索引

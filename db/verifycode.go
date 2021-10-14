@@ -19,18 +19,13 @@ const (
 	SMSCountLimit   = 3
 )
 
-var VerifyTableName = ""
-
 // 支持配置优先
 func VerifyCodeTableName() string {
-	if VerifyTableName != "" {
-		return VerifyTableName
+	verifyTableName := config.Field("code_table_name").String()
+	if verifyTableName == "" {
+		verifyTableName = VerifyCodeTable
 	}
-	VerifyTableName = config.Field("code_table_name").String()
-	if VerifyTableName == "" {
-		VerifyTableName = VerifyCodeTable
-	}
-	return VerifyTableName
+	return verifyTableName
 }
 
 //indexModel := mongo.IndexModel{

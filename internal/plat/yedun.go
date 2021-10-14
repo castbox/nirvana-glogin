@@ -34,12 +34,6 @@ type yedun struct{}
 func (y yedun) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	log.Infow("yedun_check auth", "request", request)
 	apiUrl := config.Field("yedun_oauth_url").String()
-	//yedunParam := config.PackageParam(request.Game.BundleId, "yedun_param")
-	//if yedunParam == "" {
-	//	resErr := fmt.Errorf("failed reading from metadata server: %s", request.Game.BundleId)
-	//	return nil, resErr
-	//}
-	//paramArr := strings.Split(yedunParam, "|")
 	secretId := config.PackageParam(request.Game.BundleId, "yedun_secret_id")
 	secretKey := config.PackageParam(request.Game.BundleId, "yedun_secret_key")
 	businessId := config.PackageParam(request.Game.BundleId, "yedun_business_id")
