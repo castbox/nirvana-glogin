@@ -3,7 +3,9 @@ package cgi
 import (
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"github.com/gin-gonic/gin"
+	"github.com/pborman/uuid"
 	"glogin/internal/configure"
+	"time"
 )
 
 //load pub_cfg: Url "http://127.0.0.1:2000/v1/kv/app_dynamic_cfg/lwk_dev/pub_cfg/?recurse=true"
@@ -12,8 +14,16 @@ import (
 //pub_cfg AppName <<"com.dh.bpc.gp">>, info #{<<"check_vsn">> => <<>>,<<"conn_cfg">> => #{<<"check">> => #{<<"cluster_type">> => 2,<<"uchat_addr">> => <<>>,<<"ugate_addr">> => <<>>,<<"upay_addr">> => <<>>,<<"vsn_addr">> => <<>>},<<"stable">> => #{<<"aics_http_addr">> => <<"https://aics-cli.dev-dh.com">>,<<"aics_ws_addr">> => <<"wss://aics-cli.dev-dh.com/dh_ws/ws_app">>,<<"cluster_type">> => 1,<<"community_srv_addr">> => <<"http://182.150.22.61:27778">>,<<"community_web_addr">> => <<"http://10.0.0.19:7770/aod/v1/index.html#/home">>,<<"uchat_addr">> => <<"aod-dev-uchat.dhgames.cn:18887">>,<<"ugate_addr">> => <<"10.0.240.234:18889">>,<<"upay_addr">> => <<"10.0.240.19:8088">>,<<"vsn_addr">> => <<"10.0.240.234:19889">>}}}
 func CfgHandler(ctx *gin.Context) {
 	loginInfo := &configure.CfgRequest{}
+	reqId := uuid.New()
+	log.Infow("got new query CfgHandler request", "reqId", reqId, "request", loginInfo)
+	before := time.Now().UnixNano()
+	defer func() {
+		if err := recover(); err != nil {
+			log.Errorw("got panic", "err", err)
+		}
+		log.Infow("query CfgHandler response", "reqId", reqId, "time_cost", (time.Now().UnixNano()-before)/1000000)
+	}()
 	err := ctx.Bind(loginInfo)
-	log.Infow("got new query CfgHandler request", "request", loginInfo)
 	if err != nil {
 		ParseRequestError(ctx, 500, err)
 		return

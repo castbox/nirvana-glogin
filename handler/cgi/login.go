@@ -5,6 +5,7 @@ import (
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin"
+	"github.com/pborman/uuid"
 	"glogin/config"
 	"glogin/constant"
 	"glogin/internal"
@@ -37,7 +38,8 @@ func (l Login) SMSEx(request *glogin.SmsLoginReq, ctx *gin.Context) (response *g
 
 func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, err error) {
 	ip := l.Ctx.ClientIP()
-	log.Infow("SMS login request", "request", request, "ip", ip)
+	reqId := uuid.New()
+	log.Infow("SMS login request", "reqId", reqId, "request", request, "ip", ip)
 	response = &glogin.SmsLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
@@ -50,7 +52,7 @@ func (l Login) SMS(request *glogin.SmsLoginReq) (response *glogin.SmsLoginRsp, e
 		if err := recover(); err != nil {
 			log.Errorw("got panic", "err", err)
 		}
-		log.Infow("SMS login rsp", "request", request, "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
+		log.Infow("SMS login rsp", "reqId", reqId, "request", request, "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 
 	// sms step verify 获得Phone验证码
@@ -123,7 +125,8 @@ func (l Login) ThirdEx(request *glogin.ThirdLoginReq, ctx *gin.Context) (respons
 }
 func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLoginRsp, err error) {
 	ip := l.Ctx.ClientIP()
-	log.Infow("Third login request", "request", request, "ip", ip)
+	reqId := uuid.New()
+	log.Infow("Third login request", "reqId", reqId, "request", request, "ip", ip)
 	response = &glogin.ThridLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
@@ -136,7 +139,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 		if err := recover(); err != nil {
 			log.Errorw("got panic", "err", err)
 		}
-		log.Infow("Third login rsp", "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
+		log.Infow("Third login rsp", "reqId", reqId, "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 
 	// 必传参数验证
@@ -238,13 +241,14 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 			Authentication: &glogin.StateQueryResponse{},
 		},
 	}
-	log.Infow("Visitor login", "request", req)
+	reqId := uuid.New()
+	log.Infow("Visitor login", "reqId", reqId, "request", req)
 	before := time.Now().UnixNano()
 	defer func() {
 		if err := recover(); err != nil {
 			log.Errorw("got panic", "err", err)
 		}
-		log.Infow("Visitor login rsp", "response", rsp, "time_cost", (time.Now().UnixNano()-before)/1000000)
+		log.Infow("Visitor login rsp", "reqId", reqId, "response", rsp, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 
 	// 必传参数验证
@@ -303,7 +307,8 @@ func (l Login) FastEx(request *glogin.FastLoginReq, ctx *gin.Context) (response 
 }
 
 func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp, err error) {
-	log.Infow("fast login request", "request", request)
+	reqId := uuid.New()
+	log.Infow("fast login request", "reqId", reqId, "request", request)
 	response = &glogin.FastLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
@@ -311,13 +316,12 @@ func (l Login) Fast(request *glogin.FastLoginReq) (response *glogin.FastLoginRsp
 			Authentication: &glogin.StateQueryResponse{},
 		},
 	}
-
 	before := time.Now().UnixNano()
 	defer func() {
 		if err := recover(); err != nil {
 			log.Errorw("got panic", "err", err)
 		}
-		log.Infow("fast login rsp", "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
+		log.Infow("fast login rsp", "reqId", reqId, "response", response, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 
 	// 必传参数验证
