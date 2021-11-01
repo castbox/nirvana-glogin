@@ -13,6 +13,7 @@ type ClusterCfg struct {
 	VsnAddr          string `json:"vsn_addr" binding:"required"`
 	UPayAddr         string `json:"upay_addr" binding:"required"`
 	UChatAddr        string `json:"uchat_addr" binding:"required"`
+	UChatWSAddr      string `json:"uchat_ws_addr" binding:"required"`
 	CommunityWebAddr string `json:"community_web_addr" binding:"required"`
 	CommunitySrvAddr string `json:"community_srv_addr" binding:"required"`
 	AicsWsAddr       string `json:"aics_ws_addr" binding:"required"`
