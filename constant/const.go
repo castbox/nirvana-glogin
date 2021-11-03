@@ -13,7 +13,7 @@ const (
 const (
 	ServerName       = "glogin"
 	ClusterName      = "lwk_dev"
-	Index            = 1
+	Index            = 2
 	Verify           = "verify"
 	Login            = "login"
 	HawkEyeDcCluster = "hawkeye_dc_cluster"

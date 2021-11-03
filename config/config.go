@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/gmoss/v3"
 	"git.dhgames.cn/svr_comm/gmoss/v3/consul"
 	"github.com/tidwall/gjson"
 	"strconv"
@@ -28,23 +27,24 @@ type PushLogCfg struct {
 }
 
 type All struct {
-	Ports             map[string]int         `json:"port"`
-	UTLog             string                 `json:"utlog"`
-	PushLog           PushLogCfg             `json:"push_log"`
-	SmsUrl            string                 `json:"sms_url"`
-	SmsSecret         string                 `json:"sms_secret"`
-	SmsContent        string                 `json:"sms_content"`
-	SmsAppid          string                 `json:"sms_appid"`
-	JwtSecret         string                 `json:"jwt_secret"`
-	HawkEyeOpen       bool                   `json:"hawkeye_open"`
-	HawkEyeFilter     string                 `json:"hawkeye_filter"`
-	HawkEyeDc         string                 `json:"hawkeye_dc"`
-	AntiAddictionOpen bool                   `json:"anti_addiction_open"`
-	FacebookGraphUrl  string                 `json:"facebook_graphurl"`
-	FacebookInfo      map[string]string      `json:"facebook_infos"`
-	Packages          map[string]interface{} `json:"packages"`
-	Mongo             map[string]MongoCfg    `json:"mongo"`
-	Games             map[string]interface{} `json:"games"`
+	Ports map[string]int `json:"port"`
+	//UTLog             string                 `json:"utlog"`
+	PushLog PushLogCfg `json:"push_log"`
+	//SmsUrl            string                 `json:"sms_url"`
+	//SmsSecret         string                 `json:"sms_secret"`
+	//SmsContent        string                 `json:"sms_content"`
+	//SmsAppid          string                 `json:"sms_appid"`
+	//JwtSecret         string                 `json:"jwt_secret"`
+	//HawkEyeOpen       bool                   `json:"hawkeye_open"`
+	//HawkEyeFilter     string                 `json:"hawkeye_filter"`
+	//HawkEyeDc         string                 `json:"hawkeye_dc"`
+	//AntiAddictionOpen bool                   `json:"anti_addiction_open"`
+	//FacebookGraphUrl  string                 `json:"facebook_graphurl"`
+	FacebookInfo map[string]string      `json:"facebook_infos"`
+	Packages     map[string]interface{} `json:"packages"`
+	Mongo        map[string]MongoCfg    `json:"mongo"`
+	Games        map[string]interface{} `json:"games"`
+	Pubs         map[string]interface{} `json:"pubs"`
 }
 
 var staticConfig All
@@ -83,12 +83,24 @@ func Mongo() map[string]MongoCfg { return staticConfig.Mongo }
 
 func Games() map[string]interface{} { return staticConfig.Games }
 
-// Field 获取静态json数据
+func Pubs() map[string]interface{} { return staticConfig.Pubs }
+
+// Field
+//func Field(field string) gjson.Result {
+//	return gjson.GetBytes(gmoss.StaticCfg(), field)
+//}
+// Field 获取静态 pubs json数据
 func Field(field string) gjson.Result {
-	return gjson.GetBytes(gmoss.StaticCfg(), field)
+	pubs := Pubs()
+	bD, err := json.Marshal(pubs)
+	if err != nil {
+		log.Warnw("pubs  marshal err", "pubs", pubs, "err", err)
+		return gjson.Result{}
+	}
+	return gjson.GetBytes(bD, field)
 }
 
-//运维新配置调整
+// WebPort 运维新配置调整
 //"mongo_url": "mongodb://WpxU:WpxU63@10.0.240.19:20294,10.0.240.19:24771/admin?replicaSet=dev-ulogin-db&maxPoolSize=10",
 //"mongo_db": "ulogin-account-wai",
 func WebPort() string {

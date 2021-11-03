@@ -47,3 +47,10 @@ appsecret:b46d4df71bf363b4ef4bc0b375e97f58
 商户ID:1441277802
 
 qq 登录 Android 参数
+
+
+
+facebook
+https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/
+https://developers.facebook.com/docs/facebook-login/access-tokens/#clienttokens
+https://developers.facebook.com/docs/facebook-login/access-tokens/debugging-and-error-handling

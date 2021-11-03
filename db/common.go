@@ -7,7 +7,7 @@ import (
 )
 
 func InitMongo() {
-	gmongo.Init(config.Field("mongo_url").String())
+	gmongo.Init(config.MongoUrl())
 	InitAccount()
 	InitVerifyCode()
 	InitForBusiness()
