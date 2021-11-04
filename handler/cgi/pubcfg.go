@@ -15,7 +15,6 @@ import (
 func CfgHandler(ctx *gin.Context) {
 	loginInfo := &configure.CfgRequest{}
 	reqId := uuid.New()
-	log.Infow("got new query CfgHandler request", "reqId", reqId, "request", loginInfo)
 	before := time.Now().UnixNano()
 	defer func() {
 		if err := recover(); err != nil {
@@ -24,6 +23,7 @@ func CfgHandler(ctx *gin.Context) {
 		log.Infow("query CfgHandler response", "reqId", reqId, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 	err := ctx.Bind(loginInfo)
+	log.Infow("got new query CfgHandler request", "reqId", reqId, "request", loginInfo)
 	if err != nil {
 		ParseRequestError(ctx, 500, err)
 		return
