@@ -122,20 +122,20 @@ func MongoUrl() string {
 
 func MongoDb() string {
 	mongoInfo := Mongo()
-	MongoDb := "glogin_account"
+	mongoDb := "glogin_account"
 	if VData, ok := mongoInfo["login"]; ok {
-		MongoDb = VData.DBName
+		mongoDb = VData.DBName
 	}
-	return MongoDb
+	return mongoDb
 }
 
 func MongoOldDb() string {
 	mongoInfo := Mongo()
-	MongoOldDb := "glogin_account_old"
+	mongoOldDb := "glogin_account_old"
 	if VData, ok := mongoInfo["login2"]; ok {
-		MongoOldDb = VData.DBName
+		mongoOldDb = VData.DBName
 	}
-	return MongoOldDb
+	return mongoOldDb
 }
 
 func PackageParamRst(bundleId string, key string) gjson.Result {

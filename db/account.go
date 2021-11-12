@@ -59,7 +59,7 @@ func InitAccount() {
 			Keys: bsonx.Doc{{"phone", bsonx.Int32(1)}},
 		},
 		{
-			Keys: bsonx.Doc{{"we_chat", bsonx.Int32(1)}},
+			Keys: bsonx.Doc{{"wechat", bsonx.Int32(1)}},
 		},
 		{
 			Keys: bsonx.Doc{{"qq", bsonx.Int32(1)}},

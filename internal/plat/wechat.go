@@ -85,7 +85,7 @@ func (w wechat) String() string {
 }
 
 func (w wechat) DbFieldName() string {
-	return "we_chat"
+	return "wechat"
 }
 
 //  GetOauth2AccessToken 微信第三方登录，code 换取 access_token
