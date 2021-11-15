@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/gmoss/v3"
+	"git.dhgames.cn/svr_comm/kite"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -15,26 +15,21 @@ import (
 	"glogin/internal/configure"
 	glogin2 "glogin/pbs/glogin"
 	"net/http"
-	"os"
-	"runtime"
 )
 
 func main() {
 	// 开发模式设置
 	initDevelopment()
-	// 注册服务
-	startEngine()
 	log.Infow("server started")
 	// 初始化配置
 	initConfig()
-	log.Infow("config init ok", "config", config.GetAll())
 	// 初始化DB
 	initDB()
 	// 启动http服务
 	go startHttp()
 	log.Infow("glogin server started")
-	// 循环
-	select {}
+	// RPC服务
+	kiteServe()
 }
 
 func initDevelopment() {
@@ -69,26 +64,30 @@ func startHttp() {
 }
 
 func initConfig() {
-	config.Init()
-	configure.WatchPubCfg()
+	config.WatchStaticConfig()
+	configure.WatchDynamicPubDir()
 }
 
-func startEngine() {
-	gmoss.RegSignal(func() {
-		log.Infow("glogin server stop")
-		os.Exit(0)
-	})
-	runtime.GOMAXPROCS(runtime.NumCPU())
-	serviceReg := gmoss.NewServiceRegister()
-	serviceReg.Regist(&glogin2.Login_serviceDesc, cgi.Login{})
-	serviceReg.Regist(&glogin2.Bind_serviceDesc, cgi.Bind{})
-	serviceReg.Regist(&glogin2.Gmp_serviceDesc, moss.Gmp{})
-	err := gmoss.RunServerByPath(serviceReg)
-	//	err := gmoss.RunServer(constant.ClusterName, constant.ServerName, constant.Index, serviceReg)
-	if err != nil {
-		log.Fatalw("failed to register serverByPath", "err", err)
-		panic(err)
-	}
+func kiteServe() {
+	glogin2.RegLoginServer(cgi.Login{})
+	glogin2.RegBindServer(cgi.Bind{})
+	glogin2.RegGmpServer(moss.Gmp{})
+	// 本地测试
+	//kite.StartServer(ProcessStop{}, &kite.Destination{
+	//	Cluster:      constant.ClusterName,
+	//	ServiceName:  constant.ServerName,
+	//	ServiceIndex: constant.Index,
+	//})
+	// 部署运行
+	kite.Serve(ProcessStop{})
+}
+
+// ProcessStop 执行服务退出流程
+type ProcessStop struct {
+}
+
+func (p ProcessStop) Stop() {
+
 }
 
 func prometheusHandler() gin.HandlerFunc {

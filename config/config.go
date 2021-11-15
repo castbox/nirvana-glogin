@@ -2,78 +2,86 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
+	"git.dhgames.cn/svr_comm/gcore/consul"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/gmoss/v3/consul"
 	"github.com/tidwall/gjson"
 	"strconv"
 )
 
-type MongoCfg struct {
-	Uri    string `json:"uri"`
-	DBName string `json:"dbname"`
-}
-
-type GameCfg struct {
-	AppsFlyerIosId          string `json:"appsflyer_ios_id"`
-	AppsFlyerAuthentication string `json:"appsflyer_Authentication"`
-	AppsFlyerRegistrationId int    `json:"appsflyer_registrationId"`
-}
-
-type PushLogCfg struct {
-	Url       string `json:"url"`
-	Salt      string `json:"salt"`
-	TopicCode int64  `json:"topic_code"`
-}
-
-type All struct {
-	Ports map[string]int `json:"port"`
-	//UTLog             string                 `json:"utlog"`
-	PushLog PushLogCfg `json:"push_log"`
-	//SmsUrl            string                 `json:"sms_url"`
-	//SmsSecret         string                 `json:"sms_secret"`
-	//SmsContent        string                 `json:"sms_content"`
-	//SmsAppid          string                 `json:"sms_appid"`
-	//JwtSecret         string                 `json:"jwt_secret"`
-	//HawkEyeOpen       bool                   `json:"hawkeye_open"`
-	//HawkEyeFilter     string                 `json:"hawkeye_filter"`
-	//HawkEyeDc         string                 `json:"hawkeye_dc"`
-	//AntiAddictionOpen bool                   `json:"anti_addiction_open"`
-	//FacebookGraphUrl  string                 `json:"facebook_graphurl"`
-	FacebookInfo map[string]string      `json:"facebook_infos"`
-	Packages     map[string]interface{} `json:"packages"`
-	Mongo        map[string]MongoCfg    `json:"mongo"`
-	Games        map[string]interface{} `json:"games"`
-	Pubs         map[string]interface{} `json:"pubs"`
-}
-
-var staticConfig All
-
-func Init() {
-	if err := consul.Watch(consul.StaticCfgUrl(), Reload, "kv"); err != nil {
-		log.Fatalw("failed to watch config", "err", err)
-		panic(err)
+type (
+	MongoCfg struct {
+		Uri    string `json:"uri"`
+		DBName string `json:"dbname"`
 	}
-}
-
-func Reload(urlI interface{}, configI interface{}) {
-	defer func() {
-		log.Infow("reload config", "config", staticConfig)
-	}()
-
-	configBytes := configI.([]byte)
-	if err := json.Unmarshal(configBytes, &staticConfig); err != nil {
-		log.Fatalw("failed to init config", "err", err)
-		panic(err)
+	GameCfg struct {
+		AppsFlyerIosId          string `json:"appsflyer_ios_id"`
+		AppsFlyerAuthentication string `json:"appsflyer_Authentication"`
+		AppsFlyerRegistrationId int    `json:"appsflyer_registrationId"`
 	}
-	v := staticConfig
-	fmt.Println(v)
+	PushLogCfg struct {
+		Url       string `json:"url"`
+		Salt      string `json:"salt"`
+		TopicCode int64  `json:"topic_code"`
+	}
+	LoginConfig struct {
+		Ports map[string]int `json:"port"`
+		//UTLog             string                 `json:"utlog"`
+		PushLog PushLogCfg `json:"push_log"`
+		//SmsUrl            string                 `json:"sms_url"`
+		//SmsSecret         string                 `json:"sms_secret"`
+		//SmsContent        string                 `json:"sms_content"`
+		//SmsAppid          string                 `json:"sms_appid"`
+		//JwtSecret         string                 `json:"jwt_secret"`
+		//HawkEyeOpen       bool                   `json:"hawkeye_open"`
+		//HawkEyeFilter     string                 `json:"hawkeye_filter"`
+		//HawkEyeDc         string                 `json:"hawkeye_dc"`
+		//AntiAddictionOpen bool                   `json:"anti_addiction_open"`
+		//FacebookGraphUrl  string                 `json:"facebook_graphurl"`
+		FacebookInfo map[string]string      `json:"facebook_infos"`
+		Packages     map[string]interface{} `json:"packages"`
+		Mongo        map[string]MongoCfg    `json:"mongo"`
+		Games        map[string]interface{} `json:"games"`
+		Pubs         map[string]interface{} `json:"pubs"`
 
-	//log.Infow("init config", "httpPort", WebPort())
+		PubsByte []byte
+	}
+)
+
+var staticConfig = LoginConfig{}
+
+func (c *LoginConfig) Reload() {
+	log.Infow("reload", "config", c)
+	byteData, err := json.Marshal(c.Pubs)
+	if err != nil {
+		log.Warnw("pubs  marshal err", "pubs", c.Pubs, "err", err)
+	}
+	c.PubsByte = byteData
+
+	biHost := Field("uds").String()
+	log.Infow("reload finish", "biHost", biHost)
 }
-func GetAll() *All { return &staticConfig }
+
+func WatchStaticConfig() {
+	log.ResetToDevelopment()
+
+	serInfo := consul.ServiceInfo{
+		Cluster: "lwk_dev",
+		Service: "glogin",
+		Index:   2,
+	}
+	err := consul.WatchConfigByService(&serInfo, &staticConfig)
+	if err != nil {
+		log.Fatalw("failed to wath config", "err", err)
+	} else {
+		log.Infow("succeed to wath config", "data", staticConfig)
+	}
+
+	//log.Infow("config init ok", "config", config.GetAll())
+}
 
 func Packages() map[string]interface{} { return staticConfig.Packages }
+
+func PushLog() PushLogCfg { return staticConfig.PushLog }
 
 func Ports() map[string]int { return staticConfig.Ports }
 
@@ -85,10 +93,6 @@ func Games() map[string]interface{} { return staticConfig.Games }
 
 func Pubs() map[string]interface{} { return staticConfig.Pubs }
 
-// Field
-//func Field(field string) gjson.Result {
-//	return gjson.GetBytes(gmoss.StaticCfg(), field)
-//}
 // Field 获取静态 pubs json数据
 func Field(field string) gjson.Result {
 	pubs := Pubs()

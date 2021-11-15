@@ -3,13 +3,12 @@ package hawkeye
 import (
 	"fmt"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/gmoss/v3"
-	"git.dhgames.cn/svr_comm/gmoss/v3/global"
+	api "git.dhgames.cn/svr_comm/hawkeye/v2/api"
+	"git.dhgames.cn/svr_comm/hawkeye/v2/pbs/pbgo"
+	"git.dhgames.cn/svr_comm/kite"
 	"glogin/config"
 	"glogin/constant"
 	"glogin/internal"
-	"glogin/pbs/hawkeye_login"
-	"glogin/pbs/hawkeye_register"
 	"strings"
 	"time"
 )
@@ -35,25 +34,21 @@ func CheckLogin(req internal.Req) (interface{}, error) {
 		return nil, nil
 	}
 
-	loginIn := &hawkeye_login.Login{
+	loginReq := &pbgo.LoginRequest{
 		GameCd: req.Game.GameCd,
-		DeviceInfo: &hawkeye_login.DeviceInfo{
+		DeviceInfo: &pbgo.DeviceInfo{
 			SmId:        req.Client.Dhid,
 			Ip:          req.IP,
 			AppsflyerId: req.Game.AppsflyerId,
 		},
-		UserInfo: &hawkeye_login.UserInfo{
+		UserInfo: &pbgo.UserInfo{
 			BundleId: req.Game.BundleId,
 			Account:  req.Account,
 		},
 	}
-	//service := gmoss.MossWithClusterService("yanghaitao_dev", "hawkeye")
 	cfgDc := strings.Split(config.Field(constant.HawkEyeDcCluster).String(), "|")
-	log.Infow("HawkeyeLogin Req", "loginReq", loginIn)
-	rsp, err := hawkeye_login.HawkeyeLogin(loginIn, &global.CallOption{
-		Cluster: gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.HawkEyeService),
-		Timeout: time.Second * constant.TimeOut,
-	})
+	log.Infow("HawkeyeLogin Req", "loginReq", loginReq)
+	rsp, err := api.Login(cfgDc[0], cfgDc[1], loginReq, kite.Timeout(time.Second*constant.TimeOut))
 	log.Infow("HawkeyeLogin Rsp", "loginRsp", rsp, "err", err)
 	if err != nil {
 		log.Infow("HawkeyeLogin Rsp 2", "err", rsp, "err", err)
@@ -76,26 +71,22 @@ func CheckRegister(req internal.Req) (interface{}, error) {
 		return nil, nil
 	}
 
-	registerIn := &hawkeye_register.Register{
+	registerReq := &pbgo.RegisterRequest{
 		GameCd:  req.Game.GameCd,
-		Subject: hawkeye_register.Register_Account,
-		DeviceInfo: &hawkeye_register.DeviceInfo{
+		Subject: pbgo.RegisterRequest_Account,
+		DeviceInfo: &pbgo.DeviceInfo{
 			SmId:        req.Client.Dhid,
 			Ip:          req.IP,
 			AppsflyerId: req.Game.AppsflyerId,
 		},
-		UserInfo: &hawkeye_register.UserInfo{
+		UserInfo: &pbgo.UserInfo{
 			BundleId: req.Game.BundleId,
 		},
 	}
-
 	cfgDc := strings.Split(config.Field(constant.HawkEyeDcCluster).String(), "|")
-	log.Infow("HawkeyeRegister Req", "Req", registerIn)
-	rsp, err := hawkeye_register.HawkeyeRegister(registerIn, &global.CallOption{
-		Cluster: gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.HawkEyeService),
-		Timeout: time.Second * constant.TimeOut,
-	})
-	log.Infow("HawkeyeRegister Rsp", "Rsp", rsp)
+	log.Infow("HawkeyeRegister Req", "Req", registerReq)
+	rsp, err := api.Register(cfgDc[0], cfgDc[1], registerReq, kite.Timeout(time.Second*constant.TimeOut))
+	log.Infow("HawkeyeRegister Rsp", "Rsp", rsp, "err", err)
 	if err != nil {
 		log.Infow("HawkeyeRegister Rsp", "Rsp", rsp, "Err", err)
 		return nil, nil

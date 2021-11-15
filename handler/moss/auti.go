@@ -1,15 +1,17 @@
 package moss
 
-import anti_authentication "glogin/pbs/authentication"
+import (
+	"git.dhgames.cn/svr_comm/anti_obsession/pbs/pb_obsession"
+)
 
 type Anti struct {
 }
 
-func (Anti) Query(request *anti_authentication.StateQueryRequest) (response *anti_authentication.StateQueryResponse, err error) {
+func (Anti) Query(request *pb_obsession.CheckStateQueryRequest) (response *pb_obsession.CheckStateQueryResponse, err error) {
 	return response, nil
 }
 
-func (Anti) Check(request *anti_authentication.CheckRequest) (response *anti_authentication.CheckResponse, err error) {
-	response = &anti_authentication.CheckResponse{}
+func (Anti) Check(request *pb_obsession.CheckRequest) (response *pb_obsession.CheckResponse, err error) {
+	response = &pb_obsession.CheckResponse{}
 	return response, nil
 }

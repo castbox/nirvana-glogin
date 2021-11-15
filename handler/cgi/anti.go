@@ -2,12 +2,12 @@ package cgi
 
 import (
 	"fmt"
+	"git.dhgames.cn/svr_comm/anti_obsession/pbs/pb_obsession"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"github.com/gin-gonic/gin"
 	"glogin/constant"
 	"glogin/internal"
 	"glogin/internal/anti"
-	anti_authentication "glogin/pbs/authentication"
 	"glogin/util"
 	"time"
 )
@@ -63,7 +63,7 @@ func AutiHandler(ctx *gin.Context) {
 	}
 	plaintext := checkReq.Name + "@" + checkReq.Pid
 	playerInfo := util.Enr(plaintext, AuthKey)
-	checkIn := &anti_authentication.CheckRequest{
+	checkIn := &pb_obsession.CheckRequest{
 		GameCd:     checkReq.GameCd,  //game_cd
 		Id:         checkReq.Account, //账号ID
 		PlayerInfo: playerInfo,
@@ -105,7 +105,7 @@ func AutiHandler(ctx *gin.Context) {
 		return
 	}
 	log.Infow("anti.StateQuery rsp", "rsp", antiQueryRsp)
-	r2, ok := antiQueryRsp.(*anti_authentication.StateQueryResponse)
+	r2, ok := antiQueryRsp.(*pb_obsession.CheckStateQueryResponse)
 	if ok {
 		checkRsp.Authentication = &StateQueryResponse{
 			RequestId:            r2.RequestId,

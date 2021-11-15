@@ -35,7 +35,7 @@ func (l *Log) push() error {
 		return err
 	}
 	bodyString := fmt.Sprintf("data=%s", url.QueryEscape(string(dataLog)))
-	res, err := http.Post(config.GetAll().PushLog.Url, "application/x-www-form-urlencoded", strings.NewReader(bodyString))
+	res, err := http.Post(config.PushLog().Url, "application/x-www-form-urlencoded", strings.NewReader(bodyString))
 	// res, err := http.Post("http://ulog-inner-test.dhgames.cn:8180/inner/push_log", "application/x-www-form-urlencoded", strings.NewReader(bodyString))
 	defer func() {
 		if err == nil {

@@ -1,0 +1,1 @@
+protoc --go_out=plugins=kite:. protos/*.proto --proto_path=./protos
