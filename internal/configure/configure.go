@@ -67,13 +67,15 @@ func GetCfg(appName string, vsn string, ip string) *ClusterCfg {
 func WatchDynamicPubDir() {
 	sInfo, err := consul.GetServiceInfoByPath()
 	if err != nil {
-		dir := "lwk_dev/pub_cfg"
-		if sInfo != nil {
-			dir = sInfo.Cluster + "/pub_cfg"
-		}
-		log.Infow("WatchDynamicPubDir dir", "dir", dir)
-		if err = consul.WatchDir(dir, dynamicCfg); err != nil {
-			log.Fatalw("failed to watch dir", "err", err)
-		}
+		log.Infow("consul.GetServiceInfoByPath sInfo error", "err", err)
+		return
+	}
+	dir := "lwk_dev/pub_cfg"
+	if sInfo != nil {
+		dir = sInfo.Cluster + "/pub_cfg"
+	}
+	log.Infow("WatchDynamicPubDir dir", "dir", dir)
+	if err = consul.WatchDir(dir, dynamicCfg); err != nil {
+		log.Fatalw("failed to watch dir", "err", err)
 	}
 }
