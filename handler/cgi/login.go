@@ -418,9 +418,13 @@ func fastResponse(response *glogin.FastLoginRsp, loginRsp internal.Rsp) {
 	if ok {
 		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
 	}
-	plat, errG := account.GetPlat(loginRsp.AccountData)
-	if errG == nil {
-		response.ThirdPlat = plat
+	if loginRsp.AccountData.Phone != "" {
+		response.ThirdPlat = "phone"
+	} else {
+		plat, errG := account.GetPlat(loginRsp.AccountData)
+		if errG == nil {
+			response.ThirdPlat = plat
+		}
 	}
 	response.ExtendData.GameFirstLogin = loginRsp.GameRsp.FirstLogin
 }

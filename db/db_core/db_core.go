@@ -10,7 +10,7 @@ type AccountData struct {
 	IOS       interface{}         `json:"ios" bson:"ios"`               // IOS 调整为interface兼容老数据 (老array 新string)
 	Visitor   string              `json:"visitor" bson:"visitor"`       // visitor
 	Phone     string              `json:"phone" bson:"phone"`           // phone
-	WeChat    string              `json:"we_chat" bson:"we_chat"`       // wechat
+	WeChat    string              `json:"wechat" bson:"wechat"`         // wechat
 	LastLogin int64               `json:"last_login" bson:"last_login"` // last_login
 	Games     map[string]GameInfo `json:"games" bson:"games"`           // games
 }

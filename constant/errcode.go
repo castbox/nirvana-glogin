@@ -24,6 +24,11 @@ const (
 	ErrCodeVisitorLoadErr      = -20010414 //游客账号加载失败
 	ErrCodeThirdAlreadyBind    = -20010415 //第三方账号已经绑定
 	ErrCodeThirdBindFail       = -20010416 //第三方账号绑定失败
+	ErrCodePhoneAlreadyBind    = -20010417 //phone已经绑定
+	ErrCodeNoAccount           = -20010418 //account不存在
+	ErrCodeUpdateFail          = -20010419 //更新token失败
+	ErrCodeNoThirdErr          = -20010420 //第三方错误
+
 )
 
 const (

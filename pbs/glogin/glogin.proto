@@ -200,6 +200,38 @@ message CreateData {
     string bundle_id = 4;
 }
 
+
+//新查询接口,支持批量查账号
+message QueryReq{
+    repeated string accounts = 1;
+    repeated string bundleids = 2;
+    string login_type = 3;
+    int32 page_num = 4;
+    int32 page_size = 5;
+}
+
+message QueryRsp {
+    int32 code = 1;
+    int32 count = 2;
+    string msg = 3;
+    repeated AccountData data = 4;
+}
+
+// 第三方换绑手机
+message ChangeBindReq{
+    string account = 1;
+    string phone = 2;
+    string plat = 3;
+}
+
+message ChangeBindRsp {
+    int32 code = 1;
+    string msg = 2;
+    AccountData data = 4;
+}
+
 service Gmp {
     rpc LoadAccountInfo(QueryRequest) returns(QueryResponse);
+    rpc QueryAccount(QueryReq) returns(QueryRsp);
+    rpc ChangeBind(ChangeBindReq) returns(ChangeBindRsp);
 }
