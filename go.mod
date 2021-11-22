@@ -6,7 +6,7 @@ require (
 	git.dhgames.cn/svr_comm/anti_obsession v1.1.1
 	git.dhgames.cn/svr_comm/gcore v1.0.13
 	git.dhgames.cn/svr_comm/hawkeye/v2 v2.0.6
-	git.dhgames.cn/svr_comm/kite v1.1.4
+	git.dhgames.cn/svr_comm/kite v1.1.5
 	github.com/bitly/go-simplejson v0.5.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/pprof v1.3.0

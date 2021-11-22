@@ -8,6 +8,7 @@ import (
 	"glogin/constant"
 	"glogin/internal"
 	"glogin/internal/anti"
+	"glogin/pbs/glogin"
 	"glogin/util"
 	"time"
 )
@@ -40,10 +41,10 @@ type StateQueryResponse struct {
 
 // 实名信息认证返回
 type AutiCheckResponse struct {
-	ErrCode        string              `json:"err_code"`       // 每次请求唯一标识,用作问题校验时查询
-	ErrMsg         string              `json:"err_msg"`        // 错误码
-	CheckMsg       string              `json:"check_msg"`      // 实名提示信息,如果认证成功，并且玩家是未成年，客户端需要显示此字段
-	Authentication *StateQueryResponse `json:"authentication"` // 防沉迷状态
+	ErrCode        string                     `json:"err_code"`       // 每次请求唯一标识,用作问题校验时查询
+	ErrMsg         string                     `json:"err_msg"`        // 错误码
+	CheckMsg       string                     `json:"check_msg"`      // 实名提示信息,如果认证成功，并且玩家是未成年，客户端需要显示此字段
+	Authentication *glogin.StateQueryResponse `json:"authentication"` // 防沉迷状态
 }
 
 func AutiHandler(ctx *gin.Context) {
@@ -54,7 +55,7 @@ func AutiHandler(ctx *gin.Context) {
 	// 实名认证
 	checkRsp := &AutiCheckResponse{
 		ErrCode:        "0",
-		Authentication: &StateQueryResponse{},
+		Authentication: &glogin.StateQueryResponse{},
 	}
 
 	if err != nil {
@@ -107,18 +108,19 @@ func AutiHandler(ctx *gin.Context) {
 	log.Infow("anti.StateQuery rsp", "rsp", antiQueryRsp)
 	r2, ok := antiQueryRsp.(*pb_obsession.CheckStateQueryResponse)
 	if ok {
-		checkRsp.Authentication = &StateQueryResponse{
-			RequestId:            r2.RequestId,
-			ErrCode:              r2.ErrCode,
-			ErrMsg:               r2.ErrMsg,
-			AuthenticationStatus: r2.AuthenticationStatus,
-			IsHoliday:            r2.IsHoliday,
-			LeftGameTime:         r2.LeftGameTime,
-			EachPayAmount:        r2.EachPayAmount,
-			LeftPayAmount:        r2.LeftPayAmount,
-			LoginCode:            r2.LoginCode,
-			LoginMessage:         r2.LoginMessage,
-		}
+		checkRsp.Authentication = antiConvertClient(r2)
+		//checkRsp.Authentication = &StateQueryResponse{
+		//	RequestId:            r2.RequestId,
+		//	ErrCode:              r2.ErrCode,
+		//	ErrMsg:               r2.ErrMsg,
+		//	AuthenticationStatus: r2.AuthenticationStatus,
+		//	IsHoliday:            r2.IsHoliday,
+		//	LeftGameTime:         r2.LeftGameTime,
+		//	EachPayAmount:        r2.EachPayAmount,
+		//	LeftPayAmount:        r2.LeftPayAmount,
+		//	LoginCode:            r2.LoginCode,
+		//	LoginMessage:         r2.LoginMessage,
+		//}
 	}
 	log.Infow("new query AutiHandler rsp", "rsp", checkRsp, "request", checkReq)
 	ctx.JSON(200, checkRsp)

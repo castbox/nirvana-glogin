@@ -2604,7 +2604,7 @@ func (c *login) SMS(destination kite.Destination, request *SmsLoginReq, opts ...
 	if err != nil {
 		return nil, errors.New("request marshal err")
 	}
-	resPBData, err := kite.Invoke(destination, "glogin", "glogin.Login", "SMS", reqPBData, opts...)
+	resPBData, err := kite.Invoke(destination, "glogin", "Login", "SMS", reqPBData, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2618,7 +2618,7 @@ func (c *login) Third(destination kite.Destination, request *ThirdLoginReq, opts
 	if err != nil {
 		return nil, errors.New("request marshal err")
 	}
-	resPBData, err := kite.Invoke(destination, "glogin", "glogin.Login", "Third", reqPBData, opts...)
+	resPBData, err := kite.Invoke(destination, "glogin", "Login", "Third", reqPBData, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2632,7 +2632,7 @@ func (c *login) Visitor(destination kite.Destination, request *VisitorLoginReq, 
 	if err != nil {
 		return nil, errors.New("request marshal err")
 	}
-	resPBData, err := kite.Invoke(destination, "glogin", "glogin.Login", "Visitor", reqPBData, opts...)
+	resPBData, err := kite.Invoke(destination, "glogin", "Login", "Visitor", reqPBData, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2646,7 +2646,7 @@ func (c *login) Fast(destination kite.Destination, request *FastLoginReq, opts .
 	if err != nil {
 		return nil, errors.New("request marshal err")
 	}
-	resPBData, err := kite.Invoke(destination, "glogin", "glogin.Login", "Fast", reqPBData, opts...)
+	resPBData, err := kite.Invoke(destination, "glogin", "Login", "Fast", reqPBData, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2668,7 +2668,7 @@ type LoginService struct {
 }
 
 func RegLoginServer(handle LoginServer) {
-	pb.ServiceDispatchObject.AddService("glogin", "glogin.Login", &LoginService{handle: handle})
+	pb.ServiceDispatchObject.AddService("glogin", "Login", &LoginService{handle: handle})
 }
 
 func (s *LoginService) Do(function string, reqPBData []byte) (resPBData []byte, err error) {
@@ -2744,7 +2744,7 @@ func (c *bind) BindThird(destination kite.Destination, request *VistorBindThridR
 	if err != nil {
 		return nil, errors.New("request marshal err")
 	}
-	resPBData, err := kite.Invoke(destination, "glogin", "glogin.Bind", "BindThird", reqPBData, opts...)
+	resPBData, err := kite.Invoke(destination, "glogin", "Bind", "BindThird", reqPBData, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2763,7 +2763,7 @@ type BindService struct {
 }
 
 func RegBindServer(handle BindServer) {
-	pb.ServiceDispatchObject.AddService("glogin", "glogin.Bind", &BindService{handle: handle})
+	pb.ServiceDispatchObject.AddService("glogin", "Bind", &BindService{handle: handle})
 }
 
 func (s *BindService) Do(function string, reqPBData []byte) (resPBData []byte, err error) {
@@ -2800,7 +2800,7 @@ func (c *gmp) LoadAccountInfo(destination kite.Destination, request *QueryReques
 	if err != nil {
 		return nil, errors.New("request marshal err")
 	}
-	resPBData, err := kite.Invoke(destination, "glogin", "glogin.Gmp", "LoadAccountInfo", reqPBData, opts...)
+	resPBData, err := kite.Invoke(destination, "glogin", "Gmp", "LoadAccountInfo", reqPBData, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2814,7 +2814,7 @@ func (c *gmp) QueryAccount(destination kite.Destination, request *QueryReq, opts
 	if err != nil {
 		return nil, errors.New("request marshal err")
 	}
-	resPBData, err := kite.Invoke(destination, "glogin", "glogin.Gmp", "QueryAccount", reqPBData, opts...)
+	resPBData, err := kite.Invoke(destination, "glogin", "Gmp", "QueryAccount", reqPBData, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2828,7 +2828,7 @@ func (c *gmp) ChangeBind(destination kite.Destination, request *ChangeBindReq, o
 	if err != nil {
 		return nil, errors.New("request marshal err")
 	}
-	resPBData, err := kite.Invoke(destination, "glogin", "glogin.Gmp", "ChangeBind", reqPBData, opts...)
+	resPBData, err := kite.Invoke(destination, "glogin", "Gmp", "ChangeBind", reqPBData, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2849,7 +2849,7 @@ type GmpService struct {
 }
 
 func RegGmpServer(handle GmpServer) {
-	pb.ServiceDispatchObject.AddService("glogin", "glogin.Gmp", &GmpService{handle: handle})
+	pb.ServiceDispatchObject.AddService("glogin", "Gmp", &GmpService{handle: handle})
 }
 
 func (s *GmpService) Do(function string, reqPBData []byte) (resPBData []byte, err error) {
