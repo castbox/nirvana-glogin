@@ -71,6 +71,7 @@ func WatchDynamicPubDir() {
 		if sInfo != nil {
 			dir = sInfo.Cluster + "/pub_cfg"
 		}
+		log.Infow("WatchDynamicPubDir dir", "dir", dir)
 		if err = consul.WatchDir(dir, dynamicCfg); err != nil {
 			log.Fatalw("failed to watch dir", "err", err)
 		}
