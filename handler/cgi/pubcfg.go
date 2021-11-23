@@ -17,22 +17,19 @@ func CfgHandler(ctx *gin.Context) {
 	loginInfo := &configure.CfgRequest{}
 	reqId := uuid.New()
 	before := time.Now().UnixNano()
+	cfgRsp := configure.ClusterCfg{}
 	defer func() {
 		if err := recover(); err != nil {
 			log.Errorw("got panic", "err", err)
 		}
-		log.Infow("query CfgHandler response", "reqId", reqId, "time_cost", (time.Now().UnixNano()-before)/1000000)
+		log.Infow("query CfgHandler response", "reqId", reqId, "rsp", cfgRsp, "time_cost", (time.Now().UnixNano()-before)/1000000)
 	}()
 	err := ctx.Bind(loginInfo)
-	log.Infow("query CfgHandler request", "reqId", reqId, "request", loginInfo)
+	log.Infow("query CfgHandler request", "reqId", reqId, "request", loginInfo, "ip", ctx.ClientIP())
 	if err != nil {
 		ParseRequestError(ctx, 500, err)
 		return
 	}
-	cfgRsp := configure.GetCfg(loginInfo.AppName, loginInfo.Vsn, ctx.ClientIP())
-	if cfgRsp != nil {
-		ctx.JSON(200, cfgRsp)
-		return
-	}
-	ctx.JSON(200, configure.ClusterCfg{})
+	cfgRsp = configure.GetCfg(loginInfo.AppName, loginInfo.Vsn, ctx.ClientIP())
+	ctx.JSON(200, cfgRsp)
 }

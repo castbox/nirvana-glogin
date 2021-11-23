@@ -2,7 +2,6 @@ package configure
 
 import (
 	"encoding/json"
-	"fmt"
 	"git.dhgames.cn/svr_comm/gcore/consul"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"sync"
@@ -28,26 +27,26 @@ func (d DynamicPub) Reload(appName string, jsonData []byte) {
 	log.Infow("realod dir", "appName", appName, "data", bInfo)
 }
 
-func GetCfg(appName string, vsn string, ip string) *ClusterCfg {
-	log.Infow("query CfgHandler GetCfg", "appName", appName, "vsn", vsn, "ip", ip)
+func GetCfg(appName string, vsn string, ip string) ClusterCfg {
+	//log.Infow("query CfgHandler GetCfg", "appName", appName, "vsn", vsn, "ip", ip)
 	v, ok := pubConfig.Load(appName)
 	if !ok {
 		log.Infow("GetPubCfg BundleId error", "BundleId", appName)
-		return nil
+		return ClusterCfg{}
 	}
-	fmt.Println(v)
+	//fmt.Println(v)
 	p := v.(PubCfg)
 	if len(p.WhiteList) > 0 {
 		for _, wIp := range p.WhiteList {
 			if ip == wIp {
-				return &p.ConnCfg.Test
+				return p.ConnCfg.Test
 			}
 		}
 	}
 	if p.CheckVsn == vsn {
-		return &p.ConnCfg.Check
+		return p.ConnCfg.Check
 	}
-	return &p.ConnCfg.Stable
+	return p.ConnCfg.Stable
 }
 
 // WatchDynamicPubDir
