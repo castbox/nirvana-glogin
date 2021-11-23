@@ -83,6 +83,7 @@ func AutiHandler(ctx *gin.Context) {
 	if errCheck != nil {
 		checkRsp.ErrCode = constant.ErrCodeStrAutiRpc
 		checkRsp.ErrMsg = fmt.Sprintf(" AutiCheck error: %v", errCheck)
+		log.Infow("anti.Check rsp 1", "rsp", antiCheckRsp)
 		ctx.JSON(500, checkRsp)
 		return
 	}
@@ -90,6 +91,7 @@ func AutiHandler(ctx *gin.Context) {
 	checkRsp.ErrCode = antiCheckRsp.ErrCode
 	checkRsp.CheckMsg = antiCheckRsp.CheckMsg
 	if antiCheckRsp.ErrCode != constant.ErrCodeStrOk {
+		log.Infow("anti.Check rsp 2", "rsp", antiCheckRsp)
 		ctx.JSON(200, checkRsp)
 		return
 	}

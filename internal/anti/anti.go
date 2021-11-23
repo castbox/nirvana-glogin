@@ -3,6 +3,7 @@ package anti
 import (
 	"git.dhgames.cn/svr_comm/anti_obsession/api"
 	"git.dhgames.cn/svr_comm/anti_obsession/pbs/pb_obsession"
+	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"git.dhgames.cn/svr_comm/kite"
 	"glogin/config"
 	"glogin/constant"
@@ -36,8 +37,10 @@ func StateQuery(req internal.Req) (interface{}, error) {
 		Id:     req.Account,
 		//DeviceId: req.Client.Dhid,
 	}
+	log.Infow("api.CheckAuditQuery req", "queryIn", queryIn)
 	cfgDc := strings.Split(config.Field(constant.AutiDcCluster).String(), "|")
 	rsp, err := api.CheckAuditQuery(cfgDc[0], cfgDc[1], queryIn, kite.Timeout(time.Second*constant.TimeOut))
+	log.Infow("api.CheckAuditQuery Rsp", "rsp", rsp, "err", err)
 	if err != nil {
 		return rsp, err
 	} else {
