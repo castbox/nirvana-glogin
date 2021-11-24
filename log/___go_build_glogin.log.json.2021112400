@@ -1,0 +1,1 @@
+{"log.level":"info","@timestamp":"2021-11-24T20:12:20+08:00","log.origin":{"file.name":"tcp/server.go","file.line":139},"message":"[kite] MaxConn: 12000, MaxPacketSize: 16777216"}
