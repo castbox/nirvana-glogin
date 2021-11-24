@@ -64,6 +64,15 @@ func GetCfg(appName string, vsn string, ip string) ClusterCfg {
 //	}
 //]
 func WatchDynamicPubDir() {
+	// 本地环境
+	//var err error
+	//sInfo := &consul.ServiceInfo{
+	//	Cluster: "lwk_dev",
+	//	Service: "glogin",
+	//	Index:   2,
+	//}
+
+	//部署环境
 	sInfo, err := consul.GetServiceInfoByPath()
 	if err != nil {
 		log.Infow("consul.GetServiceInfoByPath sInfo error", "err", err)
