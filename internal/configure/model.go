@@ -17,6 +17,7 @@ type ClusterCfg struct {
 	CommunityWebAddr string `json:"community_web_addr" binding:"required"`
 	CommunitySrvAddr string `json:"community_srv_addr" binding:"required"`
 	AicsWsAddr       string `json:"aics_ws_addr" binding:"required"`
+	AicsWebViewAddr  string `json:"aics_webview_addr" binding:"required"`
 	AicsHttpAddr     string `json:"aics_http_addr" binding:"required"`
 }
 
