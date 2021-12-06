@@ -42,7 +42,8 @@ func StateQuery(req internal.Req) (interface{}, error) {
 	rsp, err := api.CheckAuditQuery(cfgDc[0], cfgDc[1], queryIn, kite.Timeout(time.Second*constant.TimeOut))
 	log.Infow("api.CheckAuditQuery Rsp", "rsp", rsp, "err", err)
 	if err != nil {
-		return rsp, err
+		log.Errorw("api.CheckAuditQuery Error Let Pass Rsp ", "rsp", rsp, "err", err)
+		return rsp, nil
 	} else {
 		return rsp, nil
 	}

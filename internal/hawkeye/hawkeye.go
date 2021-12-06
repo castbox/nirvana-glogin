@@ -51,7 +51,7 @@ func CheckLogin(req internal.Req) (interface{}, error) {
 	rsp, err := api.Login(cfgDc[0], cfgDc[1], loginReq, kite.Timeout(time.Second*constant.TimeOut))
 	log.Infow("HawkeyeLogin Rsp", "loginRsp", rsp, "err", err)
 	if err != nil {
-		log.Infow("HawkeyeLogin Rsp 2", "err", rsp, "err", err)
+		log.Errorw("HawkeyeLogin Service Error let pass error 2", "err", rsp, "err", err)
 		return rsp, nil
 	} else {
 		if !rsp.Pass {
