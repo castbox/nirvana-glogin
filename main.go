@@ -54,6 +54,7 @@ func startHttp() {
 	router.POST("/anti/:action", cgi.AutiHandler)
 	router.POST("/ids/:action", cgi.IdsHandler)
 	router.POST("/cfg", cgi.CfgHandler)
+	router.POST("/agreement", cgi.CheckHandler)
 	router.POST("/token", cgi.TokenHandler)
 	router.GET("/metrics", prometheusHandler())
 	router.GET("/heart", func(ctx *gin.Context) { ctx.JSON(http.StatusOK, gin.H{"err_code": constant.ErrCodeOk}) })
