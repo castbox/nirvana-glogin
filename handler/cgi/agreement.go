@@ -44,11 +44,12 @@ func CheckHandler(ctx *gin.Context) {
 	if len(agreementMap) > 0 {
 		v, ok := agreementMap[checkReq.Language]
 		if ok {
-			CurVsn := v.Get("version").Int()
+			CurVsn := v.Get("vsn").Int()
 			if int64(checkReq.Version) < CurVsn {
 				checkRsp.PopUp = true
 				checkRsp.Tips = v.Get("tips").String()
 			}
+			checkRsp.Version = int32(CurVsn)
 		}
 	}
 	ctx.JSON(200, checkRsp)
