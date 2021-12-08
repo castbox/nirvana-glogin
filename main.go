@@ -74,13 +74,13 @@ func kiteServe() {
 	glogin2.RegBindServer(cgi.Bind{})
 	glogin2.RegGmpServer(moss.Gmp{})
 	// 本地测试
-	//kite.StartServer(ProcessStop{}, &kite.Destination{
-	//	Cluster:      constant.ClusterName,
-	//	ServiceName:  constant.ServerName,
-	//	ServiceIndex: constant.Index,
-	//})
+	kite.StartServer(ProcessStop{}, &kite.Destination{
+		Cluster:      constant.ClusterName,
+		ServiceName:  constant.ServerName,
+		ServiceIndex: constant.Index,
+	})
 	// 部署运行
-	kite.Serve(ProcessStop{})
+	//kite.Serve(ProcessStop{})
 }
 
 // ProcessStop 执行服务退出流程

@@ -63,14 +63,14 @@ func (c *LoginConfig) Reload() {
 
 func WatchStaticConfig() {
 	// 本地环境
-	//serInfo := consul.ServiceInfo{
-	//	Cluster: "lwk_dev",
-	//	Service: "glogin",
-	//	Index:   2,
-	//}
-	//err := consul.WatchConfigByService(&serInfo, &staticConfig)
+	serInfo := consul.ServiceInfo{
+		Cluster: "lwk_dev",
+		Service: "glogin",
+		Index:   2,
+	}
+	err := consul.WatchConfigByService(&serInfo, &staticConfig)
 	// 部署环境
-	err := consul.WatchConfig(&staticConfig)
+	//err := consul.WatchConfig(&staticConfig)
 	if err != nil {
 		log.Fatalw("failed to wath config", "err", err)
 	} else {
