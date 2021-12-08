@@ -1,0 +1,2 @@
+{"log.level":"info","@timestamp":"2021-12-08T14:21:30+08:00","log.origin":{"file.name":"metrics/metrics.go","file.line":31},"message":"[kite metrics 开启]"}
+{"log.level":"info","@timestamp":"2021-12-08T14:21:30+08:00","log.origin":{"file.name":"tcp/server.go","file.line":138},"message":"[kite] MaxConn: 12000, MaxPacketSize: 16777216"}

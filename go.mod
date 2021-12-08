@@ -6,7 +6,6 @@ require (
 	git.dhgames.cn/svr_comm/anti_obsession v1.1.2
 	git.dhgames.cn/svr_comm/gcore v1.0.13
 	git.dhgames.cn/svr_comm/hawkeye/v2 v2.0.7
-	git.dhgames.cn/svr_comm/kite v1.1.5
 	github.com/JakeXu/aliyun-sms-sdk-golang v0.0.0-20171107055740-67b111e025ba
 	github.com/bitly/go-simplejson v0.5.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -23,6 +22,7 @@ require (
 )
 
 require (
+	git.dhgames.cn/svr_comm/kite v1.1.17 // indirect
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
