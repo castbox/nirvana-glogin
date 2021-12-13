@@ -2,6 +2,7 @@ package cgi
 
 import (
 	"fmt"
+	"git.dhgames.cn/svr_comm/anti_obsession/pbs/pb_obsession"
 	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin"
@@ -14,7 +15,6 @@ import (
 	"glogin/internal/plat"
 	"glogin/internal/smfpcrypto"
 	"glogin/internal/sms"
-	anti_authentication "glogin/pbs/authentication"
 	glogin "glogin/pbs/glogin"
 	"glogin/util"
 	"go.mongodb.org/mongo-driver/bson"
@@ -414,9 +414,9 @@ func fastResponse(response *glogin.FastLoginRsp, loginRsp internal.Rsp) {
 	response.DhAccount = loginRsp.AccountData.ID
 	response.DhToken = util.GenDHToken(loginRsp.AccountData.ID)
 	// 防沉迷返回
-	r2, ok := loginRsp.AntiRsp.(*anti_authentication.StateQueryResponse)
+	r2, ok := loginRsp.AntiRsp.(pb_obsession.CheckStateQueryResponse)
 	if ok {
-		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
+		response.ExtendData.Authentication = antiConvertClient(&r2)
 	}
 	if loginRsp.AccountData.Phone != "" {
 		response.ThirdPlat = "phone"
@@ -444,9 +444,9 @@ func visitorResponse(rsp *glogin.VisitorLoginRsp, dcRsp internal.Rsp) {
 	rsp.DhAccount = dcRsp.AccountData.ID
 	rsp.Visitor = dcRsp.AccountData.Visitor
 	// 防沉迷返回
-	r2, ok := dcRsp.AntiRsp.(anti_authentication.StateQueryResponse)
+	r2, ok := dcRsp.AntiRsp.(pb_obsession.CheckStateQueryResponse)
 	if ok {
-		rsp.ExtendData.Authentication = (*glogin.StateQueryResponse)(&r2)
+		rsp.ExtendData.Authentication = antiConvertClient(&r2)
 	}
 	rsp.ExtendData.Nick = ""
 	rsp.ExtendData.GameFirstLogin = dcRsp.GameRsp.FirstLogin
@@ -467,9 +467,9 @@ func thirdResponse(response *glogin.ThridLoginRsp, dcRsp internal.Rsp) {
 	response.DhAccount = dcRsp.AccountData.ID
 	response.Errmsg = "success"
 	response.DhToken = util.GenDHToken(dcRsp.AccountData.ID)
-	r2, ok := dcRsp.AntiRsp.(*anti_authentication.StateQueryResponse)
+	r2, ok := dcRsp.AntiRsp.(*pb_obsession.CheckStateQueryResponse)
 	if ok {
-		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
+		response.ExtendData.Authentication = antiConvertClient(r2)
 	}
 	response.ExtendData.GameFirstLogin = dcRsp.GameRsp.FirstLogin
 }
@@ -488,9 +488,9 @@ func smsResponse(response *glogin.SmsLoginRsp, dcRsp internal.Rsp) {
 	response.DhAccount = dcRsp.AccountData.ID
 	response.Errmsg = "success"
 	response.DhToken = util.GenDHToken(dcRsp.AccountData.ID)
-	r2, ok := dcRsp.AntiRsp.(*anti_authentication.StateQueryResponse)
+	r2, ok := dcRsp.AntiRsp.(*pb_obsession.CheckStateQueryResponse)
 	if ok {
-		response.ExtendData.Authentication = (*glogin.StateQueryResponse)(r2)
+		response.ExtendData.Authentication = antiConvertClient(r2)
 	}
 	response.ExtendData.GameFirstLogin = dcRsp.GameRsp.FirstLogin
 }

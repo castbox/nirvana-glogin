@@ -1,20 +1,21 @@
 package anti
 
 import (
-	"git.dhgames.cn/svr_comm/gmoss/v3"
-	"git.dhgames.cn/svr_comm/gmoss/v3/global"
+	"git.dhgames.cn/svr_comm/anti_obsession/api"
+	"git.dhgames.cn/svr_comm/anti_obsession/pbs/pb_obsession"
+	log "git.dhgames.cn/svr_comm/gcore/glog"
+	"git.dhgames.cn/svr_comm/kite"
 	"glogin/config"
 	"glogin/constant"
 	"glogin/internal"
-	anti_authentication "glogin/pbs/authentication"
 	"strings"
 	"time"
 )
 
-func Check(req *anti_authentication.CheckRequest) (*anti_authentication.CheckResponse, error) {
+func Check(req *pb_obsession.CheckRequest) (*pb_obsession.CheckResponse, error) {
 	autiDcCluster := config.Field(constant.AutiDcCluster).String()
 	cfgDc := strings.Split(autiDcCluster, "|")
-	rsp, err := anti_authentication.Check(req, global.WithCluster(cfgDc[0], cfgDc[1], constant.AutiService).WithTimeout(time.Second*constant.TimeOut))
+	rsp, err := api.Check(cfgDc[0], cfgDc[1], req, kite.Timeout(time.Second*constant.TimeOut))
 	if err != nil {
 		return rsp, err
 	} else {
@@ -31,20 +32,18 @@ func StateQuery(req internal.Req) (interface{}, error) {
 	if req.GameCd == "" {
 		req.GameCd = req.Game.GameCd
 	}
-	queryIn := &anti_authentication.StateQueryRequest{
+	queryIn := &pb_obsession.CheckStateQueryRequest{
 		GameCd: req.GameCd,
 		Id:     req.Account,
 		//DeviceId: req.Client.Dhid,
 	}
+	log.Infow("api.CheckAuditQuery req", "queryIn", queryIn)
 	cfgDc := strings.Split(config.Field(constant.AutiDcCluster).String(), "|")
-	//rsp, err := anti_authentication.Check(req, global.WithCluster(cfgDc[0], cfgDc[1], constant.AutiService).WithTimeout(time.Second*constant.TimeOut))
-	service := gmoss.MossWithDcClusterService(cfgDc[0], cfgDc[1], constant.AutiService)
-	rsp, err := anti_authentication.AuditQuery(queryIn, &global.CallOption{
-		Cluster: service,
-		Timeout: time.Second * constant.TimeOut,
-	})
+	rsp, err := api.CheckAuditQuery(cfgDc[0], cfgDc[1], queryIn, kite.Timeout(time.Second*constant.TimeOut))
+	log.Infow("api.CheckAuditQuery Rsp", "rsp", rsp, "err", err)
 	if err != nil {
-		return rsp, err
+		log.Errorw("api.CheckAuditQuery Error Let Pass Rsp ", "rsp", rsp, "err", err)
+		return rsp, nil
 	} else {
 		return rsp, nil
 	}

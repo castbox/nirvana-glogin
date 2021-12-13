@@ -1,0 +1,238 @@
+syntax = "proto3";
+package glogin;
+option go_package = "./glogin";
+
+//Client信息
+message LoginClient {
+    string imei = 1;            //国际移动设备识别码（仅安卓）
+    string android_id = 2;      //国际移动设备识别码（仅安卓）
+    string dhid = 3;            //数美id
+    string mac_address = 4;     //mac地址
+    string device_model = 5;    //设备型号
+    string dvice_name = 6;      //设备名字
+    string os_version = 7;      //手机系统版本
+    string network_type = 8;    //网络类型 1蜂窝移动网络 2WIFI
+    string ip = 9;              //ipv4地址
+    string country = 10;        //ISO 3166 标准二字码
+}
+
+//Game信息
+message LoginGame {
+    string adid = 1;            //广告ID (andriod)
+    string idfv = 2;            //苹果厂商id
+    string appsflyer_id = 3;    //appsflyer sdk得到的id
+    string advertising_id = 4;  //appsflyer 使用的广告id
+    string device_token = 5;    //推送消息用的token
+    string language = 6;        //游戏语言编码
+    string reserved_2 = 7;      //OAID广告标识符
+    string bundle_id = 8;       //游戏包名
+    string app_version = 9;     //游戏包名
+    string platform = 10;       //平台，只能是IOS或者ANDROID 大写
+    string channel = 11;        //渠道
+    string game_cd = 12;        //游戏编码，项目标识
+}
+
+// 防沉迷返回
+message StateQueryResponse{
+    string request_id = 1;            // 每次请求唯一标识
+    string err_code = 2;              // 错误码
+    string err_msg = 3;               // 错误码说明
+    int32 authentication_status = 4;  // 实名状态：0：成年，1：游客，2：0-8岁，3：8-16岁，4：16-18岁，5:认证中，6:异常认证中
+    bool is_holiday = 5;              // 是否节假日
+    int32 left_game_time = 8;         // 剩余游戏时间，已成年请忽略
+    int32 each_pay_amount = 9;        // 单次可充值额度，已成年请忽略
+    int32 left_pay_amount = 10;       // 总剩充值额度，已成年请忽略
+    int32 login_code = 11;            // 是否可以登陆的提示code
+    string login_message = 12;        // 如果login_code不为0，相应的提示字段。
+}
+
+// extendData
+message ExtendData {
+    string nick = 1;                        //nick 昵称 手机号为脱敏
+    StateQueryResponse authentication  = 2; //防沉迷状态信息
+    bool game_first_login = 3;              //游戏首次登录标记
+}
+
+
+//第三方登录请求
+message ThirdLoginReq {
+    string third_plat = 1;     // 第三方登录的平台( google、facebook, qq, 微信,yedun）
+    string third_uid = 2;      // 第三方登录时客户端获取到的唯一ID
+    string third_token = 3;    // 第三方登录时客户端获取的变化token串
+    string access_token = 4;   // 运营商授权码token
+    LoginClient client = 5;    // Client信息
+    LoginGame game = 6;        // Game信息
+}
+
+//第三方登录返回
+message ThridLoginRsp {
+    int32 code = 1;             //状态码；0:成功，其他为失败
+    string dh_token = 2;        //DH token 发送到游戏网关使用
+    string third_uid = 3;       //第三方登录的uid
+    string errmsg = 4;          //第三方登录的uid
+    string sm_id = 5;           //解析过后的数美ID，如果解析失败 原样返回
+    int32 dh_account = 6;       //dh数字账号
+    ExtendData extend_data = 7; //扩展数据
+}
+
+//手机验证码登录请求
+message SmsLoginReq {
+    string step = 1;            // 步骤（verify获得验证码，login登陆）
+    string phone = 2;           // 手机号码
+    string verifycode = 3;      // 获得的待验证的手机验证码 (step为登陆时需传)
+    LoginClient client = 4;     // Client信息
+    LoginGame game = 5;         // Game信息
+}
+
+//手机验证码登录返回
+message SmsLoginRsp {
+    int32 code = 1;             //状态码；0:成功，其他为失败
+    string dh_token = 2;        //DH token 发送到游戏网关使用
+    string errmsg = 3;          //第三方登录的uid
+    string sm_id = 4;           //解析过后的数美ID，如果解析失败 原样返回
+    int32 dh_account = 5;       //dh数字账号
+    ExtendData extend_data = 6; //Extend信息
+}
+
+
+//游客登录请求参数
+message VisitorLoginReq {
+    string dhid = 1;           // 数美id (visitor ID)
+    LoginClient client = 2;    // Client信息
+    LoginGame game = 3;        // Game信息
+}
+
+
+//游客登录返回
+message VisitorLoginRsp {
+    int32 code = 1;             //状态码；0:成功，其他为失败
+    string dh_token = 2;        //快速登录加密token
+    string errmsg = 3;          //错误信息(会有详细错误说明）
+    string sm_id = 4;           //解析过后的数美ID，如果解析失败 原样返回
+    int32 dh_account = 5;       //dh数字账号
+    string visitor = 6;         //生成账号的visitor
+    ExtendData extend_data = 7; //Extend信息
+}
+
+//Fast登录请求参数
+message FastLoginReq {
+    string dh_token = 1;       // 客户端缓存的 login token
+    LoginClient client = 2;    // Client信息
+    LoginGame game = 3;        // Game信息
+}
+
+
+//Fast登录返回
+message FastLoginRsp {
+    int32 code = 1;                 //状态码；0:成功，其他为失败
+    string dh_token = 2;            //快速登录加密token
+    string errmsg = 3;              //错误信息(会有详细错误说明）
+    string sm_id = 4;               //解析过后的数美ID，如果解析失败 原样返回
+    int32 dh_account = 5;           //dh数字账号
+    ExtendData extend_data = 6;     //Extend信息
+    string third_plat = 7;          //fast登录返回第三方登录方式
+}
+
+//登录相关
+service Login {
+    rpc SMS(SmsLoginReq) returns(SmsLoginRsp);
+    rpc Third(ThirdLoginReq) returns(ThridLoginRsp);
+    rpc Visitor(VisitorLoginReq) returns(VisitorLoginRsp);
+    rpc Fast(FastLoginReq) returns(FastLoginRsp);
+}
+
+
+//游客绑定申请
+message VistorBindThridReq {
+    string dhid = 1;
+    string dh_token = 2;
+    string third_plat = 3;
+    string third_token = 4;
+    string visitor = 5;
+}
+
+//游客绑定回复
+message VistorBindThridRsp {
+    int32 code = 1;
+    string dh_token = 2;
+    string errmsg = 3;
+    string sm_id = 4;
+    int32 dh_account = 5;
+    ExtendData extend_data = 6; //Extend信息
+    string third_plat = 7;
+}
+
+service Bind {
+    rpc BindThird(VistorBindThridReq) returns(VistorBindThridRsp);
+}
+
+//给GMP调用的moss接口
+message QueryRequest{
+    string account = 1;
+    repeated string bundleids = 2;
+    string login_type = 3;
+    int32 page_num = 4;
+    int32 page_size = 5;
+}
+
+message QueryResponse {
+    int32 code = 1;
+    int32 count = 2;
+    string msg = 3;
+    repeated AccountData data = 4;
+}
+
+message AccountData {
+    int32  _id= 1;
+    string bundle_id = 2;
+    string facebook = 3;
+    string ios = 4;
+    string google = 5;
+    string phone = 6;
+    CreateData create = 7;
+    string visitor = 8;
+    int64  last_login = 9;
+}
+
+message CreateData {
+    string   ip = 1;
+    int64 time = 2;
+    string sm_id = 3;
+    string bundle_id = 4;
+}
+
+
+//新查询接口,支持批量查账号
+message QueryReq{
+    repeated string accounts = 1;
+    repeated string bundleids = 2;
+    string login_type = 3;
+    int32 page_num = 4;
+    int32 page_size = 5;
+}
+
+message QueryRsp {
+    int32 code = 1;
+    int32 count = 2;
+    string msg = 3;
+    repeated AccountData data = 4;
+}
+
+// 第三方换绑手机
+message ChangeBindReq{
+    string account = 1;
+    string phone = 2;
+    string plat = 3;
+}
+
+message ChangeBindRsp {
+    int32 code = 1;
+    string msg = 2;
+    AccountData data = 4;
+}
+
+service Gmp {
+    rpc LoadAccountInfo(QueryRequest) returns(QueryResponse);
+    rpc QueryAccount(QueryReq) returns(QueryRsp);
+    rpc ChangeBind(ChangeBindReq) returns(ChangeBindRsp);
+}
