@@ -11,7 +11,7 @@ import (
 // AgreementCheckReq 用户协议检查请求
 type AgreementCheckReq struct {
 	BundleID string `json:"bundle_id" binding:"required"`
-	Version  int32  `json:"version" binding:"required"`
+	Version  int32  `json:"version"`
 	Language string `json:"language" binding:"required"`
 }
 
