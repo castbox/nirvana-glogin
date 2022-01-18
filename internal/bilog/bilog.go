@@ -3,7 +3,7 @@ package bilog
 import (
 	"encoding/json"
 	"fmt"
-	log "git.dhgames.cn/svr_comm/gcore/glog"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"glogin/config"
 	"io/ioutil"
 	"net/http"

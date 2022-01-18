@@ -2,13 +2,11 @@ package account
 
 import (
 	"fmt"
-	log "git.dhgames.cn/svr_comm/gcore/glog"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"glogin/db"
 	"glogin/db/db_core"
 	"glogin/internal"
-	"glogin/internal/anti"
 	"glogin/internal/appsflyer"
-	"glogin/internal/hawkeye"
 	"glogin/internal/plat"
 	"glogin/pbs/glogin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -85,11 +83,11 @@ func LoginVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (i
 
 func create(accountInfo bson.M, req internal.Req) (rsp internal.Rsp, err error) {
 	// 鹰眼check注册
-	_, hErr := hawkeye.CheckRegister(req)
-	if hErr != nil {
-		err = hErr
-		return
-	}
+	//_, hErr := hawkeye.CheckRegister(req)
+	//if hErr != nil {
+	//	err = hErr
+	//	return
+	//}
 	// 自动激活gameCD  k-v  gameCd - time
 	gameMap := make(map[string]db_core.GameInfo)
 	gameMap[req.Game.GameCd] = db_core.GameInfo{
@@ -105,12 +103,12 @@ func create(accountInfo bson.M, req internal.Req) (rsp internal.Rsp, err error) 
 		req.Account = fmt.Sprintf("%d", dhid)
 		req.GameCd = req.Game.GameCd
 		//anti_addiction
-		antiRsp, antiErr := anti.StateQuery(req)
-		if antiErr != nil {
-			err = antiErr
-			return
-		}
-		rsp.AntiRsp = antiRsp
+		//antiRsp, antiErr := anti.StateQuery(req)
+		//if antiErr != nil {
+		//	err = antiErr
+		//	return
+		//}
+		//rsp.AntiRsp = antiRsp
 		rsp.GameRsp.FirstLogin = true
 		// todo:: appsflyer
 		appsflyer.SendAppsFlyer(req)
@@ -127,21 +125,21 @@ func login(filter interface{}, req internal.Req) (internal.Rsp, error) {
 	}
 	// 鹰眼检查
 	req.Account = fmt.Sprintf("%d", accountData.ID)
-	hawkRsp, hawkErr := hawkeye.CheckLogin(req)
-	if hawkErr != nil {
-		return internalRsp, hawkErr
-	}
+	//hawkRsp, hawkErr := hawkeye.CheckLogin(req)
+	//if hawkErr != nil {
+	//	return internalRsp, hawkErr
+	//}
 	// 防沉迷查询
 	req.GameCd = req.Game.GameCd
 	log.Infow("anti.StateQuery req", "req", req)
-	antiRsp, antiErr := anti.StateQuery(req)
-	if antiErr != nil {
-		return internalRsp, antiErr
-	}
-	log.Infow("anti.StateQuery rsp ", "rsp", antiRsp, "req", req)
+	//antiRsp, antiErr := anti.StateQuery(req)
+	//if antiErr != nil {
+	//	return internalRsp, antiErr
+	//}
+	log.Infow("anti.StateQuery rsp ", "rsp", "antiRsp", "req", req)
 	internalRsp.AccountData = accountData
-	internalRsp.HawkRsp = hawkRsp
-	internalRsp.AntiRsp = antiRsp
+	//internalRsp.HawkRsp = hawkRsp
+	//internalRsp.AntiRsp = antiRsp
 	// 更新信息
 	gameRsp, upErr := updateLoginInfo(req, accountData)
 	internalRsp.GameRsp = gameRsp

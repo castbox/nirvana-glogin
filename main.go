@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/kite"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	"gitlab.degames.cn/svr_comm/kite"
 	"glogin/config"
 	"glogin/constant"
 	"glogin/db"
@@ -51,7 +51,7 @@ func startHttp() {
 	router := gin.Default()
 	pprof.Register(router)
 	router.POST("/:service/:action", cgi.ServiceHandler)
-	router.POST("/anti/:action", cgi.AutiHandler)
+	//router.POST("/anti/:action", cgi.AutiHandler)
 	router.POST("/ids/:action", cgi.IdsHandler)
 	router.POST("/cfg", cgi.CfgHandler)
 	router.POST("/agreement", cgi.CheckHandler)

@@ -2,8 +2,8 @@ package db
 
 import (
 	"context"
-	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/gcore/gmongo"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	"gitlab.degames.cn/svr_comm/gcore/gmongo"
 	"glogin/config"
 	"glogin/constant"
 	"glogin/db/db_core"

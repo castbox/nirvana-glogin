@@ -2,8 +2,8 @@ package configure
 
 import (
 	"encoding/json"
-	"git.dhgames.cn/svr_comm/gcore/consul"
-	log "git.dhgames.cn/svr_comm/gcore/glog"
+	"gitlab.degames.cn/svr_comm/gcore/consul"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"sync"
 )
 

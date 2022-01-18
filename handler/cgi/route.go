@@ -1,7 +1,7 @@
 package cgi
 
 import (
-	log "git.dhgames.cn/svr_comm/gcore/glog"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"

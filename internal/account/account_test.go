@@ -1,8 +1,8 @@
 package account
 
 import (
-	log "git.dhgames.cn/svr_comm/gcore/glog"
-	"git.dhgames.cn/svr_comm/gcore/gmongo"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	"gitlab.degames.cn/svr_comm/gcore/gmongo"
 	"glogin/config"
 	"glogin/db/db_core"
 	"glogin/util"

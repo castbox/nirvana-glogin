@@ -3,29 +3,25 @@ module glogin
 go 1.17
 
 require (
-	git.dhgames.cn/svr_comm/anti_obsession v1.1.2
-	git.dhgames.cn/svr_comm/gcore v1.0.13
-	git.dhgames.cn/svr_comm/hawkeye/v2 v2.0.7
 	github.com/JakeXu/aliyun-sms-sdk-golang v0.0.0-20171107055740-67b111e025ba
 	github.com/bitly/go-simplejson v0.5.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/pprof v1.3.0
-	github.com/gin-gonic/gin v1.7.4
+	github.com/gin-gonic/gin v1.7.7
 	github.com/gogf/gf v1.16.4
 	github.com/golang/protobuf v1.5.2
 	github.com/pborman/uuid v1.2.1
 	github.com/prometheus/client_golang v1.11.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.8.1
-	go.mongodb.org/mongo-driver v1.7.4
+	gitlab.degames.cn/svr_comm/gcore v1.3.5
+	go.mongodb.org/mongo-driver v1.8.2
 	google.golang.org/protobuf v1.27.1
 )
 
 require (
-	git.dhgames.cn/svr_comm/kite v1.1.17 // indirect
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/clbanning/mxj v1.8.5-0.20200714211355-ff02cfb8ea28 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -35,8 +31,6 @@ require (
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
-	github.com/golang/snappy v0.0.3 // indirect
-	github.com/google/uuid v1.1.2 // indirect
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
@@ -63,11 +57,19 @@ require (
 	go.elastic.co/ecszap v1.0.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	go.uber.org/zap v1.18.1 // indirect
-	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899 // indirect
+	go.uber.org/zap v1.20.0 // indirect
+	golang.org/x/crypto v0.0.0-20201216223049-8b5274cf687f // indirect
+	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20211025201205-69cdffdb9359 // indirect
-	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+)
+
+require (
+	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
+	github.com/golang/snappy v0.0.3 // indirect
+	github.com/google/uuid v1.1.2
+	gitlab.degames.cn/svr_comm/kite v1.2.2
+	golang.org/x/sys v0.0.0-20211025201205-69cdffdb9359 // indirect
+	golang.org/x/text v0.3.7 // indirect
 )

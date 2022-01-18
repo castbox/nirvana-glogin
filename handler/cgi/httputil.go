@@ -2,11 +2,7 @@ package cgi
 
 import (
 	"fmt"
-	"git.dhgames.cn/svr_comm/anti_obsession/pbs/pb_obsession"
-	log "git.dhgames.cn/svr_comm/gcore/glog"
 	"github.com/gin-gonic/gin"
-	"glogin/pbs/glogin"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func ParseRequestError(c *gin.Context, code int32, err error) {
@@ -16,19 +12,19 @@ func ParseRequestError(c *gin.Context, code int32, err error) {
 	})
 }
 
-func antiConvertClient(antiRsp *pb_obsession.CheckStateQueryResponse) *glogin.StateQueryResponse {
-	rspToClient := &glogin.StateQueryResponse{}
-	defer func() {
-		if err := recover(); err != nil {
-			log.Errorw("got panic", "err", err)
-		}
-	}()
-	rspBytes, err := protojson.Marshal(antiRsp)
-	if err != nil {
-		return rspToClient
-	}
-	err = protojson.Unmarshal(rspBytes, rspToClient)
-	return rspToClient
+//func antiConvertClient(antiRsp *pb_obsession.CheckStateQueryResponse) *glogin.StateQueryResponse {
+//	rspToClient := &glogin.StateQueryResponse{}
+//	defer func() {
+//		if err := recover(); err != nil {
+//			log.Errorw("got panic", "err", err)
+//		}
+//	}()
+//	rspBytes, err := protojson.Marshal(antiRsp)
+//	if err != nil {
+//		return rspToClient
+//	}
+//	err = protojson.Unmarshal(rspBytes, rspToClient)
+//	return rspToClient
 
 	//return &glogin.StateQueryResponse{
 	//	RequestId:            antiRsp.RequestId,
@@ -42,4 +38,4 @@ func antiConvertClient(antiRsp *pb_obsession.CheckStateQueryResponse) *glogin.St
 	//	LoginCode:            antiRsp.LoginCode,
 	//	LoginMessage:         antiRsp.LoginMessage,
 	//}
-}
+//}

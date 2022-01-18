@@ -8,7 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	log "git.dhgames.cn/svr_comm/gcore/glog"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"github.com/dgrijalva/jwt-go"
 	"glogin/config"
 	"io"

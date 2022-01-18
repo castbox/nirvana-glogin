@@ -8,8 +8,8 @@ package glogin
 
 import (
 	errors "errors"
-	kite "git.dhgames.cn/svr_comm/kite"
-	pb "git.dhgames.cn/svr_comm/kite/pb"
+	kite "gitlab.degames.cn/svr_comm/kite"
+	pb "gitlab.degames.cn/svr_comm/kite/pb"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

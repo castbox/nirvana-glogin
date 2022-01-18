@@ -2,7 +2,7 @@ package appsflyer
 
 import (
 	"encoding/json"
-	log "git.dhgames.cn/svr_comm/gcore/glog"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"glogin/config"
 	"glogin/constant"
 	"glogin/internal"

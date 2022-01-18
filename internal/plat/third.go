@@ -1,7 +1,7 @@
 package plat
 
 import (
-	log "git.dhgames.cn/svr_comm/gcore/glog"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"glogin/pbs/glogin"
 )
 

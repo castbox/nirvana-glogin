@@ -2,7 +2,7 @@ package plat
 
 import (
 	"fmt"
-	log "git.dhgames.cn/svr_comm/gcore/glog"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"github.com/tidwall/gjson"
 	"glogin/config"
 	"glogin/db"

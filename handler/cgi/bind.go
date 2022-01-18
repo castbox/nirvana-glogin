@@ -2,7 +2,7 @@ package cgi
 
 import (
 	"fmt"
-	log "git.dhgames.cn/svr_comm/gcore/glog"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"glogin/constant"
 	"glogin/internal/account"
 	"glogin/internal/smfpcrypto"

@@ -1,7 +1,7 @@
 package sms
 
 import (
-	log "git.dhgames.cn/svr_comm/gcore/glog"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"glogin/util"
 	"testing"
 	"time"
