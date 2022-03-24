@@ -1,10 +1,10 @@
 package cgi
 
 import (
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	glogin2 "glogin/pbs/glogin"
 	"reflect"
 )
@@ -24,8 +24,8 @@ func ServiceHandler(ctx *gin.Context) {
 func schedule(service string, action string, ctx *gin.Context) (result proto.Message) {
 	request := reflect.ValueOf(routes[service][action][1]).Call(nil)
 	req := request[0].Interface()
-	if err := ctx.BindJSON(req); err != nil {
-		log.Errorw("BindJSON", "err", err)
+	if err := ctx.Bind(req); err != nil {
+		log.Errorw("Bind", "err", err)
 		panic(err)
 	}
 	log.Infow("schedule 2", "req", req)
