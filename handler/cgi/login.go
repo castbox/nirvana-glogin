@@ -17,6 +17,7 @@ import (
 	glogin "glogin/pbs/glogin"
 	"glogin/util"
 	"go.mongodb.org/mongo-driver/bson"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -260,9 +261,12 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 	ip := l.Ctx.ClientIP()
 	req.Client.Ip = ip
 	// 数美ID解析
-	smId := smfpcrypto.ParseSMID(req.Client.Dhid)
+	// smId := smfpcrypto.ParseSMID(req.Client.Dhid)
 	// 创建唯一设备账号，如果有SMID就用SMID创建，如果没有就随机
-	visitorId := CreateVisitorID(req.Dhid, smId)
+	// visitorId := CreateVisitorID(req.Dhid, smId)
+	fmt.Println("req.Dhid: ", req.Dhid)
+	visitorId := VisitorID(req.Dhid)
+	fmt.Println("visitorId: ", visitorId)
 	if visitorId == "" {
 		rsp.Code = constant.ErrCodeCreateVisitorIdFail
 		rsp.Errmsg = fmt.Sprintf("visitor is agrs smid error: %s", req.Dhid)
@@ -278,7 +282,7 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 			rsp.Errmsg = fmt.Sprintf("visitor  %s fast login create account error: %s", visitorId, errCreate)
 			return rsp, errCreate
 		}
-		rsp.SmId = smId
+		rsp.SmId = visitorId
 		visitorResponse(rsp, createRsp)
 		log.Infow("visitor fast login success ", "rsp", rsp)
 		return rsp, nil
@@ -292,7 +296,7 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 			return rsp, nil
 		}
 		// 返回
-		rsp.SmId = smId
+		rsp.SmId = visitorId
 		visitorResponse(rsp, loginRsp)
 		log.Infow("visitor login success", "visitor", visitorId)
 		return rsp, nil
@@ -390,6 +394,14 @@ func CreateVisitorID(srcVisitor string, dhId string) string {
 	// 拼接时间戳
 	timeParam := srcVisitor[lastPos:]
 	return dhId + timeParam
+}
+
+// 获取visitor id
+func VisitorID(srcVisitor string) (ret string) {
+	if srcVisitor == "0" {
+		ret = strconv.FormatInt(account.AccountCount(bson.M{"_id": bson.M{"$gt": 0}}), 10)
+	}
+	return ret
 }
 
 func fastParamCheck(request *glogin.FastLoginReq) (bRsp bool, code int32, errMsg string) {

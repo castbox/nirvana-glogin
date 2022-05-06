@@ -18,6 +18,10 @@ func CheckNotExist(filter interface{}) bool {
 	return db.CheckNotExist(filter, db.AccountTableName())
 }
 
+func AccountCount(filter interface{}) int64 {
+	return db.AccountCount(filter, db.AccountTableName())
+}
+
 func CreateVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (internal.Rsp, error) {
 	document := bson.M{"visitor": visitor, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
 	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}

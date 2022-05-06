@@ -220,9 +220,9 @@ github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d h1:splanxYIlg+5LfHAM
 github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d/go.mod h1:rHwXgn7JulP+udvsHwJoVG1YGAP6VLg4y9I5dyZdqmA=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
-gitlab.degames.cn/svr_comm/gcore v1.3.5 h1:hY1wCHh1tXjA5K/Pr+jDiceCqkz6kafzrazK6OY7b50=
+gitlab.degames.cn/svr_comm/gcore v1.3.5 h1:LY+unB4oaTEqX0rs1qb5arL9HNtw1HJs6OXZaHGditE=
 gitlab.degames.cn/svr_comm/gcore v1.3.5/go.mod h1:Y/7UdczFgk2h8SiZIGetTi6kKQem9x7QjMcGDiP+uvw=
-gitlab.degames.cn/svr_comm/kite v1.2.2 h1:QYS5ZYe4XVK0XDE/Ms+TO7DI6dvDwEFwdDdrs3XqLnY=
+gitlab.degames.cn/svr_comm/kite v1.2.2 h1:ENy3HcUmbM6qvFk9eCyS60FE2/ckFNQtwFL0Suw5z+w=
 gitlab.degames.cn/svr_comm/kite v1.2.2/go.mod h1:O92z0qkMoKAf2kUsFPBlfW2NrApb5whf3mXpNPS4HKs=
 go.elastic.co/ecszap v1.0.0 h1:PdQkRUeraR3XHJ14T7JMa+ncU0XXrVrcEN/BoRa2nMI=
 go.elastic.co/ecszap v1.0.0/go.mod h1:HTUi+QRmr3EuZMqxPX+5fyOdMNfUu5iPebgfhgsTJYQ=

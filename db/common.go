@@ -47,3 +47,13 @@ func UpdateOne(filter interface{}, update interface{}, tableName string) (err er
 	}
 	return
 }
+
+// 账号数量
+func AccountCount(filter interface{}, tableName string) int64 {
+	count, err := gmongo.CountDocuments(config.MongoUrl(), config.MongoDb(), tableName, filter)
+	if err != nil {
+		log.Warnw("AccountCount", "err", err)
+		return -1
+	}
+	return count
+}
