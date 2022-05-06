@@ -261,7 +261,7 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 	ip := l.Ctx.ClientIP()
 	req.Client.Ip = ip
 	visitorId := VisitorID(req.Dhid)
-	log.Infow("req.Dhid: ", req.Dhid, "visitorId: ", visitorId)
+	log.Infow("visitor Id","dhid: ", req.Dhid, "visitorId: ", visitorId)
 	if visitorId == "" {
 		rsp.Code = constant.ErrCodeCreateVisitorIdFail
 		rsp.Errmsg = fmt.Sprintf("visitor is agrs smid error: %s", req.Dhid)
