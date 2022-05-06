@@ -260,13 +260,8 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 	}
 	ip := l.Ctx.ClientIP()
 	req.Client.Ip = ip
-	// 数美ID解析
-	// smId := smfpcrypto.ParseSMID(req.Client.Dhid)
-	// 创建唯一设备账号，如果有SMID就用SMID创建，如果没有就随机
-	// visitorId := CreateVisitorID(req.Dhid, smId)
-	fmt.Println("req.Dhid: ", req.Dhid)
 	visitorId := VisitorID(req.Dhid)
-	fmt.Println("visitorId: ", visitorId)
+	log.Infow("req.Dhid: ", req.Dhid, "visitorId: ", visitorId)
 	if visitorId == "" {
 		rsp.Code = constant.ErrCodeCreateVisitorIdFail
 		rsp.Errmsg = fmt.Sprintf("visitor is agrs smid error: %s", req.Dhid)
@@ -399,9 +394,15 @@ func CreateVisitorID(srcVisitor string, dhId string) string {
 // 获取visitor id
 func VisitorID(srcVisitor string) (ret string) {
 	if srcVisitor == "0" {
-		ret = strconv.FormatInt(account.AccountCount(bson.M{"_id": bson.M{"$gt": 0}}), 10)
+		Count := account.AccountCount(bson.M{"_id": bson.M{"$gt": 0}})
+		if Count == -1 {
+			log.Warnw("VisitorID err: Count = -1")
+			ret = ""
+		}else {
+			ret = strconv.FormatInt(Count, 10)
+		}
 	}
-	return ret
+	return
 }
 
 func fastParamCheck(request *glogin.FastLoginReq) (bRsp bool, code int32, errMsg string) {
