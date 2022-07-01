@@ -19,11 +19,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
 var (
 	PlatIsWrong = fmt.Errorf("third plat is wrong")
+	VisitorMutex sync.Mutex
 )
 
 type Login struct {
@@ -234,6 +236,9 @@ func (l Login) VisitorEx(request *glogin.VisitorLoginReq, ctx *gin.Context) (res
 }
 
 func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp, err error) {
+	VisitorMutex.Lock()
+	defer VisitorMutex.Unlock()
+
 	rsp = &glogin.VisitorLoginRsp{
 		Code:   constant.ErrCodeOk,
 		Errmsg: constant.ErrMsgOk,
