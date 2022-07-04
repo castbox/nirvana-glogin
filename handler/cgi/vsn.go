@@ -164,13 +164,19 @@ func DbSetVsn(request *SetVsnReq) (err error) {
 	_ = db.LoadOne(bson.M{"_id": request.Platform}, doc, VsnTableName())
 
 	upData := bson.M{}
-	//upData["client_version_map"] = doc.ClientVersionMap
+	upData["client_version_map"] = bson.M{}
 	if request.AppVersion != "" {
 		upData["app_version"] = request.AppVersion
 	}
 	if request.ClientVersion != "" && request.ClientHotversion != "" {
-		doc.ClientVersionMap[request.ClientVersion] = request.ClientHotversion
-		upData["client_version_map"] = doc.ClientVersionMap
+		if doc.ClientVersionMap == nil {
+			tmp := bson.M{}
+			tmp[request.ClientVersion] = request.ClientHotversion
+			upData["client_version_map"] = tmp
+		}else{
+			doc.ClientVersionMap[request.ClientVersion] = request.ClientHotversion
+			upData["client_version_map"] = doc.ClientVersionMap
+		}
 	}
 	if request.ClientForceupdate != "" {
 		upData["client_forceupdate"] = request.ClientForceupdate
