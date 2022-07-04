@@ -4,6 +4,7 @@ import (
 	log "gitlab.degames.cn/svr_comm/gcore/glog"
 	"gitlab.degames.cn/svr_comm/gcore/gmongo"
 	"glogin/config"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func InitMongo() {
@@ -16,7 +17,7 @@ func InitMongo() {
 func LoadOne(filter interface{}, result interface{}, tableName string) (err error) {
 	doc, errFind := gmongo.FindOne(config.MongoUrl(), config.MongoDb(), tableName, filter)
 	if errFind != nil {
-		log.Warnw("AccountTable LoadOne", "err", err)
+		log.Warnw("Table LoadOne", "err", err)
 		err = errFind
 		return
 	}
@@ -40,6 +41,16 @@ func CheckNotExist(filter interface{}, tableName string) bool {
 
 func UpdateOne(filter interface{}, update interface{}, tableName string) (err error) {
 	_, errUpdate := gmongo.UpdateOne(config.MongoUrl(), config.MongoDb(), tableName, filter, update)
+	if errUpdate != nil {
+		log.Warnw("UpdateOne Table error", "tableName", tableName, "errUpdate", errUpdate)
+		err = errUpdate
+		return
+	}
+	return
+}
+
+func UpdateOne_Upsert(filter interface{}, update interface{}, tableName string) (err error) {
+	_, errUpdate := gmongo.UpdateOne(config.MongoUrl(), config.MongoDb(), tableName, filter, update, options.Update().SetUpsert(true))
 	if errUpdate != nil {
 		log.Warnw("UpdateOne Table error", "tableName", tableName, "errUpdate", errUpdate)
 		err = errUpdate

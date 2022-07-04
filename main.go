@@ -56,6 +56,8 @@ func startHttp() {
 	router.POST("/cfg", cgi.CfgHandler)
 	router.POST("/agreement", cgi.CheckHandler)
 	router.POST("/token", cgi.TokenHandler)
+	router.POST("/set_vsn", cgi.SetVsn)
+	router.GET("/get_vsn", cgi.GetVsn)
 	router.GET("/metrics", prometheusHandler())
 	router.GET("/heart", func(ctx *gin.Context) { ctx.JSON(http.StatusOK, gin.H{"err_code": constant.ErrCodeOk}) })
 	if err := router.Run(config.WebPort()); err != nil {
