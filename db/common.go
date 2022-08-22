@@ -8,7 +8,7 @@ import (
 )
 
 func InitMongo() {
-	gmongo.Init(config.MongoUrl())
+	//gmongo.Init(config.MongoUrl())
 	InitAccount()
 	InitVerifyCode()
 	InitForBusiness()
