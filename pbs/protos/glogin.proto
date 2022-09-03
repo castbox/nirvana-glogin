@@ -192,6 +192,7 @@ message AccountData {
     CreateData create = 7;
     string visitor = 8;
     int64  last_login = 9;
+    string token = 10;
 }
 
 message CreateData {
