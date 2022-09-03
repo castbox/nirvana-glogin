@@ -284,6 +284,8 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 		}
 		rsp.SmId = visitorId
 		visitorResponse(rsp, createRsp)
+		// token存储
+		account.SetToken(rsp.DhAccount, rsp.DhToken)
 		log.Infow("visitor fast login success ", "rsp", rsp)
 		return rsp, nil
 	} else {
@@ -298,6 +300,8 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 		// 返回
 		rsp.SmId = visitorId
 		visitorResponse(rsp, loginRsp)
+		// token存储
+		account.SetToken(rsp.DhAccount, rsp.DhToken)
 		log.Infow("visitor login success", "visitor", visitorId)
 		return rsp, nil
 	}

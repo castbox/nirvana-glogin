@@ -22,6 +22,14 @@ func AccountCount(filter interface{}) int64 {
 	return db.AccountCount(filter, db.AccountTableName())
 }
 
+func SetToken(account int32, token string)  {
+	upData := bson.M{
+		"token": token,
+	}
+	setData := bson.M{"$set": upData}
+	db.UpdateOne(bson.M{"_id": account}, setData, db.AccountTableName())
+}
+
 func CreateVisitor(request *glogin.VisitorLoginReq, visitor string, ip string) (internal.Rsp, error) {
 	document := bson.M{"visitor": visitor, "create": bson.M{"time": time.Now().Unix(), "ip": ip, "bundle_id": request.Game.BundleId}}
 	req := internal.Req{IP: ip, Client: request.Client, Game: request.Game}
