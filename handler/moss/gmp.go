@@ -222,7 +222,7 @@ func (Gmp) LoadAccountInfo(request *glogin.QueryRequest) (response *glogin.Query
 		filter := bson.M{
 			"_id": dhAccount,
 		}
-
+		log.Infow(" LoadAccountInfo test 1 ", dhAccount)
 		doc := db_core.AccountData{}
 		errLoad := db.LoadOne(filter, &doc, db.AccountTableName())
 		if errLoad != nil {
@@ -236,10 +236,12 @@ func (Gmp) LoadAccountInfo(request *glogin.QueryRequest) (response *glogin.Query
 				return response, err
 			}
 		}
+		log.Infow(" LoadAccountInfo test 2 ", doc.Token)
 		response.Code = 200
 		response.Count = 1
 		response.Msg = "success"
 		pbAcc, errC := dbConvertToPb(doc)
+		log.Infow(" LoadAccountInfo test 3 ", pbAcc.Token)
 		if errC == nil {
 			response.Data = append(response.Data, &pbAcc)
 		}
