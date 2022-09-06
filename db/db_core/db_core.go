@@ -13,7 +13,7 @@ type AccountData struct {
 	WeChat    string              `json:"wechat" bson:"wechat"`         // wechat
 	LastLogin int64               `json:"last_login" bson:"last_login"` // last_login
 	Games     map[string]GameInfo `json:"games" bson:"games"`           // games
-	Token 	  string 			  `json:"token,omitempty"`				// token
+	Token 	  string 			  `json:"token" bson:"token"`			// token
 }
 
 type GameInfo struct {
