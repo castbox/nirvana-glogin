@@ -232,8 +232,18 @@ message ChangeBindRsp {
     AccountData data = 4;
 }
 
+// 删除账号
+message DeleteAccountReq {
+    string account = 1;
+}
+
+message DeleteAccountRsp {
+    int32 code = 1;
+}
+
 service Gmp {
     rpc LoadAccountInfo(QueryRequest) returns(QueryResponse);
     rpc QueryAccount(QueryReq) returns(QueryRsp);
     rpc ChangeBind(ChangeBindReq) returns(ChangeBindRsp);
+    rpc DeleteAccount(DeleteAccountReq) returns(DeleteAccountRsp);
 }

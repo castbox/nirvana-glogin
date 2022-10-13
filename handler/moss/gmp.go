@@ -251,6 +251,15 @@ func (Gmp) LoadAccountInfo(request *glogin.QueryRequest) (response *glogin.Query
 	return response, nil
 }
 
+// 根据玩家账号删除
+func (Gmp) DeleteAccount(request *glogin.DeleteAccountReq) (response *glogin.DeleteAccountRsp, err error) {
+	log.Infow("DeleteAccount begin, account: ", request.GetAccount())
+	err = db.DeleteOne(bson.M{
+		"_id": request.GetAccount(),
+	}, db.AccountTableName())
+	return
+}
+
 func dbConvertToPb(dbAccount db_core.AccountData) (pbAccount glogin.AccountData, err error) {
 	pbAccount.XId = dbAccount.ID
 	pbAccount.BundleId = dbAccount.BundleID
