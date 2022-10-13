@@ -69,8 +69,9 @@ func AccountCount(filter interface{}, tableName string) int64 {
 	return count
 }
 
-func DeleteOne(filter interface{}, tableName string) (err error)  {
-	_, err = gmongo.DeleteOne(config.MongoUrl(), config.MongoDb(), tableName, filter)
+func DeleteOne(filter interface{}, tableName string) (err error) {
+	n, err := gmongo.DeleteOne(config.MongoUrl(), config.MongoDb(), tableName, filter)
+	log.Warnw("DeleteOne Table count", n)
 	if err != nil {
 		log.Warnw("DeleteOne Table error", "tableName", tableName, "errDeleteOne", err)
 	}

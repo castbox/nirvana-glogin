@@ -254,10 +254,14 @@ func (Gmp) LoadAccountInfo(request *glogin.QueryRequest) (response *glogin.Query
 // 根据玩家账号删除
 func (Gmp) DeleteAccount(request *glogin.DeleteAccountReq) (response *glogin.DeleteAccountRsp, err error) {
 	log.Infow("DeleteAccount begin, account: ", request.GetAccount())
-	err = db.DeleteOne(bson.M{
+	response = &glogin.DeleteAccountRsp{Code: 0}
+	if err = db.DeleteOne(bson.M{
 		"_id": request.GetAccount(),
-	}, db.AccountTableName())
-	return
+	}, db.AccountTableName()); err != nil {
+		log.Infow("DeleteAccount err: ", err)
+		response.Code = -1
+	}
+	return response, err
 }
 
 func dbConvertToPb(dbAccount db_core.AccountData) (pbAccount glogin.AccountData, err error) {
