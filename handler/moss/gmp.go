@@ -255,8 +255,9 @@ func (Gmp) LoadAccountInfo(request *glogin.QueryRequest) (response *glogin.Query
 func (Gmp) DeleteAccount(request *glogin.DeleteAccountReq) (response *glogin.DeleteAccountRsp, err error) {
 	log.Infof("DeleteAccount begin, account: %v ", request.GetAccount())
 	response = &glogin.DeleteAccountRsp{Code: 0}
+	dhAccount, err := strconv.Atoi(request.Account)
 	if err = db.DeleteOne(bson.M{
-		"_id": request.GetAccount(),
+		"_id": dhAccount,
 	}, db.AccountTableName()); err != nil {
 		log.Infof("DeleteAccount err: %v", err)
 		response.Code = -1
