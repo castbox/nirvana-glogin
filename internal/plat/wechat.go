@@ -20,6 +20,15 @@ type Oauth2AccessToken struct {
 	Errmsg       string `json:"errmsg,omitempty"`  // 错误信息
 }
 
+// 获取开放平台，access_token 返回结构体
+type Json2AccessToken struct {
+	Openid       string `json:"openid,omitempty"`
+	Unionid      string `json:"unionid,omitempty"`
+	SessionKey   string `json:"session_key,omitempty"`
+	Errcode      int    `json:"errcode,omitempty"` // 错误码
+	Errmsg       string `json:"errmsg,omitempty"`  // 错误信息
+}
+
 type CheckAccessTokenRsp struct {
 	Errcode int    `json:"errcode,omitempty"` // 错误码
 	Errmsg  string `json:"errmsg,omitempty"`  // 错误信息
@@ -48,8 +57,8 @@ func (w wechat) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 	appId := config.PackageParam(request.Game.BundleId, "wx_app_id")
 	appSecret := config.PackageParam(request.Game.BundleId, "wx_app_secret")
 	code := request.ThirdToken
-	//log.Infow("wechat auth appInfo", "appId", appId, "appSecret", appSecret, "code", code)
-	accessToken, err := GetOauth2AccessToken(appId, appSecret, code)
+	log.Infow("wechat auth appInfo", "appId", appId, "appSecret", appSecret, "code", code)
+	accessToken, err := GetJsCode2SessionAccessToken(appId, appSecret, code)
 	if err != nil {
 		log.Warnw("wechat auth error ", "err", err)
 		return nil, err
@@ -66,6 +75,8 @@ func (w wechat) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 			return nil, fmt.Errorf("wechat auth error unionid and opendid is nil")
 		}
 	}
+
+	/*
 	// Nick
 	oauth2UserInfo, errUserInfo := GetOauth2UserInfo(accessToken.AccessToken, accessToken.Openid)
 	if errUserInfo != nil {
@@ -73,10 +84,11 @@ func (w wechat) Auth(request *glogin.ThirdLoginReq) (*AuthRsp, error) {
 		return nil, errUserInfo
 	}
 	log.Infow("wechat auth GetOauth2UserInfo rsp", "rsp", errUserInfo)
+	 */
 	return &AuthRsp{
 		Uid:     accessToken.Openid,
 		UnionId: accessToken.Unionid,
-		Nick:    oauth2UserInfo.Nickname,
+		//Nick:    oauth2UserInfo.Nickname,
 	}, nil
 }
 
@@ -86,6 +98,22 @@ func (w wechat) String() string {
 
 func (w wechat) DbFieldName() string {
 	return "wechat"
+}
+
+//  GetJsCode2SessionAccessToken 微信第三方登录，code 换取 access_token
+//  appId：应用唯一标识，在微信开放平台提交应用审核通过后获得
+//  appSecret：应用密钥AppSecret，在微信开放平台提交应用审核通过后获得
+//  code：App用户换取access_token的code
+//  文档：https://developers.weixin.qq.com/minigame/dev/api-backend/open-api/login/auth.code2Session.html
+func GetJsCode2SessionAccessToken(appId, appSecret, code string) (accessToken *Json2AccessToken, err error) {
+	accessToken = new(Json2AccessToken)
+	url := "https://api.weixin.qq.com/sns/jscode2session?appid=" + appId + "&secret=" + appSecret + "&js_code=" + code + "&grant_type=authorization_code"
+	log.Infow("wechat auth url", "url", url)
+	_, errs := xhttp.NewClient().Get(url).EndStruct(accessToken)
+	if len(errs) > 0 {
+		return nil, errs[0]
+	}
+	return accessToken, nil
 }
 
 //  GetOauth2AccessToken 微信第三方登录，code 换取 access_token

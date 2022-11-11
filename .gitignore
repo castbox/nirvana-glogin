@@ -3,4 +3,5 @@
 *.log
 log/
 .idea/
+client_test-glogin_test-1/glogin
 glogin

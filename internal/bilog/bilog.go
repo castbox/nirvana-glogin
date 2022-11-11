@@ -22,6 +22,8 @@ type Log struct {
 }
 
 func (l *Log) Push() {
+	// 暂时注释楼上的BI打点
+	return
 	if err := l.push(); err != nil {
 		log.Warnw("bilog push 失败", "err", err)
 		return

@@ -6,7 +6,6 @@ import (
 	_ "github.com/gin-gonic/gin"
 	"github.com/pborman/uuid"
 	log "gitlab.degames.cn/svr_comm/gcore/glog"
-	"glogin/config"
 	"glogin/constant"
 	"glogin/internal"
 	"glogin/internal/account"
@@ -173,6 +172,8 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 	smID := smfpcrypto.ParseSMID(request.Client.Dhid)
 	request.GetClient().Dhid = smID
 	response.SmId = smID
+
+	/*
 	// 为兼容海外版本老数据,1004项目若获得bundle账号，直接登录
 	if config.Field("region_mark").Int() == constant.RegionOverseas &&
 		request.Game.GameCd == constant.AODGameCd {
@@ -191,6 +192,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			return response, nil
 		}
 	}
+	*/
 
 	// 卓杭通行证
 	if account.CheckNotExist(bson.M{dbField: unionId}) {
@@ -207,7 +209,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Nick = util.HideStar(unionId)
 		}
 		log.Infow("third login success 1", " request.ThirdPlat", request.ThirdPlat, "unionId", unionId)
-		bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
+		//bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
 		return response, nil
 	} else {
 		// 账号存在, 直接登录
@@ -224,7 +226,7 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 			response.ExtendData.Nick = util.HideStar(unionId)
 		}
 		log.Infow("third login success 2", "response", response, "unionId", unionId)
-		bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
+		//bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
 		return response, nil
 	}
 	return response, nil
