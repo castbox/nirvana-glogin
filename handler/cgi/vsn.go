@@ -88,15 +88,23 @@ func SetVsn(ctx *gin.Context) {
 		ParseRequestError(ctx, 500, err)
 		return
 	}
-	//todo 存储字段
-	err = DbSetVsn(vsnReq)
-	if err != nil {
-		ParseRequestError(ctx, 500, err)
-		return
+	// 判断platform是否为""
+	if vsnReq.Platform == "" {
+		vsnRsp.Errno = -1
+		vsnRsp.Info = "Platform == nil"
+		ctx.JSON(404, vsnRsp)
+	}else{
+		//todo 存储字段
+		err = DbSetVsn(vsnReq)
+		if err != nil {
+			ParseRequestError(ctx, 500, err)
+			return
+		}
+
+		vsnRsp.Errno = 0
+		vsnRsp.Info = "success"
+		ctx.JSON(200, vsnRsp)
 	}
-	vsnRsp.Errno = 0
-	vsnRsp.Info = "success"
-	ctx.JSON(200, vsnRsp)
 }
 
 func GetVsn(ctx *gin.Context) {
@@ -122,24 +130,19 @@ func GetVsn(ctx *gin.Context) {
 
 	hot, ok := dbVsn.ClientVersionMap[VsnReq.ClientVersion]
 	if ok {
-		VsnRsp.Errno = 0
-		VsnRsp.Info = "success"
 		VsnRsp.ClientHotversion = hot.(string)
-		VsnRsp.AppVersion = dbVsn.AppVersion
-		VsnRsp.ClientVersion = VsnReq.ClientVersion
-		VsnRsp.ClientForceupdate = dbVsn.ClientForceupdate
-		VsnRsp.ClientDownloadurl = dbVsn.ClientDownloadurl
-		VsnRsp.ClientUnderreviewVersion = dbVsn.ClientUnderreviewVersion
-		VsnRsp.ServerVersion = dbVsn.ServerVersion
-		VsnRsp.ServerForceequal = dbVsn.ServerForceequal
-		VsnRsp.ClientSpecifyForceupdateVersion = dbVsn.ClientSpecifyForceupdateVersion
-
-		ctx.JSON(200, VsnRsp)
-	}else{
-		VsnRsp.Errno = -1
-		VsnRsp.Info = "failure, cannot find ClientVersion!"
-		ctx.JSON(200, VsnRsp)
 	}
+	VsnRsp.AppVersion = dbVsn.AppVersion
+	VsnRsp.ClientVersion = VsnReq.ClientVersion
+	VsnRsp.ClientForceupdate = dbVsn.ClientForceupdate
+	VsnRsp.ClientDownloadurl = dbVsn.ClientDownloadurl
+	VsnRsp.ClientUnderreviewVersion = dbVsn.ClientUnderreviewVersion
+	VsnRsp.ServerVersion = dbVsn.ServerVersion
+	VsnRsp.ServerForceequal = dbVsn.ServerForceequal
+	VsnRsp.ClientSpecifyForceupdateVersion = dbVsn.ClientSpecifyForceupdateVersion
+	VsnRsp.Errno = 0
+	VsnRsp.Info = "success"
+	ctx.JSON(200, VsnRsp)
 }
 
 const VsnTable = "glogin_vsn"
