@@ -180,6 +180,8 @@ func DbSetVsn(request *SetVsnReq) (err error) {
 			doc.ClientVersionMap[request.ClientVersion] = request.ClientHotversion
 			upData["client_version_map"] = doc.ClientVersionMap
 		}
+	}else{
+		upData["client_version_map"] = doc.ClientVersionMap
 	}
 	if request.ClientForceupdate != "" {
 		upData["client_forceupdate"] = request.ClientForceupdate
