@@ -152,84 +152,128 @@ func (l Login) Third(request *glogin.ThirdLoginReq) (response *glogin.ThridLogin
 	}
 
 	request.Client.Ip = ip
-	// 第三方认证
-	authRsp, dbField, errAuth := ThirdAuth(request)
-	if errAuth == PlatIsWrong {
-		response.Code = constant.ErrCodePlatWrong
-		response.Errmsg = fmt.Sprintf("third %s plat is wrong", request.ThirdPlat)
-		return response, nil
-	}
-	// 第三方账号验证失败
-	if errAuth != nil || authRsp == nil {
-		response.Code = constant.ErrCodeThirdAuthFail
-		response.Errmsg = fmt.Sprintf("thrid plat %s auth error: %s", request.ThirdPlat, errAuth)
-		return response, nil
-	}
-	uid := authRsp.Uid
-	unionId := authRsp.UnionId
-	log.Infow("ThirdAuth Rsp", "uid", uid, "unionId", unionId)
-	// 数美ID解析
-	smID := smfpcrypto.ParseSMID(request.Client.Dhid)
-	request.GetClient().Dhid = smID
-	response.SmId = smID
 
-	/*
-	// 为兼容海外版本老数据,1004项目若获得bundle账号，直接登录
-	if config.Field("region_mark").Int() == constant.RegionOverseas &&
-		request.Game.GameCd == constant.AODGameCd {
-		if !account.CheckNotExist(bson.M{dbField: uid, "bundle_id": request.Game.BundleId}) {
-			loginRsp, errLogin := account.LoginBundleThird(request, dbField, uid, ip)
+	if request.ThirdToken == "editor_test_token"{
+		// 游客验证
+		visitorId := VisitorID(request.Client.Dhid)
+		log.Infow("visitor Id","dhid: ", request.Client.Dhid, "visitorId: ", visitorId)
+		if visitorId == "" {
+			response.Code = constant.ErrCodeCreateVisitorIdFail
+			response.Errmsg = fmt.Sprintf("visitor is agrs smid error: %s", request.Client.Dhid)
+			return response, nil
+		}
+
+		if account.CheckNotExist(bson.M{"visitor": visitorId}) {
+			// 账号不存在,创建
+			createRsp, errCreate := account.CreateThird(request, "visitor", visitorId, ip)
+			if errCreate != nil {
+				log.Infow("visitor fast login create account error ", "visitor", visitorId)
+				response.Code = constant.ErrCodeCreateInternal
+				response.Errmsg = fmt.Sprintf("visitor  %s fast login create account error: %s", visitorId, errCreate)
+				return response, errCreate
+			}
+			response.SmId = visitorId
+			thirdResponse(response, createRsp)
+			// token存储
+			account.SetToken(response.DhAccount, response.DhToken)
+			log.Infow("visitor fast login success ", "response", response)
+			return response, nil
+		} else {
+			// 账号存在, 直接登录
+			loginRsp, errLogin := account.LoginThird(request, "visitor", visitorId, ip)
 			if errLogin != nil {
+				log.Infow("visitor fast login 1 error", "visitor", visitorId)
 				response.Code = constant.ErrCodeLoginInternal
-				response.Errmsg = fmt.Sprintf("thrid plat %s bundle account login error: %s", request.ThirdPlat, errAuth)
+				response.Errmsg = fmt.Sprintf("visitor %s fast login error: %s", request.Client.Dhid, errLogin)
 				return response, nil
 			}
-			response.SmId = smID
-			response.ExtendData.Nick = authRsp.Nick
+			// 返回
+			response.SmId = visitorId
 			thirdResponse(response, loginRsp)
-			log.Infow("third bundle account login success", "response", response, "uid", uid)
-			bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
+			// token存储
+			account.SetToken(response.DhAccount, response.DhToken)
+			log.Infow("visitor login success", "visitor", visitorId)
 			return response, nil
 		}
-	}
-	*/
+	}else{
+		// 第三方认证
+		authRsp, dbField, errAuth := ThirdAuth(request)
+		if errAuth == PlatIsWrong {
+			response.Code = constant.ErrCodePlatWrong
+			response.Errmsg = fmt.Sprintf("third %s plat is wrong", request.ThirdPlat)
+			return response, nil
+		}
+		// 第三方账号验证失败
+		if errAuth != nil || authRsp == nil {
+			response.Code = constant.ErrCodeThirdAuthFail
+			response.Errmsg = fmt.Sprintf("thrid plat %s auth error: %s", request.ThirdPlat, errAuth)
+			return response, nil
+		}
+		uid := authRsp.Uid
+		unionId := authRsp.UnionId
+		log.Infow("ThirdAuth Rsp", "uid", uid, "unionId", unionId)
+		// 数美ID解析
+		smID := smfpcrypto.ParseSMID(request.Client.Dhid)
+		request.GetClient().Dhid = smID
+		response.SmId = smID
 
-	// 卓杭通行证
-	if account.CheckNotExist(bson.M{dbField: unionId}) {
-		// 账号不存在,创建
-		createRsp, errCreate := account.CreateThird(request, dbField, unionId, ip)
-		if errCreate != nil {
-			response.Code = constant.ErrCodeCreateInternal
-			response.Errmsg = fmt.Sprintf("thrid plat 1 %s login error: %s", request.ThirdPlat, errCreate)
-			return response, errCreate
-		}
-		thirdResponse(response, createRsp)
-		response.ExtendData.Nick = authRsp.Nick
-		if request.ThirdPlat == "yedun" {
-			response.ExtendData.Nick = util.HideStar(unionId)
-		}
-		log.Infow("third login success 1", " request.ThirdPlat", request.ThirdPlat, "unionId", unionId)
-		//bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
-		return response, nil
-	} else {
-		// 账号存在, 直接登录
-		loginRsp, errLogin := account.LoginThird(request, dbField, unionId, ip)
-		if errLogin != nil {
-			response.Code = constant.ErrCodeLoginInternal
-			response.Errmsg = fmt.Sprintf("thrid plat 3 %s login error: %s", request.ThirdPlat, errLogin)
+		/*
+			// 为兼容海外版本老数据,1004项目若获得bundle账号，直接登录
+			if config.Field("region_mark").Int() == constant.RegionOverseas &&
+				request.Game.GameCd == constant.AODGameCd {
+				if !account.CheckNotExist(bson.M{dbField: uid, "bundle_id": request.Game.BundleId}) {
+					loginRsp, errLogin := account.LoginBundleThird(request, dbField, uid, ip)
+					if errLogin != nil {
+						response.Code = constant.ErrCodeLoginInternal
+						response.Errmsg = fmt.Sprintf("thrid plat %s bundle account login error: %s", request.ThirdPlat, errAuth)
+						return response, nil
+					}
+					response.SmId = smID
+					response.ExtendData.Nick = authRsp.Nick
+					thirdResponse(response, loginRsp)
+					log.Infow("third bundle account login success", "response", response, "uid", uid)
+					bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
+					return response, nil
+				}
+			}
+		*/
+
+		// 卓杭通行证
+		if account.CheckNotExist(bson.M{dbField: unionId}) {
+			// 账号不存在,创建
+			createRsp, errCreate := account.CreateThird(request, dbField, unionId, ip)
+			if errCreate != nil {
+				response.Code = constant.ErrCodeCreateInternal
+				response.Errmsg = fmt.Sprintf("thrid plat 1 %s login error: %s", request.ThirdPlat, errCreate)
+				return response, errCreate
+			}
+			thirdResponse(response, createRsp)
+			response.ExtendData.Nick = authRsp.Nick
+			if request.ThirdPlat == "yedun" {
+				response.ExtendData.Nick = util.HideStar(unionId)
+			}
+			log.Infow("third login success 1", " request.ThirdPlat", request.ThirdPlat, "unionId", unionId)
+			//bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
+			return response, nil
+		} else {
+			// 账号存在, 直接登录
+			loginRsp, errLogin := account.LoginThird(request, dbField, unionId, ip)
+			if errLogin != nil {
+				response.Code = constant.ErrCodeLoginInternal
+				response.Errmsg = fmt.Sprintf("thrid plat 3 %s login error: %s", request.ThirdPlat, errLogin)
+				return response, nil
+			}
+			// 返回
+			thirdResponse(response, loginRsp)
+			response.ExtendData.Nick = authRsp.Nick
+			if request.ThirdPlat == "yedun" {
+				response.ExtendData.Nick = util.HideStar(unionId)
+			}
+			log.Infow("third login success 2", "response", response, "unionId", unionId)
+			//bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
 			return response, nil
 		}
-		// 返回
-		thirdResponse(response, loginRsp)
-		response.ExtendData.Nick = authRsp.Nick
-		if request.ThirdPlat == "yedun" {
-			response.ExtendData.Nick = util.HideStar(unionId)
-		}
-		log.Infow("third login success 2", "response", response, "unionId", unionId)
-		//bilog.ThirdLogin(request, util.Int642String(int64(response.DhAccount)))
-		return response, nil
 	}
-	return response, nil
 }
 
 func (l Login) VisitorEx(request *glogin.VisitorLoginReq, ctx *gin.Context) (response *glogin.VisitorLoginRsp, err error) {
@@ -267,6 +311,7 @@ func (l Login) Visitor(req *glogin.VisitorLoginReq) (rsp *glogin.VisitorLoginRsp
 	}
 	ip := l.Ctx.ClientIP()
 	req.Client.Ip = ip
+	// 游客验证
 	visitorId := VisitorID(req.Dhid)
 	log.Infow("visitor Id","dhid: ", req.Dhid, "visitorId: ", visitorId)
 	if visitorId == "" {

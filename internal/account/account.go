@@ -6,7 +6,6 @@ import (
 	"glogin/db"
 	"glogin/db/db_core"
 	"glogin/internal"
-	"glogin/internal/appsflyer"
 	"glogin/internal/plat"
 	"glogin/pbs/glogin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -123,7 +122,8 @@ func create(accountInfo bson.M, req internal.Req) (rsp internal.Rsp, err error) 
 		//rsp.AntiRsp = antiRsp
 		rsp.GameRsp.FirstLogin = true
 		// todo:: appsflyer
-		appsflyer.SendAppsFlyer(req)
+		// 暂时注释写AppsFlyer
+		// appsflyer.SendAppsFlyer(req)
 		return
 	}
 }
