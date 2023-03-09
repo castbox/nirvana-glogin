@@ -14,7 +14,7 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.8.1
-	github.com/castbox/nirvana-gcore v1.3.5
+	github.com/castbox/nirvana-gcore v1.3.6
 	go.mongodb.org/mongo-driver v1.8.2
 	google.golang.org/protobuf v1.27.1
 )
