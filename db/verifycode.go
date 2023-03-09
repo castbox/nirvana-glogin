@@ -2,8 +2,8 @@ package db
 
 import (
 	"fmt"
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
-	"gitlab.degames.cn/svr_comm/gcore/gmongo"
+	log "github.com/castbox/nirvana-gcore/glog"
+	"github.com/castbox/nirvana-gcore/gmongo"
 	"glogin/config"
 	"glogin/db/db_core"
 	"go.mongodb.org/mongo-driver/bson"

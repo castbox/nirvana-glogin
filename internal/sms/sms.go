@@ -3,7 +3,7 @@ package sms
 import (
 	"encoding/json"
 	"fmt"
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"glogin/config"
 	"glogin/constant"
 	"glogin/db"

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"github.com/bitly/go-simplejson"
 	"glogin/config"
 	"io/ioutil"

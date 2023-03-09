@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin"
 	"github.com/pborman/uuid"
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"glogin/constant"
 	"glogin/internal"
 	"glogin/internal/account"

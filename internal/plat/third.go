@@ -1,7 +1,7 @@
 package plat
 
 import (
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"glogin/pbs/glogin"
 )
 

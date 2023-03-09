@@ -1,8 +1,8 @@
 package account
 
 import (
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
-	"gitlab.degames.cn/svr_comm/gcore/gmongo"
+	log "github.com/castbox/nirvana-gcore/glog"
+	"github.com/castbox/nirvana-gcore/gmongo"
 	"glogin/config"
 	"glogin/db/db_core"
 	"glogin/util"

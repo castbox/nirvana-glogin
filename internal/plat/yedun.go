@@ -4,7 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"github.com/bitly/go-simplejson"
 	_ "github.com/gogf/gf/encoding/gjson"
 	"glogin/config"

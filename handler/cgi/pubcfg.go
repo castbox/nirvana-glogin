@@ -1,7 +1,7 @@
 package cgi
 
 import (
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"github.com/gin-gonic/gin"
 	"github.com/pborman/uuid"
 	"glogin/internal/configure"

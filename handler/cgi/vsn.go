@@ -12,7 +12,7 @@ package cgi
 
 import (
 	"github.com/gin-gonic/gin"
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"glogin/config"
 	"glogin/db"
 	"go.mongodb.org/mongo-driver/bson"

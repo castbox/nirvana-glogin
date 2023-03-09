@@ -2,7 +2,7 @@ package plat
 
 import (
 	"fmt"
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"glogin/config"
 	"glogin/pbs/glogin"
 	"io/ioutil"

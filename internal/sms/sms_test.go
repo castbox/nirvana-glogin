@@ -1,7 +1,7 @@
 package sms
 
 import (
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"glogin/util"
 	"testing"
 	"time"

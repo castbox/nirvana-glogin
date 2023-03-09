@@ -2,7 +2,7 @@ package cgi
 
 import (
 	"fmt"
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"github.com/gin-gonic/gin"
 	"glogin/config"
 	"glogin/constant"

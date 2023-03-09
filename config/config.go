@@ -2,8 +2,8 @@ package config
 
 import (
 	"encoding/json"
-	"gitlab.degames.cn/svr_comm/gcore/consul"
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	"github.com/castbox/nirvana-gcore/consul"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"github.com/tidwall/gjson"
 	"strconv"
 )

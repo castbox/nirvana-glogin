@@ -2,7 +2,7 @@ package moss
 
 import (
 	"fmt"
-	log "gitlab.degames.cn/svr_comm/gcore/glog"
+	log "github.com/castbox/nirvana-gcore/glog"
 	"github.com/pborman/uuid"
 	"glogin/constant"
 	"glogin/db"
