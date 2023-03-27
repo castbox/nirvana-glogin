@@ -72,7 +72,7 @@ require (
 
 require (
         github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
-        github.com/castbox/nirvana-kite v1.2.4
+        github.com/castbox/nirvana-kite v1.2.13
         github.com/golang/snappy v0.0.3 // indirect
         github.com/google/uuid v1.1.2
         golang.org/x/sys v0.0.0-20211025201205-69cdffdb9359 // indirect
