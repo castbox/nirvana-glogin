@@ -11,63 +11,65 @@
 package cgi
 
 import (
-	"github.com/gin-gonic/gin"
 	log "github.com/castbox/nirvana-gcore/glog"
+	"github.com/gin-gonic/gin"
 	"glogin/config"
 	"glogin/db"
 	"go.mongodb.org/mongo-driver/bson"
+	"strconv"
+	"strings"
 )
 
 // vsn请求
 type SetVsnReq struct {
-	Token string                           `json:"token" bson:"token"`
-	Platform  string                       `json:"platform" bson:"platform"`
+	Token    string `json:"token" bson:"token"`
+	Platform string `json:"platform" bson:"platform"`
 
-	AppVersion string                      `json:"app_version" bson:"app_version"`
-	ClientVersion string                   `json:"client_version" bson:"client_version"`
-	ClientHotversion string                `json:"client_hotversion" bson:"client_hotversion"`
-	ClientForceupdate string               `json:"client_forceupdate" bson:"client_forceupdate"`
-	ClientDownloadurl string               `json:"client_downloadurl" bson:"client_downloadurl"`
-	ClientUnderreviewVersion string        `json:"client_underreview_version" bson:"client_underreview_version"`
-	ServerVersion string                   `json:"server_version" bson:"server_version"`
-	ServerForceequal string                `json:"server_forceequal" bson:"server_forceequal"`
+	AppVersion                      string `json:"app_version" bson:"app_version"`
+	ClientVersion                   string `json:"client_version" bson:"client_version"`
+	ClientHotversion                string `json:"client_hotversion" bson:"client_hotversion"`
+	ClientForceupdate               string `json:"client_forceupdate" bson:"client_forceupdate"`
+	ClientDownloadurl               string `json:"client_downloadurl" bson:"client_downloadurl"`
+	ClientUnderreviewVersion        string `json:"client_underreview_version" bson:"client_underreview_version"`
+	ServerVersion                   string `json:"server_version" bson:"server_version"`
+	ServerForceequal                string `json:"server_forceequal" bson:"server_forceequal"`
 	ClientSpecifyForceupdateVersion string `json:"client_specify_forceupdate_version" bson:"client_specify_forceupdate_version"`
 }
 
 type SetVsnRsp struct {
 	Errno int32  `json:"errno" bson:"errno"`
-	Info string  `json:"info" bson:"info"`
+	Info  string `json:"info" bson:"info"`
 }
 
 type GetVsnReq struct {
-	Token string           `json:"token" bson:"token"`
-	Platform string        `json:"platform" bson:"platform"`
-	ClientVersion string   `json:"client_version" bson:"client_version"`
+	Token         string `json:"token" bson:"token"`
+	Platform      string `json:"platform" bson:"platform"`
+	ClientVersion string `json:"client_version" bson:"client_version"`
 }
 
 type GetVsnRsp struct {
-	Errno int32                            `json:"errno" bson:"errno"`
-	Info string                            `json:"info" bson:"info"`
-	AppVersion string                      `json:"app_version" bson:"app_version"`
-	ClientVersion string                   `json:"client_version" bson:"client_version"`
-	ClientHotversion string                `json:"client_hotversion" bson:"client_hotversion"`
-	ClientForceupdate string               `json:"client_forceupdate" bson:"client_forceupdate"`
-	ClientDownloadurl string               `json:"client_downloadurl" bson:"client_downloadurl"`
-	ClientUnderreviewVersion string        `json:"client_underreview_version" bson:"client_underreview_version"`
-	ServerVersion string                   `json:"server_version" bson:"server_version"`
-	ServerForceequal string                `json:"server_forceequal" bson:"server_forceequal"`
+	Errno                           int32  `json:"errno" bson:"errno"`
+	Info                            string `json:"info" bson:"info"`
+	AppVersion                      string `json:"app_version" bson:"app_version"`
+	ClientVersion                   string `json:"client_version" bson:"client_version"`
+	ClientHotversion                string `json:"client_hotversion" bson:"client_hotversion"`
+	ClientForceupdate               string `json:"client_forceupdate" bson:"client_forceupdate"`
+	ClientDownloadurl               string `json:"client_downloadurl" bson:"client_downloadurl"`
+	ClientUnderreviewVersion        string `json:"client_underreview_version" bson:"client_underreview_version"`
+	ServerVersion                   string `json:"server_version" bson:"server_version"`
+	ServerForceequal                string `json:"server_forceequal" bson:"server_forceequal"`
 	ClientSpecifyForceupdateVersion string `json:"client_specify_forceupdate_version" bson:"client_specify_forceupdate_version"`
 }
 
 type DBVsn struct {
-	AppVersion string                      `json:"app_version" bson:"app_version"`
-	ClientVersionMap map[string]interface{}`json:"client_version_map" bson:"client_version_map"`
-	ClientForceupdate string               `json:"client_forceupdate" bson:"client_forceupdate"`
-	ClientDownloadurl string               `json:"client_downloadurl" bson:"client_downloadurl"`
-	ClientUnderreviewVersion string        `json:"client_underreview_version" bson:"client_underreview_version"`
-	ServerVersion string                   `json:"server_version" bson:"server_version"`
-	ServerForceequal string                `json:"server_forceequal" bson:"server_forceequal"`
-	ClientSpecifyForceupdateVersion string `json:"client_specify_forceupdate_version" bson:"client_specify_forceupdate_version"`
+	AppVersion                      string                 `json:"app_version" bson:"app_version"`
+	ClientVersionMap                map[string]interface{} `json:"client_version_map" bson:"client_version_map"`
+	ClientForceupdate               string                 `json:"client_forceupdate" bson:"client_forceupdate"`
+	ClientDownloadurl               string                 `json:"client_downloadurl" bson:"client_downloadurl"`
+	ClientUnderreviewVersion        string                 `json:"client_underreview_version" bson:"client_underreview_version"`
+	ServerVersion                   string                 `json:"server_version" bson:"server_version"`
+	ServerForceequal                string                 `json:"server_forceequal" bson:"server_forceequal"`
+	ClientSpecifyForceupdateVersion string                 `json:"client_specify_forceupdate_version" bson:"client_specify_forceupdate_version"`
 }
 
 func SetVsn(ctx *gin.Context) {
@@ -93,7 +95,7 @@ func SetVsn(ctx *gin.Context) {
 		vsnRsp.Errno = -1
 		vsnRsp.Info = "Platform == nil"
 		ctx.JSON(404, vsnRsp)
-	}else{
+	} else {
 		//todo 存储字段
 		err = DbSetVsn(vsnReq)
 		if err != nil {
@@ -132,8 +134,14 @@ func GetVsn(ctx *gin.Context) {
 	if ok {
 		VsnRsp.ClientHotversion = hot.(string)
 	}
+	clientVersion := VsnReq.ClientVersion
+	result := strings.Split(clientVersion, ".")
+	num, _ := strconv.Atoi(result[1])
+	if num == 11 {
+		clientVersion = result[0] + "." + "12" + "." + result[2]
+	}
 	VsnRsp.AppVersion = dbVsn.AppVersion
-	VsnRsp.ClientVersion = VsnReq.ClientVersion
+	VsnRsp.ClientVersion = clientVersion
 	VsnRsp.ClientForceupdate = dbVsn.ClientForceupdate
 	VsnRsp.ClientDownloadurl = dbVsn.ClientDownloadurl
 	VsnRsp.ClientUnderreviewVersion = dbVsn.ClientUnderreviewVersion
@@ -176,11 +184,11 @@ func DbSetVsn(request *SetVsnReq) (err error) {
 			tmp := bson.M{}
 			tmp[request.ClientVersion] = request.ClientHotversion
 			upData["client_version_map"] = tmp
-		}else{
+		} else {
 			doc.ClientVersionMap[request.ClientVersion] = request.ClientHotversion
 			upData["client_version_map"] = doc.ClientVersionMap
 		}
-	}else{
+	} else {
 		upData["client_version_map"] = doc.ClientVersionMap
 	}
 	if request.ClientForceupdate != "" {
