@@ -133,8 +133,6 @@ func GetVsn(ctx *gin.Context) {
 	hot, ok := dbVsn.ClientVersionMap[VsnReq.ClientVersion]
 	if ok {
 		VsnRsp.ClientHotversion = hot.(string)
-	} else {
-		VsnRsp.ClientHotversion = "0.1"
 	}
 	clientVersion := VsnReq.ClientVersion
 	result := strings.Split(clientVersion, ".")
