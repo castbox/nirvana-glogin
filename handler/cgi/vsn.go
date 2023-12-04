@@ -111,12 +111,12 @@ func SetVsn(ctx *gin.Context) {
 }
 
 func GetVsn(ctx *gin.Context) {
-	startTime := time.Now().Unix()
+	startTime := time.Now()
 	log.Infow("GetVsn request", "start", startTime)
 	VsnReq := &GetVsnReq{}
 	VsnRsp := &GetVsnRsp{}
 	defer func() {
-		log.Infow("GetVsn request end", "time", time.Now().Unix()-startTime)
+		log.Infow("GetVsn request end", "cost_time", time.Since(startTime))
 		if err := recover(); err != nil {
 			log.Errorw("got panic", "err", err)
 		}
