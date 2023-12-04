@@ -18,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // vsn请求
@@ -110,9 +111,12 @@ func SetVsn(ctx *gin.Context) {
 }
 
 func GetVsn(ctx *gin.Context) {
+	startTime := time.Now().Unix()
+	log.Infow("GetVsn request start", startTime)
 	VsnReq := &GetVsnReq{}
 	VsnRsp := &GetVsnRsp{}
 	defer func() {
+		log.Infow("GetVsn request end", "time", time.Now().Unix()-startTime)
 		if err := recover(); err != nil {
 			log.Errorw("got panic", "err", err)
 		}
@@ -120,12 +124,14 @@ func GetVsn(ctx *gin.Context) {
 	err := ctx.Bind(VsnReq)
 	log.Infow("GetVsn request", "request", VsnReq)
 	if err != nil {
+		log.Infow("GetVsn request", "err", err)
 		ParseRequestError(ctx, 500, err)
 		return
 	}
 	//todo 存储字段
 	dbVsn, err := DbGetVsn(VsnReq)
 	if err != nil {
+		log.Infow("DbGetVsn request", "err", err)
 		ParseRequestError(ctx, 500, err)
 		return
 	}
