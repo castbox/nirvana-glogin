@@ -112,7 +112,7 @@ func SetVsn(ctx *gin.Context) {
 
 func GetVsn(ctx *gin.Context) {
 	startTime := time.Now().Unix()
-	log.Infow("GetVsn request start", startTime)
+	log.Infow("GetVsn request", "start", startTime)
 	VsnReq := &GetVsnReq{}
 	VsnRsp := &GetVsnRsp{}
 	defer func() {
